@@ -8,4 +8,4 @@ parameters:
 		- src
 		- tests
 	ignoreErrors:
-	    - '#expects Munus\\Collection\\Stream\\Collector\<string, string\>#'
+	    - '#expects Munus\\Collection\\Stream\\Collector\<#'

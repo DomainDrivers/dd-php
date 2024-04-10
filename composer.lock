@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a89c078251587f746ad48f17d18d4812",
+    "content-hash": "a18792e51c077353ce3503c96283bc21",
     "packages": [
         {
             "name": "munusphp/munus",
-            "version": "0.6.0",
+            "version": "0.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/munusphp/munus.git",
-                "reference": "74e66b44ac8b59b6ec394e4643bf0baf1ef6d610"
+                "reference": "132a27beb9f1de7c9198e18af66b734c0abb43a7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/munusphp/munus/zipball/74e66b44ac8b59b6ec394e4643bf0baf1ef6d610",
-                "reference": "74e66b44ac8b59b6ec394e4643bf0baf1ef6d610",
+                "url": "https://api.github.com/repos/munusphp/munus/zipball/132a27beb9f1de7c9198e18af66b734c0abb43a7",
+                "reference": "132a27beb9f1de7c9198e18af66b734c0abb43a7",
                 "shasum": ""
             },
             "require": {
@@ -51,9 +51,9 @@
             "description": "Power of object-oriented programming with the elegance of functional programming.",
             "support": {
                 "issues": "https://github.com/munusphp/munus/issues",
-                "source": "https://github.com/munusphp/munus/tree/0.6.0"
+                "source": "https://github.com/munusphp/munus/tree/0.8.0"
             },
-            "time": "2024-01-08T20:43:13+00:00"
+            "time": "2024-04-10T05:41:45+00:00"
         }
     ],
     "packages-dev": [

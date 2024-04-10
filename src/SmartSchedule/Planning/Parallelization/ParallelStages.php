@@ -23,4 +23,12 @@ final readonly class ParallelStages
             ->sorted()
             ->collect(Collectors::joining(', '));
     }
+
+    /**
+     * @return Set<Stage>
+     */
+    public function stages(): Set
+    {
+        return $this->stages;
+    }
 }

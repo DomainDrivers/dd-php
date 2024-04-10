@@ -33,6 +33,7 @@ final class ParallelizationTest extends TestCase
 
         // then
         self::assertEquals(1, $sortedStages->all()->length());
+        self::assertEquals('Stage1, Stage2', $sortedStages->print());
     }
 
     #[Test]

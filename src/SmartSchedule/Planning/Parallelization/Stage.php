@@ -27,7 +27,7 @@ final class Stage
 
     public function dependsOn(Stage $stage): self
     {
-        $this->dependencies->add($stage);
+        $this->dependencies = $this->dependencies->add($stage);
 
         return $this;
     }
@@ -48,5 +48,13 @@ final class Stage
     public function duration(): \DateInterval
     {
         return $this->duration;
+    }
+
+    /**
+     * @return Set<Stage>
+     */
+    public function dependencies(): Set
+    {
+        return $this->dependencies;
     }
 }
