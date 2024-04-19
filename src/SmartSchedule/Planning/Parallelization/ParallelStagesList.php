@@ -7,12 +7,12 @@ namespace DomainDrivers\SmartSchedule\Planning\Parallelization;
 use Munus\Collection\GenericList;
 use Munus\Collection\Stream\Collectors;
 
-final class ParallelStagesList
+final readonly class ParallelStagesList
 {
     /**
      * @param GenericList<ParallelStages> $all
      */
-    private function __construct(private GenericList $all)
+    public function __construct(private GenericList $all)
     {
     }
 

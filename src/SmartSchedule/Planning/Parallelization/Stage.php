@@ -6,7 +6,7 @@ namespace DomainDrivers\SmartSchedule\Planning\Parallelization;
 
 use Munus\Collection\Set;
 
-final class Stage
+final readonly class Stage
 {
     /**
      * @param Set<Stage>        $dependencies
@@ -27,9 +27,12 @@ final class Stage
 
     public function dependsOn(Stage $stage): self
     {
-        $this->dependencies = $this->dependencies->add($stage);
+        return new self($this->stageName, $this->dependencies->add($stage), $this->resources, $this->duration);
+    }
 
-        return $this;
+    public function withChosenResourceCapabilities(ResourceName ...$resources): self
+    {
+        return new self($this->stageName, $this->dependencies, Set::ofAll($resources), $this->duration);
     }
 
     public function name(): string
