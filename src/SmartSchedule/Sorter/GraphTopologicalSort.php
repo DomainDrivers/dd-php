@@ -8,11 +8,29 @@ use Munus\Collection\Stream\Collectors;
 
 final readonly class GraphTopologicalSort
 {
+    /**
+     * @template T
+     *
+     * @param Nodes<T> $nodes
+     *
+     * @return SortedNodes<T>
+     */
     public function sort(Nodes $nodes): SortedNodes
     {
-        return $this->createSortedNodesRecursively($nodes, SortedNodes::empty());
+        /** @var SortedNodes<T> $empty */
+        $empty = SortedNodes::empty();
+
+        return $this->createSortedNodesRecursively($nodes, $empty);
     }
 
+    /**
+     * @template T
+     *
+     * @param Nodes<T>       $remainingNodes
+     * @param SortedNodes<T> $accumulatedSortedNodes
+     *
+     * @return SortedNodes<T>
+     */
     private function createSortedNodesRecursively(Nodes $remainingNodes, SortedNodes $accumulatedSortedNodes): SortedNodes
     {
         $alreadyProcessedNodes = $accumulatedSortedNodes->all

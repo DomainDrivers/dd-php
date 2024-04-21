@@ -29,8 +29,10 @@ final class FeedbackArcSetOnGraphTest extends TestCase
         $node1 = $node1->dependsOn($node4);
         $node2 = $node2->dependsOn($node3);
         $node1 = $node1->dependsOn($node2);
+        /** @var GenericList<Node<string>> $all */
+        $all = GenericList::of($node1, $node2, $node3, $node4);
 
-        $toRemove = FeedbackArcSetOnGraph::calculate(GenericList::of($node1, $node2, $node3, $node4));
+        $toRemove = FeedbackArcSetOnGraph::calculate($all);
 
         self::assertTrue($toRemove->containsAll(Set::of(new Edge(3, 1), new Edge(4, 3))));
     }
@@ -46,8 +48,10 @@ final class FeedbackArcSetOnGraphTest extends TestCase
         $node2 = $node2->dependsOn($node3);
         $node1 = $node1->dependsOn($node2);
         $node1 = $node1->dependsOn($node4);
+        /** @var GenericList<Node<string>> $all */
+        $all = GenericList::of($node1, $node2, $node3, $node4);
 
-        $toRemove = FeedbackArcSetOnGraph::calculate(GenericList::of($node1, $node2, $node3, $node4));
+        $toRemove = FeedbackArcSetOnGraph::calculate($all);
 
         self::assertTrue($toRemove->isEmpty());
     }

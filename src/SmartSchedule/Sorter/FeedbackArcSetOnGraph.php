@@ -10,7 +10,7 @@ use Munus\Collection\Map;
 final class FeedbackArcSetOnGraph
 {
     /**
-     * @param GenericList<Node> $initialNodes
+     * @param GenericList<Node<string>> $initialNodes
      *
      * @return GenericList<Edge>
      */
@@ -39,7 +39,7 @@ final class FeedbackArcSetOnGraph
     }
 
     /**
-     * @param GenericList<Node> $initialNodes
+     * @param GenericList<Node<string>> $initialNodes
      *
      * @return Map<string, GenericList<int>>
      */

@@ -14,6 +14,8 @@ final readonly class StagesToNodes
 {
     /**
      * @param GenericList<Stage> $stages
+     *
+     * @return Nodes<Stage>
      */
     public function calculate(GenericList $stages): Nodes
     {
@@ -33,10 +35,10 @@ final readonly class StagesToNodes
     }
 
     /**
-     * @param GenericList<Stage> $with
-     * @param Map<string, Node>  $result
+     * @param GenericList<Stage>       $with
+     * @param Map<string, Node<Stage>> $result
      *
-     * @return Map<string, Node>
+     * @return Map<string, Node<Stage>>
      */
     private function sharedResources(Stage $stage, GenericList $with, Map $result): Map
     {
@@ -60,13 +62,12 @@ final readonly class StagesToNodes
     }
 
     /**
-     * @param Map<string, Node> $result
+     * @param Map<string, Node<Stage>> $result
      *
-     * @return Map<string, Node>
+     * @return Map<string, Node<Stage>>
      */
     private function explicitDependencies(Stage $stage, Map $result): Map
     {
-        /** @var Node $nodeWithExplicitDeps */
         $nodeWithExplicitDeps = $result->get($stage->name())->get();
         foreach ($stage->dependencies() as $explicitDependency) {
             $nodeWithExplicitDeps = $nodeWithExplicitDeps->dependsOn($result->get($explicitDependency->name())->get());
