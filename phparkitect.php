@@ -12,9 +12,11 @@ return static function (Config $config): void {
     $layeredArchitectureRules = Architecture::withComponents()
         ->component('Parallelization')->definedBy('DomainDrivers\SmartSchedule\Planning\Parallelization\*')
         ->component('Sorter')->definedBy('DomainDrivers\SmartSchedule\Sorter\*')
+        ->component('Simulation')->definedBy('DomainDrivers\SmartSchedule\Simulation\*')
 
         ->where('Parallelization')->mayDependOnComponents('Sorter')
         ->where('Sorter')->shouldNotDependOnAnyComponent()
+        ->where('Simulation')->shouldNotDependOnAnyComponent()
 
         ->rules();
 

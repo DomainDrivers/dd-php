@@ -36,8 +36,6 @@ final class SimulationScenariosTest extends TestCase
         $this->staszek = Uuid::v7();
         $this->leon = Uuid::v7();
         $this->simulationFacade = new SimulationFacade();
-
-        self::markTestSkipped('wip');
     }
 
     #[Test]

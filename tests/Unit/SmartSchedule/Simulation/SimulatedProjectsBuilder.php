@@ -33,6 +33,9 @@ final class SimulatedProjectsBuilder
 
     public function __construct()
     {
+        $this->simulatedProjects = GenericList::empty();
+        $this->simulatedDemands = Map::empty();
+        $this->simulatedEarnings = Map::empty();
     }
 
     public function withProject(ProjectId $id): self
