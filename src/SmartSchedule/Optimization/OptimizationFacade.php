@@ -11,9 +11,10 @@ use Munus\Collection\Map;
 final readonly class OptimizationFacade
 {
     /**
-     * @param GenericList<Item> $items
+     * @param GenericList<Item>          $items
+     * @param ?\Closure(Item, Item): int $comparator
      */
-    public function calculate(GenericList $items, TotalCapacity $totalCapacity): Result
+    public function calculate(GenericList $items, TotalCapacity $totalCapacity, \Closure $comparator = null): Result
     {
         $allCapacities = $totalCapacity->components;
         $capacitiesSize = $totalCapacity->size();
@@ -35,7 +36,7 @@ final readonly class OptimizationFacade
             ->fold(new Decimal(0), fn (Decimal $sum, Decimal $e) => $sum->add($e));
 
         $itemsArray = $items->toArray();
-        uasort($itemsArray, fn (Item $a, Item $b) => $a->value <=> $b->value);
+        uasort($itemsArray, $comparator ?? fn (Item $a, Item $b) => $a->value <=> $b->value);
         foreach (array_reverse($itemsArray) as $item) {
             $chosenCapacities = $this->matchCapacities($item->totalWeight, $allCapacities);
             $allCapacities = $allCapacities->filter(fn (CapacityDimension $c) => !$chosenCapacities->contains($c));

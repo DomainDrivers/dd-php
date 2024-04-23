@@ -27,15 +27,15 @@ final class SimulatedProjectsBuilder
     private Map $simulatedDemands;
 
     /**
-     * @var Map<string, Decimal>
+     * @var Map<string, \Closure(): Decimal>
      */
-    private Map $simulatedEarnings;
+    private Map $values;
 
     public function __construct()
     {
         $this->simulatedProjects = GenericList::empty();
         $this->simulatedDemands = Map::empty();
-        $this->simulatedEarnings = Map::empty();
+        $this->values = Map::empty();
     }
 
     public function withProject(ProjectId $id): self
@@ -55,7 +55,14 @@ final class SimulatedProjectsBuilder
 
     public function thatCanEarn(Decimal $earnings): self
     {
-        $this->simulatedEarnings = $this->simulatedEarnings->put($this->currentId->toString(), $earnings);
+        $this->values = $this->values->put($this->currentId->toString(), fn () => $earnings);
+
+        return $this;
+    }
+
+    public function thatCanGenerateReputationLoss(int $factor): self
+    {
+        $this->values = $this->values->put($this->currentId->toString(), fn () => new Decimal($factor));
 
         return $this;
     }
@@ -67,7 +74,7 @@ final class SimulatedProjectsBuilder
     {
         return $this->simulatedProjects->map(fn (ProjectId $id) => new SimulatedProject(
             $id,
-            $this->simulatedEarnings->get($id->toString())->get(),
+            $this->values->get($id->toString())->get(),
             $this->simulatedDemands->get($id->toString())->get()
         ));
     }

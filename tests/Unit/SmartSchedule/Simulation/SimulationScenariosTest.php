@@ -137,6 +137,33 @@ final class SimulationScenariosTest extends TestCase
         self::assertTrue($resultWithExtraResource->profit->equals(new Decimal(108)));
     }
 
+    #[Test]
+    public function picksOptimalProjectBasedOnReputation(): void
+    {
+        // given
+        $simulatedProjects = $this->simulatedProjects()
+            ->withProject($this->project_1)
+            ->thatRequires(Demand::for(Capability::skill('PHP-MID'), $this->jan_1))
+            ->thatCanGenerateReputationLoss(100)
+            ->withProject($this->project_2)
+            ->thatRequires(Demand::for(Capability::skill('PHP-MID'), $this->jan_1))
+            ->thatCanGenerateReputationLoss(40)
+            ->build();
+
+        // and there are
+        $simulatedAvailability = $this->simulatedCapabilities()
+            ->withEmployee($this->staszek)
+            ->thatBrings(Capability::skill('PHP-MID'))
+            ->thatIsAvailableAt($this->jan_1)
+            ->build();
+
+        // when
+        $result = $this->simulationFacade->whichProjectWithMissingDemandsIsMostProfitableToAllocateResourcesTo($simulatedProjects, $simulatedAvailability);
+
+        // then
+        self::assertSame($this->project_1->toString(), $result->chosenItems->get()->name);
+    }
+
     private function simulatedProjects(): SimulatedProjectsBuilder
     {
         return new SimulatedProjectsBuilder();

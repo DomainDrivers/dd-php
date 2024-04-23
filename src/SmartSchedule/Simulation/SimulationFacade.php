@@ -39,7 +39,7 @@ final readonly class SimulationFacade
     {
         return $projectsSimulations->map(fn (SimulatedProject $p) => new Item(
             $p->projectId->toString(),
-            $p->earnings,
+            $p->calculateValue(),
             new TotalWeight($p->missingDemands->all)
         ));
     }

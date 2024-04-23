@@ -8,10 +8,18 @@ use Decimal\Decimal;
 
 final readonly class SimulatedProject
 {
+    /**
+     * @param \Closure(): Decimal $value
+     */
     public function __construct(
         public ProjectId $projectId,
-        public Decimal $earnings,
+        public \Closure $value,
         public Demands $missingDemands
     ) {
+    }
+
+    public function calculateValue(): Decimal
+    {
+        return ($this->value)();
     }
 }
