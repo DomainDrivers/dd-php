@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Simulation;
 
+use Decimal\Decimal;
 use DomainDrivers\SmartSchedule\Optimization\Item;
 use DomainDrivers\SmartSchedule\Optimization\OptimizationFacade;
 use DomainDrivers\SmartSchedule\Optimization\Result;
@@ -28,6 +29,27 @@ final readonly class SimulationFacade
             $this->toItems($projectsSimulations),
             new TotalCapacity($totalCapability->capabilities)
         );
+    }
+
+    /**
+     * @param GenericList<SimulatedProject> $projectsSimulations
+     */
+    public function profitAfterBuyingNewCapability(
+        GenericList $projectsSimulations,
+        SimulatedCapabilities $capabilitiesWithoutNewOne,
+        AdditionalPricedCapability $newPricedCapability
+    ): Decimal {
+        $capabilitiesWithNewResource = $capabilitiesWithoutNewOne->add($newPricedCapability->availableResourceCapability);
+        $resultWithout = $this->optimizationFacade->calculate(
+            $this->toItems($projectsSimulations),
+            new TotalCapacity($capabilitiesWithoutNewOne->capabilities)
+        );
+        $resultWit = $this->optimizationFacade->calculate(
+            $this->toItems($projectsSimulations),
+            new TotalCapacity($capabilitiesWithNewResource->capabilities)
+        );
+
+        return $resultWit->profit->sub($newPricedCapability->value)->sub($resultWithout->profit);
     }
 
     /**

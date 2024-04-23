@@ -7,6 +7,7 @@ namespace DomainDrivers\Tests\Unit\SmartSchedule\Simulation;
 use Decimal\Decimal;
 use DomainDrivers\SmartSchedule\Optimization\OptimizationFacade;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
+use DomainDrivers\SmartSchedule\Simulation\AdditionalPricedCapability;
 use DomainDrivers\SmartSchedule\Simulation\AvailableResourceCapability;
 use DomainDrivers\SmartSchedule\Simulation\Capability;
 use DomainDrivers\SmartSchedule\Simulation\Demand;
@@ -162,6 +163,39 @@ final class SimulationScenariosTest extends TestCase
 
         // then
         self::assertSame($this->project_1->toString(), $result->chosenItems->get()->name);
+    }
+
+    #[Test]
+    public function checkIfItPaysOffToPayForCapability(): void
+    {
+        // given
+        $simulatedProjects = $this->simulatedProjects()
+            ->withProject($this->project_1)
+            ->thatRequires(Demand::for(Capability::skill('PHP-MID'), $this->jan_1))
+            ->thatCanEarn(new Decimal(100))
+            ->withProject($this->project_2)
+            ->thatRequires(Demand::for(Capability::skill('PHP-MID'), $this->jan_1))
+            ->thatCanEarn(new Decimal(40))
+            ->build();
+
+        // and there are
+        $simulatedAvailability = $this->simulatedCapabilities()
+            ->withEmployee($this->staszek)
+            ->thatBrings(Capability::skill('PHP-MID'))
+            ->thatIsAvailableAt($this->jan_1)
+            ->build();
+
+        // and there are
+        $slawek = new AdditionalPricedCapability(new Decimal(9999), new AvailableResourceCapability(Uuid::v7(), Capability::skill('PHP-MID'), $this->jan_1));
+        $staszek = new AdditionalPricedCapability(new Decimal(3), new AvailableResourceCapability(Uuid::v7(), Capability::skill('PHP-MID'), $this->jan_1));
+
+        // when
+        $buyingSlawek = $this->simulationFacade->profitAfterBuyingNewCapability($simulatedProjects, $simulatedAvailability, $slawek);
+        $buyingStaszek = $this->simulationFacade->profitAfterBuyingNewCapability($simulatedProjects, $simulatedAvailability, $staszek);
+
+        // then
+        self::assertTrue($buyingSlawek->equals(new Decimal(-9959))); // we pay 9999 and get the project for 40
+        self::assertTrue($buyingStaszek->equals(new Decimal(37))); // we pay 3 and get the project for 40
     }
 
     private function simulatedProjects(): SimulatedProjectsBuilder
