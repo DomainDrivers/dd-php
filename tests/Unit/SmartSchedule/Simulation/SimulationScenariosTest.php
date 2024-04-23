@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace DomainDrivers\Tests\Unit\SmartSchedule\Simulation;
 
 use Decimal\Decimal;
+use DomainDrivers\SmartSchedule\Optimization\OptimizationFacade;
+use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use DomainDrivers\SmartSchedule\Simulation\AvailableResourceCapability;
 use DomainDrivers\SmartSchedule\Simulation\Capability;
 use DomainDrivers\SmartSchedule\Simulation\Demand;
 use DomainDrivers\SmartSchedule\Simulation\ProjectId;
 use DomainDrivers\SmartSchedule\Simulation\SimulationFacade;
-use DomainDrivers\SmartSchedule\Simulation\TimeSlot;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -35,7 +36,7 @@ final class SimulationScenariosTest extends TestCase
         $this->project_3 = ProjectId::newOne();
         $this->staszek = Uuid::v7();
         $this->leon = Uuid::v7();
-        $this->simulationFacade = new SimulationFacade();
+        $this->simulationFacade = new SimulationFacade(new OptimizationFacade());
     }
 
     #[Test]
@@ -69,7 +70,7 @@ final class SimulationScenariosTest extends TestCase
 
         // then
         self::assertTrue($result->profit->equals(new Decimal(108)));
-        self::assertSame(2, $result->chosenProjects->length());
+        self::assertSame(2, $result->chosenItems->length());
     }
 
     #[Test]
@@ -97,7 +98,7 @@ final class SimulationScenariosTest extends TestCase
 
         // then
         self::assertTrue($result->profit->equals(new Decimal(99)));
-        self::assertSame(1, $result->chosenProjects->length());
+        self::assertSame(1, $result->chosenItems->length());
     }
 
     #[Test]

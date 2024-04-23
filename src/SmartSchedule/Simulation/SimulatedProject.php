@@ -14,9 +14,4 @@ final readonly class SimulatedProject
         public Demands $missingDemands
     ) {
     }
-
-    public function allDemandsSatisfied(): bool
-    {
-        return $this->missingDemands->all->isEmpty();
-    }
 }

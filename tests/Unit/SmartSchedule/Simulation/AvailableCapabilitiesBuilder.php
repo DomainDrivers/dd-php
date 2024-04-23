@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace DomainDrivers\Tests\Unit\SmartSchedule\Simulation;
 
+use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use DomainDrivers\SmartSchedule\Simulation\AvailableResourceCapability;
 use DomainDrivers\SmartSchedule\Simulation\Capability;
 use DomainDrivers\SmartSchedule\Simulation\SimulatedCapabilities;
-use DomainDrivers\SmartSchedule\Simulation\TimeSlot;
 use Munus\Collection\GenericList;
 use Symfony\Component\Uid\Uuid;
 

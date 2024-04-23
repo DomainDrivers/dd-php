@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Simulation;
 
-final readonly class Demand
+use DomainDrivers\SmartSchedule\Optimization\CapacityDimension;
+use DomainDrivers\SmartSchedule\Optimization\WeightDimension;
+use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
+
+final readonly class Demand implements WeightDimension
 {
     private function __construct(public Capability $capability, public TimeSlot $timeSlot)
     {
@@ -15,9 +19,12 @@ final readonly class Demand
         return new self($capability, $timeSlot);
     }
 
-    public function isSatisfiedBy(AvailableResourceCapability $availableResourceCapability): bool
+    #[\Override]
+    public function isSatisfiedBy(CapacityDimension $capacityDimension): bool
     {
-        return $availableResourceCapability->performs($this->capability)
-            && $this->timeSlot->within($availableResourceCapability->timeSlot);
+        \assert($capacityDimension instanceof AvailableResourceCapability);
+
+        return $capacityDimension->performs($this->capability)
+            && $this->timeSlot->within($capacityDimension->timeSlot);
     }
 }
