@@ -29,7 +29,7 @@ final class AvailableCapabilitiesBuilder
 
     public function withEmployee(Uuid $id): self
     {
-        if ($this->currentResourceId !== null) {
+        if ($this->currentResourceId instanceof Uuid) {
             $this->availabilities = $this->availabilities->append(new AvailableResourceCapability($this->currentResourceId, $this->capability, $this->timeSlot));
         }
         $this->currentResourceId = $id;
@@ -53,7 +53,7 @@ final class AvailableCapabilitiesBuilder
 
     public function build(): SimulatedCapabilities
     {
-        if ($this->currentResourceId !== null) {
+        if ($this->currentResourceId instanceof Uuid) {
             $this->availabilities = $this->availabilities->append(new AvailableResourceCapability($this->currentResourceId, $this->capability, $this->timeSlot));
         }
 

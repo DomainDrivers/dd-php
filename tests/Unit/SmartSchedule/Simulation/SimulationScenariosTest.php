@@ -28,6 +28,7 @@ final class SimulationScenariosTest extends TestCase
     private Uuid $leon;
     private SimulationFacade $simulationFacade;
 
+    #[\Override]
     protected function setUp(): void
     {
         $this->jan_1 = TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1);

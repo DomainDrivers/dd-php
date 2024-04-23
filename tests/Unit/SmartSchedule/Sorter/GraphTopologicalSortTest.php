@@ -16,6 +16,7 @@ final class GraphTopologicalSortTest extends TestCase
 {
     private GraphTopologicalSort $graphTopologicalSort;
 
+    #[\Override]
     protected function setUp(): void
     {
         $this->graphTopologicalSort = new GraphTopologicalSort();

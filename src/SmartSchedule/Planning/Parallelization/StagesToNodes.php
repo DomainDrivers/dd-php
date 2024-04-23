@@ -43,17 +43,15 @@ final readonly class StagesToNodes
     private function sharedResources(Stage $stage, GenericList $with, Map $result): Map
     {
         foreach ($with as $other) {
-            if ($stage->name() !== $other->name()) {
-                if (!$stage->resources()->disjoint($other->resources())) {
-                    if ($other->resources()->length() > $stage->resources()->length()) {
-                        $node = $result->get($stage->name())->get();
-                        $node = $node->dependsOn($result->get($other->name())->get());
-                        $result = $result->put($stage->name(), $node);
-                    } else {
-                        $node = $result->get($other->name())->get();
-                        $node = $node->dependsOn($result->get($stage->name())->get());
-                        $result = $result->put($other->name(), $node);
-                    }
+            if ($stage->name() !== $other->name() && !$stage->resources()->disjoint($other->resources())) {
+                if ($other->resources()->length() > $stage->resources()->length()) {
+                    $node = $result->get($stage->name())->get();
+                    $node = $node->dependsOn($result->get($other->name())->get());
+                    $result = $result->put($stage->name(), $node);
+                } else {
+                    $node = $result->get($other->name())->get();
+                    $node = $node->dependsOn($result->get($stage->name())->get());
+                    $result = $result->put($other->name(), $node);
                 }
             }
         }

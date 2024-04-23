@@ -25,7 +25,8 @@ final class FeedbackArcSetOnGraph
             $neighbours = $adjacencyList->get($i)->get()->toArray();
             if ($neighbours !== []) {
                 $visited[(int) $i] = 1;
-                for ($j = 0; $j < count($neighbours); ++$j) {
+                $counter = count($neighbours);
+                for ($j = 0; $j < $counter; ++$j) {
                     if (($visited[$neighbours[$j]] ?? null) === 1) {
                         $feedbackEdges = $feedbackEdges->append(new Edge((int) $i, $neighbours[$j]));
                     } else {

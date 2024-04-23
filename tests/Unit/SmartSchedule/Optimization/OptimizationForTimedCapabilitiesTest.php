@@ -20,6 +20,7 @@ final class OptimizationForTimedCapabilitiesTest extends TestCase
 {
     private OptimizationFacade $optimizationFacade;
 
+    #[\Override]
     protected function setUp(): void
     {
         $this->optimizationFacade = new OptimizationFacade();

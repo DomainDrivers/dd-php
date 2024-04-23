@@ -17,6 +17,7 @@ final class ParallelizationTest extends TestCase
 {
     private StageParallelization $stageParallelization;
 
+    #[\Override]
     protected function setUp(): void
     {
         $this->stageParallelization = new StageParallelization();
@@ -33,8 +34,8 @@ final class ParallelizationTest extends TestCase
         $sortedStages = $this->stageParallelization->of(Set::of($stage1, $stage2));
 
         // then
-        self::assertEquals(1, $sortedStages->all()->length());
-        self::assertEquals('Stage1, Stage2', $sortedStages->print());
+        self::assertSame(1, $sortedStages->all()->length());
+        self::assertSame('Stage1, Stage2', $sortedStages->print());
     }
 
     #[Test]
@@ -53,7 +54,7 @@ final class ParallelizationTest extends TestCase
         $sortedStages = $this->stageParallelization->of(Set::of($stage1, $stage2, $stage3, $stage4));
 
         // then
-        self::assertEquals('Stage1 | Stage2, Stage3 | Stage4', $sortedStages->print());
+        self::assertSame('Stage1 | Stage2, Stage3 | Stage4', $sortedStages->print());
     }
 
     #[Test]

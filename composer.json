@@ -15,7 +15,8 @@
         "phpstan/phpstan": "^1.10",
         "phpstan/phpstan-phpunit": "^1.3",
         "phpstan/phpstan-strict-rules": "^1.5",
-        "phparkitect/phparkitect": "^0.3.29"
+        "phparkitect/phparkitect": "^0.3.29",
+        "rector/rector": "^1.0.4"
     },
     "autoload": {
         "psr-4": {
@@ -43,6 +44,12 @@
         "code-style:check": [
             "PHP_CS_FIXER_FUTURE_MODE=1 php-cs-fixer fix --dry-run --diff --ansi"
         ],
+        "rector:check": [
+            "rector --dry-run --ansi"
+        ],
+        "rector:fix": [
+            "rector --ansi"
+        ],
         "phpstan": [
             "phpstan analyze --ansi"
         ],
@@ -56,6 +63,7 @@
             "@composer validate",
             "@composer audit",
             "@code-style:check",
+            "@rector:check",
             "@phpstan",
             "@phparkitect",
             "@tests"
