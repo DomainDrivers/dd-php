@@ -16,6 +16,11 @@ final readonly class SimulatedCapabilities
     {
     }
 
+    public static function none(): self
+    {
+        return new self(GenericList::empty());
+    }
+
     public function add(AvailableResourceCapability $capability): self
     {
         return new self($this->capabilities->append($capability));

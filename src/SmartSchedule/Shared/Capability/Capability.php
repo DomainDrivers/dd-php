@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DomainDrivers\SmartSchedule\Simulation;
+namespace DomainDrivers\SmartSchedule\Shared\Capability;
 
 final readonly class Capability
 {

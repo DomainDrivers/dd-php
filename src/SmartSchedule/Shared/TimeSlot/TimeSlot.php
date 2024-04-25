@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Shared\TimeSlot;
 
+use Munus\Collection\GenericList;
+
 final readonly class TimeSlot
 {
     public function __construct(public \DateTimeImmutable $from, public \DateTimeImmutable $to)
@@ -31,5 +33,38 @@ final readonly class TimeSlot
     public function within(self $other): bool
     {
         return $this->from >= $other->from && $this->to <= $other->to;
+    }
+
+    public function overlapsWith(self $other): bool
+    {
+        return $this->from <= $other->to && $this->to >= $other->from;
+    }
+
+    /**
+     * @return GenericList<self>
+     */
+    public function leftoverAfterRemovingCommonWith(self $other): GenericList
+    {
+        if ($this == $other) {
+            return GenericList::empty();
+        }
+        if (!$other->overlapsWith($this)) {
+            return GenericList::of($this, $other);
+        }
+        $result = GenericList::empty();
+        if ($this->from < $other->from) {
+            $result = $result->append(new self($this->from, $other->from));
+        }
+        if ($other->from < $this->from) {
+            $result = $result->append(new self($other->from, $this->from));
+        }
+        if ($this->to > $other->to) {
+            $result = $result->append(new self($other->to, $this->to));
+        }
+        if ($other->to > $this->to) {
+            $result = $result->append(new self($this->to, $other->to));
+        }
+
+        return $result;
     }
 }

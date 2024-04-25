@@ -17,6 +17,11 @@ final readonly class ProjectId
         return new self(Uuid::v7());
     }
 
+    public static function fromString(string $id): self
+    {
+        return new self(Uuid::fromString($id));
+    }
+
     public function toString(): string
     {
         return $this->id->toRfc4122();

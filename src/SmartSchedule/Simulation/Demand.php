@@ -6,6 +6,7 @@ namespace DomainDrivers\SmartSchedule\Simulation;
 
 use DomainDrivers\SmartSchedule\Optimization\CapacityDimension;
 use DomainDrivers\SmartSchedule\Optimization\WeightDimension;
+use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 
 final readonly class Demand implements WeightDimension

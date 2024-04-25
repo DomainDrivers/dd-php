@@ -21,7 +21,7 @@ final readonly class SimulationFacade
     /**
      * @param GenericList<SimulatedProject> $projectsSimulations
      */
-    public function whichProjectWithMissingDemandsIsMostProfitableToAllocateResourcesTo(
+    public function whatIsTheOptimalSetup(
         GenericList $projectsSimulations,
         SimulatedCapabilities $totalCapability
     ): Result {

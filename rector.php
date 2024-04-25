@@ -1,6 +1,7 @@
 <?php
 
 use Rector\Config\RectorConfig;
+use Rector\Php74\Rector\Closure\ClosureToArrowFunctionRector;
 use Rector\PHPUnit\CodeQuality\Rector\Class_\PreferPHPUnitThisCallRector;
 use Rector\PHPUnit\Set\PHPUnitSetList;
 use Rector\TypeDeclaration\Rector\Property\TypedPropertyFromStrictConstructorRector;
@@ -24,7 +25,8 @@ return RectorConfig::configure()
         PHPUnitSetList::PHPUNIT_CODE_QUALITY,
     ])
     ->withSkip([
-        PreferPHPUnitThisCallRector::class
+        PreferPHPUnitThisCallRector::class,
+        ClosureToArrowFunctionRector::class
     ])
     ->withPreparedSets(
         deadCode: true,

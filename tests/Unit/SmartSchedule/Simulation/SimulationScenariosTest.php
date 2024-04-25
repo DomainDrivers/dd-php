@@ -6,10 +6,10 @@ namespace DomainDrivers\Tests\Unit\SmartSchedule\Simulation;
 
 use Decimal\Decimal;
 use DomainDrivers\SmartSchedule\Optimization\OptimizationFacade;
+use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use DomainDrivers\SmartSchedule\Simulation\AdditionalPricedCapability;
 use DomainDrivers\SmartSchedule\Simulation\AvailableResourceCapability;
-use DomainDrivers\SmartSchedule\Simulation\Capability;
 use DomainDrivers\SmartSchedule\Simulation\Demand;
 use DomainDrivers\SmartSchedule\Simulation\ProjectId;
 use DomainDrivers\SmartSchedule\Simulation\SimulationFacade;
@@ -68,7 +68,7 @@ final class SimulationScenariosTest extends TestCase
             ->build();
 
         // when
-        $result = $this->simulationFacade->whichProjectWithMissingDemandsIsMostProfitableToAllocateResourcesTo($simulatedProjects, $simulatedAvailability);
+        $result = $this->simulationFacade->whatIsTheOptimalSetup($simulatedProjects, $simulatedAvailability);
 
         // then
         self::assertTrue($result->profit->equals(new Decimal(108)));
@@ -96,7 +96,7 @@ final class SimulationScenariosTest extends TestCase
             ->build();
 
         // when
-        $result = $this->simulationFacade->whichProjectWithMissingDemandsIsMostProfitableToAllocateResourcesTo($simulatedProjects, $simulatedAvailability);
+        $result = $this->simulationFacade->whatIsTheOptimalSetup($simulatedProjects, $simulatedAvailability);
 
         // then
         self::assertTrue($result->profit->equals(new Decimal(99)));
@@ -127,8 +127,8 @@ final class SimulationScenariosTest extends TestCase
         $extraCapability = new AvailableResourceCapability(Uuid::v7(), Capability::skill('YT DRAMA COMMENTS'), $this->jan_1);
 
         // when
-        $resultWithoutExtraResource = $this->simulationFacade->whichProjectWithMissingDemandsIsMostProfitableToAllocateResourcesTo($simulatedProjects, $simulatedAvailability);
-        $resultWithExtraResource = $this->simulationFacade->whichProjectWithMissingDemandsIsMostProfitableToAllocateResourcesTo(
+        $resultWithoutExtraResource = $this->simulationFacade->whatIsTheOptimalSetup($simulatedProjects, $simulatedAvailability);
+        $resultWithExtraResource = $this->simulationFacade->whatIsTheOptimalSetup(
             $simulatedProjects,
             $simulatedAvailability->add($extraCapability)
         );
@@ -159,7 +159,7 @@ final class SimulationScenariosTest extends TestCase
             ->build();
 
         // when
-        $result = $this->simulationFacade->whichProjectWithMissingDemandsIsMostProfitableToAllocateResourcesTo($simulatedProjects, $simulatedAvailability);
+        $result = $this->simulationFacade->whatIsTheOptimalSetup($simulatedProjects, $simulatedAvailability);
 
         // then
         self::assertSame($this->project_1->toString(), $result->chosenItems->get()->name);

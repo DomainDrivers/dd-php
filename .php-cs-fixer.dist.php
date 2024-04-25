@@ -31,6 +31,7 @@ return (new PhpCsFixer\Config())
         'trim_array_spaces' => true,
         'yoda_style' => false,
         'php_unit_method_casing' => false,
+        'phpdoc_to_comment' => false,
         // risky -->
         'strict_param' => true,
     ])

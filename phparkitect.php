@@ -14,11 +14,13 @@ return static function (Config $config): void {
         ->component('Sorter')->definedBy('DomainDrivers\SmartSchedule\Sorter\*')
         ->component('Simulation')->definedBy('DomainDrivers\SmartSchedule\Simulation\*')
         ->component('Optimization')->definedBy('DomainDrivers\SmartSchedule\Optimization\*')
+        ->component('Shared')->definedBy('DomainDrivers\SmartSchedule\Shared\*')
 
         ->where('Parallelization')->mayDependOnComponents('Sorter')
         ->where('Sorter')->shouldNotDependOnAnyComponent()
-        ->where('Simulation')->mayDependOnComponents('Optimization')
-        ->where('Optimization')->shouldNotDependOnAnyComponent()
+        ->where('Simulation')->mayDependOnComponents('Optimization', 'Shared')
+        ->where('Optimization')->mayDependOnComponents('Shared')
+        ->where('Shared')->shouldNotDependOnAnyComponent()
 
         ->rules();
 
