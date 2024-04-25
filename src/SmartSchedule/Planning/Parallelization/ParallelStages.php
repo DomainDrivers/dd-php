@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Planning\Parallelization;
 
+use DomainDrivers\SmartSchedule\Shared\TimeSlot\Duration;
 use Munus\Collection\Set;
 use Munus\Collection\Stream\Collectors;
 
@@ -14,6 +15,11 @@ final readonly class ParallelStages
      */
     public function __construct(private Set $stages)
     {
+    }
+
+    public static function of(Stage ...$stages): self
+    {
+        return new self(Set::ofAll($stages));
     }
 
     public function print(): string
@@ -30,5 +36,10 @@ final readonly class ParallelStages
     public function stages(): Set
     {
         return $this->stages;
+    }
+
+    public function duration(): Duration
+    {
+        return new Duration($this->stages->map(fn (Stage $stage) => $stage->duration()->seconds)->max()->getOrElse(0));
     }
 }

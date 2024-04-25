@@ -16,7 +16,7 @@ return static function (Config $config): void {
         ->component('Optimization')->definedBy('DomainDrivers\SmartSchedule\Optimization\*')
         ->component('Shared')->definedBy('DomainDrivers\SmartSchedule\Shared\*')
 
-        ->where('Parallelization')->mayDependOnComponents('Sorter')
+        ->where('Parallelization')->mayDependOnComponents('Sorter', 'Shared')
         ->where('Sorter')->shouldNotDependOnAnyComponent()
         ->where('Simulation')->mayDependOnComponents('Optimization', 'Shared')
         ->where('Optimization')->mayDependOnComponents('Shared')

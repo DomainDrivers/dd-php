@@ -21,6 +21,11 @@ final readonly class ParallelStagesList
         return new self(GenericList::empty());
     }
 
+    public static function of(ParallelStages ...$stages): self
+    {
+        return new self(GenericList::ofAll($stages));
+    }
+
     public function add(ParallelStages $new): self
     {
         return new self($this->all->append($new));
@@ -39,5 +44,18 @@ final readonly class ParallelStagesList
     public function all(): GenericList
     {
         return $this->all;
+    }
+
+    /**
+     * @param callable(ParallelStages, ParallelStages): int $comparator
+     *
+     * @return GenericList<ParallelStages>
+     */
+    public function allSorted(callable $comparator): GenericList
+    {
+        $all = $this->all->toArray();
+        uasort($all, $comparator);
+
+        return GenericList::ofAll($all);
     }
 }

@@ -12,6 +12,11 @@ final readonly class TimeSlot
     {
     }
 
+    public static function empty(): self
+    {
+        return new self((new \DateTimeImmutable())->setTimestamp(0), (new \DateTimeImmutable())->setTimestamp(0));
+    }
+
     public static function createDailyTimeSlotAtUTC(int $year, int $month, int $day): self
     {
         return new self(
@@ -66,5 +71,35 @@ final readonly class TimeSlot
         }
 
         return $result;
+    }
+
+    public function commonPartWith(self $other): self
+    {
+        if (!$this->overlapsWith($other)) {
+            return self::empty();
+        }
+
+        return new self(
+            max($this->from, $other->from),
+            min($this->to, $other->to)
+        );
+    }
+
+    public function isEmpty(): bool
+    {
+        return $this->from->getTimestamp() === $this->to->getTimestamp();
+    }
+
+    public function duration(): Duration
+    {
+        return new Duration($this->to->getTimestamp() - $this->from->getTimestamp());
+    }
+
+    public function stretch(Duration $duration): self
+    {
+        return new self(
+            $this->from->modify(sprintf('-%s seconds', $duration->seconds)),
+            $this->to->modify(sprintf('+%s seconds', $duration->seconds)),
+        );
     }
 }

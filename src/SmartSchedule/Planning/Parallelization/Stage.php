@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Planning\Parallelization;
 
+use DomainDrivers\SmartSchedule\Shared\TimeSlot\Duration;
 use Munus\Collection\Set;
 
 final readonly class Stage
@@ -16,13 +17,18 @@ final readonly class Stage
         private string $stageName,
         private Set $dependencies,
         private Set $resources,
-        private \DateInterval $duration
+        private Duration $duration
     ) {
     }
 
     public static function of(string $stageName): self
     {
-        return new self($stageName, Set::empty(), Set::empty(), new \DateInterval('P0D'));
+        return new self($stageName, Set::empty(), Set::empty(), Duration::ofDays(0));
+    }
+
+    public function ofDuration(Duration $duration): self
+    {
+        return new self($this->stageName, $this->dependencies, $this->resources, $duration);
     }
 
     public function dependsOn(Stage $stage): self
@@ -48,7 +54,7 @@ final readonly class Stage
         return $this->resources;
     }
 
-    public function duration(): \DateInterval
+    public function duration(): Duration
     {
         return $this->duration;
     }
