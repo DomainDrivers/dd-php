@@ -16,8 +16,18 @@ final readonly class ScheduleBasedOnStartDayCalculator
     public function calculate(\DateTimeImmutable $startDate, ParallelStagesList $parallelStages, callable $comparator): Map
     {
         $scheduleMap = Map::empty();
-        $parallelStages->allSorted($comparator);
-        // todo
+        $currentStart = $startDate;
+        foreach ($parallelStages->allSorted($comparator)->toArray() as $stages) {
+            $parallelizedStagesEnd = $currentStart;
+            foreach ($stages->stages()->toArray() as $stage) {
+                $stageEnd = $currentStart->add($stage->duration()->toDateInterval());
+                $scheduleMap = $scheduleMap->put($stage->name(), new TimeSlot($currentStart, $stageEnd));
+                if ($stageEnd > $parallelizedStagesEnd) {
+                    $parallelizedStagesEnd = $stageEnd;
+                }
+            }
+            $currentStart = $parallelizedStagesEnd;
+        }
 
         return $scheduleMap;
     }

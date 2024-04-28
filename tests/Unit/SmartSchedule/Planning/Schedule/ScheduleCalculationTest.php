@@ -62,6 +62,7 @@ final class ScheduleCalculationTest extends TestCase
         $this->jan3_6 = new TimeSlot(new \DateTimeImmutable('2020-01-03 00:00:00'), new \DateTimeImmutable('2020-01-06 00:00:00'));
     }
 
+    #[Test]
     public function canCalculateScheduleBasedOnTheStartDay(): void
     {
         // given
