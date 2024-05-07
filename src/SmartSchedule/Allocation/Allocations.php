@@ -8,6 +8,7 @@ use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\Set;
 use Munus\Collection\Stream\Collectors;
 use Munus\Control\Option;
+use Symfony\Component\Uid\Uuid;
 
 final readonly class Allocations
 {
@@ -28,9 +29,9 @@ final readonly class Allocations
         return new self($this->all->add($newOne));
     }
 
-    public function remove(AllocatedCapability $toRemove, TimeSlot $slot): self
+    public function remove(Uuid $toRemove, TimeSlot $slot): self
     {
-        return $this->find($toRemove, $slot)
+        return $this->find($toRemove)
             ->map(fn (AllocatedCapability $ac) => $this->removeFromSlot($ac, $slot))
             ->getOrElse($this)
         ;
@@ -39,9 +40,9 @@ final readonly class Allocations
     /**
      * @return Option<AllocatedCapability>
      */
-    public function find(AllocatedCapability $capability, TimeSlot $timeSlot): Option
+    public function find(Uuid $allocatedCapabilityId): Option
     {
-        return $this->all->find(fn (AllocatedCapability $ac) => $ac == $capability);
+        return $this->all->find(fn (AllocatedCapability $ac) => $ac->allocatedCapabilityID->equals($allocatedCapabilityId));
     }
 
     private function removeFromSlot(AllocatedCapability $allocatedResource, TimeSlot $slot): self
@@ -51,7 +52,7 @@ final readonly class Allocations
             ->leftoverAfterRemovingCommonWith($slot)
             ->toStream()
             ->filter(fn (TimeSlot $leftOver) => $leftOver->within($allocatedResource->timeSlot))
-            ->map(fn (TimeSlot $leftOver) => new AllocatedCapability($allocatedResource->resourceId, $allocatedResource->capability, $leftOver))
+            ->map(fn (TimeSlot $leftOver) => AllocatedCapability::with($allocatedResource->resourceId, $allocatedResource->capability, $leftOver))
             ->collect(Collectors::toSet());
         $newSlots = $this->all->remove($allocatedResource);
         /** @var AllocatedCapability $leftOver */

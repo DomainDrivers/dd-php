@@ -47,7 +47,7 @@ final class PotentialTransferScenariosTest extends TestCase
         );
         $this->bankingSoftId = Uuid::v7();
         $this->insuranceSoftId = Uuid::v7();
-        $this->staszekPhpMid = new AllocatedCapability(Uuid::v7(), Capability::skill('php-mid'), $this->jan1);
+        $this->staszekPhpMid = AllocatedCapability::with(Uuid::v7(), Capability::skill('php-mid'), $this->jan1);
         $this->simulationFacade = new AllocationFacade(new SimulationFacade(new OptimizationFacade()));
     }
 

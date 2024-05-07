@@ -10,7 +10,19 @@ use Symfony\Component\Uid\Uuid;
 
 final readonly class AllocatedCapability
 {
-    public function __construct(public Uuid $resourceId, public Capability $capability, public TimeSlot $timeSlot)
-    {
+    public function __construct(
+        public Uuid $allocatedCapabilityID,
+        public Uuid $resourceId,
+        public Capability $capability,
+        public TimeSlot $timeSlot
+    ) {
+    }
+
+    public static function with(
+        Uuid $resourceId,
+        Capability $capability,
+        TimeSlot $timeSlot
+    ): self {
+        return new self(Uuid::v7(), $resourceId, $capability, $timeSlot);
     }
 }

@@ -32,11 +32,11 @@ final class Project
      */
     public function remove(AllocatedCapability $capability, TimeSlot $forSlot): Option
     {
-        $toRemove = $this->allocations->find($capability, $forSlot);
+        $toRemove = $this->allocations->find($capability->allocatedCapabilityID);
         if ($toRemove->isEmpty()) {
             return $toRemove;
         }
-        $this->allocations = $this->allocations->remove($capability, $forSlot);
+        $this->allocations = $this->allocations->remove($capability->allocatedCapabilityID, $forSlot);
 
         return $toRemove;
     }

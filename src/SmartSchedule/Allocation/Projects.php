@@ -37,7 +37,7 @@ final readonly class Projects
             return $this;
         }
 
-        $to->get()->add(new AllocatedCapability($removed->get()->resourceId, $removed->get()->capability, $forSlot));
+        $to->get()->add(AllocatedCapability::with($removed->get()->resourceId, $removed->get()->capability, $forSlot));
 
         return new self($this->projects);
     }
