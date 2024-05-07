@@ -14,7 +14,7 @@ final readonly class OptimizationFacade
      * @param GenericList<Item>          $items
      * @param ?\Closure(Item, Item): int $comparator
      */
-    public function calculate(GenericList $items, TotalCapacity $totalCapacity, \Closure $comparator = null): Result
+    public function calculate(GenericList $items, TotalCapacity $totalCapacity, ?\Closure $comparator = null): Result
     {
         $allCapacities = $totalCapacity->components;
         $capacitiesSize = $totalCapacity->size();

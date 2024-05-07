@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace DomainDrivers\Tests\Unit\SmartSchedule\Planning\Schedule;
 
+use DomainDrivers\SmartSchedule\Availability\Calendar;
+use DomainDrivers\SmartSchedule\Availability\Calendars;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\ParallelStages;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\ParallelStagesList;
-use DomainDrivers\SmartSchedule\Planning\Parallelization\ResourceName;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\Stage;
-use DomainDrivers\SmartSchedule\Planning\Schedule\Calendar;
-use DomainDrivers\SmartSchedule\Planning\Schedule\Calendars;
 use DomainDrivers\SmartSchedule\Planning\Schedule\Schedule;
 use DomainDrivers\SmartSchedule\Planning\Schedule\ScheduleBasedOnChosenResourcesAvailabilityCalculator;
 use DomainDrivers\SmartSchedule\Planning\Schedule\ScheduleBasedOnReferenceStageCalculator;
 use DomainDrivers\SmartSchedule\Planning\Schedule\ScheduleBasedOnStartDayCalculator;
+use DomainDrivers\SmartSchedule\Shared\ResourceName;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\Duration;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use DomainDrivers\Tests\Unit\SmartSchedule\Planning\Schedule\Assertions\ScheduleAssert;

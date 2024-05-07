@@ -1,11 +1,24 @@
 includes:
     - vendor/phpstan/phpstan-strict-rules/rules.neon
     - vendor/phpstan/phpstan-phpunit/extension.neon
+    - vendor/phpstan/phpstan-symfony/extension.neon
 
 parameters:
 	level: 9
 	paths:
+		- bin
+		- config
+		- migrations
+		- public
 		- src
 		- tests
 	ignoreErrors:
 	    - '#expects Munus\\Collection\\Stream\\Collector\<#'
+	symfony:
+		container_xml_path: var/cache/test/DomainDrivers_SmartSchedule_KernelTestDebugContainer.xml
+
+services:
+	-
+		class: DomainDrivers\Tests\Phpstan\ReadWriteProperties
+		tags:
+			- phpstan.properties.readWriteExtension

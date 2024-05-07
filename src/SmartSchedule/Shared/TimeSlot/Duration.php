@@ -10,6 +10,11 @@ final readonly class Duration
     {
     }
 
+    public static function zero(): self
+    {
+        return new self(0);
+    }
+
     public static function ofDays(int $days): self
     {
         return new self($days * 86400);
@@ -23,5 +28,15 @@ final readonly class Duration
     public function toDateInterval(): \DateInterval
     {
         return new \DateInterval(sprintf('PT%sS', $this->seconds));
+    }
+
+    public function plus(self $other): self
+    {
+        return new self($this->seconds + $other->seconds);
+    }
+
+    public function equals(self $other): bool
+    {
+        return $this->seconds === $other->seconds;
     }
 }

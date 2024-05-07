@@ -3,6 +3,10 @@
 $finder = PhpCsFixer\Finder::create()
     ->in(__DIR__.'/src')
     ->in(__DIR__.'/tests')
+    ->in(__DIR__.'/migrations')
+    ->in(__DIR__.'/bin')
+    ->in(__DIR__.'/public')
+    ->in(__DIR__.'/config')
 ;
 
 return (new PhpCsFixer\Config())

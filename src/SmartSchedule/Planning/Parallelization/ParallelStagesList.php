@@ -47,14 +47,14 @@ final readonly class ParallelStagesList
     }
 
     /**
-     * @param callable(ParallelStages, ParallelStages): int $comparator
+     * @param ?callable(ParallelStages, ParallelStages): int $comparator
      *
      * @return GenericList<ParallelStages>
      */
-    public function allSorted(callable $comparator): GenericList
+    public function allSorted(?callable $comparator = null): GenericList
     {
         $all = $this->all->toArray();
-        uasort($all, $comparator);
+        uasort($all, $comparator ?? fn (ParallelStages $a, ParallelStages $b) => $a->print() <=> $b->print());
 
         return GenericList::ofAll($all);
     }

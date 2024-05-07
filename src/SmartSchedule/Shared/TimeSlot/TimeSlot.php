@@ -17,6 +17,11 @@ final readonly class TimeSlot
         return new self((new \DateTimeImmutable())->setTimestamp(0), (new \DateTimeImmutable())->setTimestamp(0));
     }
 
+    public static function with(string $from, string $to): self
+    {
+        return new self(new \DateTimeImmutable($from), new \DateTimeImmutable($to));
+    }
+
     public static function createDailyTimeSlotAtUTC(int $year, int $month, int $day): self
     {
         return new self(

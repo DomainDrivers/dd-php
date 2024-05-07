@@ -2,16 +2,13 @@
 
 declare(strict_types=1);
 
-namespace DomainDrivers\SmartSchedule\Planning\Schedule;
+namespace DomainDrivers\SmartSchedule\Availability;
 
-use DomainDrivers\SmartSchedule\Planning\Parallelization\ResourceName;
+use DomainDrivers\SmartSchedule\Shared\ResourceName;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\GenericList;
 use Munus\Collection\Map;
 
-/**
- * this class will be part of another module - possibly "Availability".
- */
 final readonly class Calendar
 {
     /**

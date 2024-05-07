@@ -2,6 +2,7 @@
 
 use Rector\Config\RectorConfig;
 use Rector\Php74\Rector\Closure\ClosureToArrowFunctionRector;
+use Rector\Php80\Rector\Class_\ClassPropertyAssignToConstructorPromotionRector;
 use Rector\PHPUnit\CodeQuality\Rector\Class_\PreferPHPUnitThisCallRector;
 use Rector\PHPUnit\Set\PHPUnitSetList;
 use Rector\TypeDeclaration\Rector\Property\TypedPropertyFromStrictConstructorRector;
@@ -26,7 +27,10 @@ return RectorConfig::configure()
     ])
     ->withSkip([
         PreferPHPUnitThisCallRector::class,
-        ClosureToArrowFunctionRector::class
+        ClosureToArrowFunctionRector::class,
+        ClassPropertyAssignToConstructorPromotionRector::class => [
+            __DIR__.'/src/SmartSchedule/Planning/Project.php'
+        ]
     ])
     ->withPreparedSets(
         deadCode: true,

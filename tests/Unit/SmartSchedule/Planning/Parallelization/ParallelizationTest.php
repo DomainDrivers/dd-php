@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace DomainDrivers\Tests\Unit\SmartSchedule\Planning\Parallelization;
 
-use DomainDrivers\SmartSchedule\Planning\Parallelization\ResourceName;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\Stage;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\StageParallelization;
+use DomainDrivers\SmartSchedule\Shared\ResourceName;
 use Munus\Collection\Set;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;

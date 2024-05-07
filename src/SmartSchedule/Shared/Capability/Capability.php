@@ -6,7 +6,7 @@ namespace DomainDrivers\SmartSchedule\Shared\Capability;
 
 final readonly class Capability
 {
-    private function __construct(public string $name, public string $type)
+    public function __construct(public string $name, public string $type)
     {
     }
 

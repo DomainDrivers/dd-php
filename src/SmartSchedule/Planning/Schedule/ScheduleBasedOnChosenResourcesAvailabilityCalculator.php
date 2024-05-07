@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Planning\Schedule;
 
-use DomainDrivers\SmartSchedule\Planning\Parallelization\ResourceName;
+use DomainDrivers\SmartSchedule\Availability\Calendars;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\Stage;
+use DomainDrivers\SmartSchedule\Shared\ResourceName;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\Duration;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\GenericList;

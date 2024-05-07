@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Planning\Parallelization;
 
+use DomainDrivers\SmartSchedule\Shared\ResourceName;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\Duration;
 use Munus\Collection\Set;
 

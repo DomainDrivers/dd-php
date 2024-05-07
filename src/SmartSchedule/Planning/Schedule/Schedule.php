@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Planning\Schedule;
 
+use DomainDrivers\SmartSchedule\Availability\Calendars;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\ParallelStages;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\ParallelStagesList;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\Stage;
@@ -18,6 +19,11 @@ final readonly class Schedule
      */
     public function __construct(public Map $dates)
     {
+    }
+
+    public static function none(): self
+    {
+        return new self(Map::empty());
     }
 
     public static function basedOnStartDay(\DateTimeImmutable $startDate, ParallelStagesList $parallelizedStages): self

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DomainDrivers\SmartSchedule\Planning\Parallelization;
+namespace DomainDrivers\SmartSchedule\Shared;
 
 final readonly class ResourceName
 {

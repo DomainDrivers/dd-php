@@ -1,0 +1,34 @@
+version: '3.9'
+
+services:
+  php:
+    tty: true
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      COMPOSER_HOME: "/tmp/.composer"
+      SSH_AUTH_SOCK: "/run/ssh-agent"
+    volumes:
+      - ".:/app"
+      - "~/.composer:/tmp/.composer"
+      - "${SSH_AUTH_SOCK}:/run/ssh-agent"
+
+  postgres:
+    image: 'postgres:16'
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: "password"
+      POSTGRES_USER: "root"
+      POSTGRES_DB: "app"
+    volumes:
+      - db-data:/var/lib/postgresql/data:rw
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      timeout: 10s
+      interval: 1s
+      retries: 15
+
+volumes:
+  db-data:

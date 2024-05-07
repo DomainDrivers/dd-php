@@ -2,32 +2,21 @@
 
 Prerequisites:
 
-- PHP 8.3
-- `decimal` extension (https://github.com/php-decimal/ext-decimal)
-- Composer 
+- Make
+- docker compose
 
 ### Setup
 
-The code below will install all dependencies and run the build script (code style check, static analysis and all tests):
+The code below will boot the project, install all dependencies and run the build script (code style check, static analysis and all tests):
 
 ```shell
-composer install
-composer ci
+make up
+make ci
 ```
 
 
-Alternatively you can use a docker image, then you have two options:
-
-#### Build and run image locally
+### Interactive shell
 
 ```shell
-docker build -t domain-drivers .
-docker run -it --rm -v "$PWD":/app -w /app domain-drivers bash
+make bash
 ```
-
-#### Use public image
-
-```shell
-docker run -it --rm -v "$PWD":/app -w /app akondas/domain-drivers bash
-```
-
