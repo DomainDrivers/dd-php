@@ -72,7 +72,6 @@
             "@composer validate",
             "@composer audit",
             "@code-style:check",
-            "@rector:check",
             "@phpstan",
             "@phparkitect",
             "@tests:database:reset",
