@@ -4,21 +4,31 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Allocation;
 
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\Embedded;
 use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\Table;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Control\Option;
 use Symfony\Component\Uid\Uuid;
 
 #[Entity]
+#[Table(name: 'project_allocations')]
 final class ProjectAllocations
 {
+    #[Id]
+    #[Column(type: 'project_allocations_id')]
     private ProjectAllocationsId $projectId;
 
+    #[Column(type: 'allocations', options: ['jsonb' => true])]
     private Allocations $allocations;
 
+    #[Column(type: 'allocation_demands', options: ['jsonb' => true])]
     private Demands $demands;
 
+    #[Embedded(class: TimeSlot::class, columnPrefix: 'date_')]
     private TimeSlot $timeSlot;
 
     public function __construct(
@@ -131,5 +141,20 @@ final class ProjectAllocations
         $this->demands = $this->demands->withNew($demands);
 
         return Option::of(ProjectAllocationsDemandsScheduled::new($this->projectId, $this->missingDemands(), $when));
+    }
+
+    public function id(): ProjectAllocationsId
+    {
+        return $this->projectId;
+    }
+
+    public function demands(): Demands
+    {
+        return $this->demands;
+    }
+
+    public function timeSlot(): TimeSlot
+    {
+        return $this->timeSlot;
     }
 }

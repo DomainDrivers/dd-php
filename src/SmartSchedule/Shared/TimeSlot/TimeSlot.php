@@ -4,13 +4,20 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Shared\TimeSlot;
 
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\Embeddable;
 use Munus\Collection\GenericList;
 use Munus\Value\Comparable;
 
+#[Embeddable]
 final readonly class TimeSlot implements Comparable
 {
-    public function __construct(public \DateTimeImmutable $from, public \DateTimeImmutable $to)
-    {
+    public function __construct(
+        #[Column(type: 'datetime_immutable')]
+        public \DateTimeImmutable $from,
+        #[Column(type: 'datetime_immutable')]
+        public \DateTimeImmutable $to
+    ) {
     }
 
     public static function empty(): self

@@ -15,6 +15,9 @@ doctrine:
             demands: DomainDrivers\SmartSchedule\Planning\Infrastructure\DemandsType
             demands_per_stage: DomainDrivers\SmartSchedule\Planning\Infrastructure\DemandsPerStageType
             chosen_resources: DomainDrivers\SmartSchedule\Planning\Infrastructure\ChosenResourcesType
+            project_allocations_id: DomainDrivers\SmartSchedule\Allocation\Infrastructure\ProjectAllocationsIdType
+            allocation_demands: DomainDrivers\SmartSchedule\Allocation\Infrastructure\DemandsType
+            allocations: DomainDrivers\SmartSchedule\Allocation\Infrastructure\AllocationsType
     orm:
         auto_generate_proxy_classes: true
         enable_lazy_ghost_objects: true
@@ -23,12 +26,24 @@ doctrine:
         naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
         auto_mapping: true
         mappings:
-            App:
+            Planning:
                 type: attribute
                 is_bundle: false
                 dir: '%kernel.project_dir%/src/SmartSchedule/Planning'
                 prefix: 'DomainDrivers\SmartSchedule\Planning'
                 alias: Planning
+            Allocation:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/SmartSchedule/Allocation'
+                prefix: 'DomainDrivers\SmartSchedule\Allocation'
+                alias: Allocation
+            Shared:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/SmartSchedule/Shared'
+                prefix: 'DomainDrivers\SmartSchedule\Shared'
+                alias: Shared
         controller_resolver:
             auto_mapping: true
 

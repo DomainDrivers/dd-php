@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Shared\Capability;
 
+use Munus\Collection\GenericList;
+use Munus\Collection\Stream;
+use Munus\Collection\Stream\Collectors;
+
 final readonly class Capability
 {
     public function __construct(public string $name, public string $type)
@@ -23,6 +27,14 @@ final readonly class Capability
     public static function asset(string $name): self
     {
         return new self($name, 'ASSET');
+    }
+
+    /**
+     * @return GenericList<self>
+     */
+    public static function skills(string ...$skills): GenericList
+    {
+        return Stream::ofAll($skills)->map(fn (string $s) => self::skill($s))->collect(Collectors::toList());
     }
 
     public function equals(self $other): bool
