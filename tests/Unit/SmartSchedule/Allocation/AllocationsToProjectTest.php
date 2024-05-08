@@ -4,17 +4,21 @@ declare(strict_types=1);
 
 namespace DomainDrivers\Tests\Unit\SmartSchedule\Allocation;
 
+use DomainDrivers\SmartSchedule\Allocation\AllocatedCapability;
 use DomainDrivers\SmartSchedule\Allocation\Allocations;
 use DomainDrivers\SmartSchedule\Allocation\CapabilitiesAllocated;
 use DomainDrivers\SmartSchedule\Allocation\CapabilityReleased;
 use DomainDrivers\SmartSchedule\Allocation\Demand;
 use DomainDrivers\SmartSchedule\Allocation\Demands;
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocations;
+use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationScheduled;
+use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsDemandsScheduled;
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsId;
 use DomainDrivers\SmartSchedule\Allocation\ResourceId;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\GenericList;
+use Munus\Collection\Set;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -29,7 +33,9 @@ final class AllocationsToProjectTest extends TestCase
     private TimeSlot $feb_1;
     private TimeSlot $feb_2;
     private TimeSlot $january;
+    private TimeSlot $february;
 
+    #[\Override]
     protected function setUp(): void
     {
         $this->when = new \DateTimeImmutable('1970-01-01');
@@ -37,16 +43,13 @@ final class AllocationsToProjectTest extends TestCase
         $this->adminId = ResourceId::newOne();
         $this->feb_1 = TimeSlot::createDailyTimeSlotAtUTC(2020, 2, 1);
         $this->feb_2 = TimeSlot::createDailyTimeSlotAtUTC(2020, 2, 2);
-        $this->january = TimeSlot::createDailyTimeSlotAtUTC(2020, 1, 1);
+        $this->january = TimeSlot::createMonthlyTimeSlotAtUTC(2020, 1);
+        $this->february = TimeSlot::createMonthlyTimeSlotAtUTC(2020, 2);
     }
 
     #[Test]
     public function canAllocate(): void
     {
-        if (time() > 1) { // phpstan workaround
-            self::markTestSkipped('Not implemented yet');
-        }
-
         // given
         $allocations = ProjectAllocations::empty($this->projectId);
 
@@ -97,10 +100,6 @@ final class AllocationsToProjectTest extends TestCase
     #[Test]
     public function thereAreNoMissingDemandsWhenAllAllocated(): void
     {
-        if (time() > 1) { // phpstan workaround
-            self::markTestSkipped('Not implemented yet');
-        }
-
         // given
         $demands = Demands::of(new Demand(Capability::permission('admin'), $this->feb_1), new Demand(Capability::skill('java'), $this->feb_1));
         // and
@@ -124,10 +123,6 @@ final class AllocationsToProjectTest extends TestCase
     #[Test]
     public function missingDemandsArePresentWhenAllocatingForDifferentThanDemandedSlot(): void
     {
-        if (time() > 1) { // phpstan workaround
-            self::markTestSkipped('Not implemented yet');
-        }
-
         // given
         $demands = Demands::of(new Demand(Capability::permission('admin'), $this->feb_1), new Demand(Capability::skill('java'), $this->feb_1));
         // and
@@ -152,10 +147,6 @@ final class AllocationsToProjectTest extends TestCase
     #[Test]
     public function canRelease(): void
     {
-        if (time() > 1) { // phpstan workaround
-            self::markTestSkipped('Not implemented yet');
-        }
-
         // given
         $allocations = ProjectAllocations::empty($this->projectId);
         // and
@@ -177,10 +168,6 @@ final class AllocationsToProjectTest extends TestCase
     #[Test]
     public function releasingHasNoEffectWhenCapabilityWasNotAllocated(): void
     {
-        if (time() > 1) { // phpstan workaround
-            self::markTestSkipped('Not implemented yet');
-        }
-
         // given
         $allocations = ProjectAllocations::empty($this->projectId);
 
@@ -194,10 +181,6 @@ final class AllocationsToProjectTest extends TestCase
     #[Test]
     public function missingDemandsArePresentAfterReleasingSomeOfAllocatedCapabilities(): void
     {
-        if (time() > 1) { // phpstan workaround
-            self::markTestSkipped('Not implemented yet');
-        }
-
         // given
         $demandForPhp = new Demand(Capability::skill('php'), $this->feb_1);
         $demandForAdmin = new Demand(Capability::permission('admin'), $this->feb_1);
@@ -220,10 +203,6 @@ final class AllocationsToProjectTest extends TestCase
     #[Test]
     public function releasingHasNoEffectWhenReleasingSlotNotWithinAllocatedSlot(): void
     {
-        if (time() > 1) { // phpstan workaround
-            self::markTestSkipped('Not implemented yet');
-        }
-
         // given
         $allocations = ProjectAllocations::empty($this->projectId);
         // and
@@ -239,10 +218,6 @@ final class AllocationsToProjectTest extends TestCase
     #[Test]
     public function releasingSmallPartOfSlotLeavesTheRest(): void
     {
-        if (time() > 1) { // phpstan workaround
-            self::markTestSkipped('Not implemented yet');
-        }
-
         // given
         $allocations = ProjectAllocations::empty($this->projectId);
         // and
@@ -264,6 +239,49 @@ final class AllocationsToProjectTest extends TestCase
             Demands::none(),
             $this->when
         ));
-        self::assertEquals([$oneHourBefore, $theRest], $allocations->allocations()->all->toArray());
+        self::assertTrue($allocations->allocations()->all->equals(Set::of(
+            AllocatedCapability::new($this->adminId->id, Capability::permission('admin'), $oneHourBefore),
+            AllocatedCapability::new($this->adminId->id, Capability::permission('admin'), $theRest)
+        )));
+    }
+
+    #[Test]
+    public function canChangeDemands(): void
+    {
+        // given
+        $demands = Demands::of(new Demand(Capability::permission('admin'), $this->feb_1), new Demand(Capability::skill('php'), $this->feb_1));
+        // and
+        $allocations = ProjectAllocations::withDemands($this->projectId, $demands);
+        // and
+        $allocations->allocate($this->adminId, Capability::permission('admin'), $this->feb_1, $this->when);
+        // when
+        $event = $allocations->addDemands(Demands::of(new Demand(Capability::skill('python'), $this->feb_1)), $this->when);
+        // then
+        self::assertTrue($allocations->missingDemands()->all->equals(Demands::allInSameTimeSlot($this->feb_1, Capability::skill('php'), Capability::skill('python'))->all));
+        self::assertEquals($event->get(), new ProjectAllocationsDemandsScheduled(
+            $event->get()->uuid,
+            $this->projectId,
+            Demands::allInSameTimeSlot($this->feb_1, Capability::skill('php'), Capability::skill('python')),
+            $this->when
+        ));
+    }
+
+    #[Test]
+    public function canChangeProjectDates(): void
+    {
+        // given
+        $allocations = new ProjectAllocations($this->projectId, Allocations::none(), Demands::none(), $this->january);
+
+        // when
+        $event = $allocations->defineSlot($this->february, $this->when);
+
+        // then
+        self::assertTrue($event->isPresent());
+        self::assertEquals($event->get(), new ProjectAllocationScheduled(
+            $event->get()->uuid,
+            $this->projectId,
+            $this->february,
+            $this->when
+        ));
     }
 }

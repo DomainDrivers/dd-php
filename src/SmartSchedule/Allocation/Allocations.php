@@ -52,7 +52,7 @@ final readonly class Allocations
             ->leftoverAfterRemovingCommonWith($slot)
             ->toStream()
             ->filter(fn (TimeSlot $leftOver) => $leftOver->within($allocatedResource->timeSlot))
-            ->map(fn (TimeSlot $leftOver) => AllocatedCapability::with($allocatedResource->resourceId, $allocatedResource->capability, $leftOver))
+            ->map(fn (TimeSlot $leftOver) => AllocatedCapability::new($allocatedResource->resourceId, $allocatedResource->capability, $leftOver))
             ->collect(Collectors::toSet());
         $newSlots = $this->all->remove($allocatedResource);
         /** @var AllocatedCapability $leftOver */

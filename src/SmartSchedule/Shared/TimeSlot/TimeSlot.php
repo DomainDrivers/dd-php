@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace DomainDrivers\SmartSchedule\Shared\TimeSlot;
 
 use Munus\Collection\GenericList;
+use Munus\Value\Comparable;
 
-final readonly class TimeSlot
+final readonly class TimeSlot implements Comparable
 {
     public function __construct(public \DateTimeImmutable $from, public \DateTimeImmutable $to)
     {
@@ -106,5 +107,11 @@ final readonly class TimeSlot
             $this->from->modify(sprintf('-%s seconds', $duration->seconds)),
             $this->to->modify(sprintf('+%s seconds', $duration->seconds)),
         );
+    }
+
+    #[\Override]
+    public function equals(Comparable $other): bool
+    {
+        return self::class === $other::class && $this->from == $other->from && $this->to == $other->to;
     }
 }

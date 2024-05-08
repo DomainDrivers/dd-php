@@ -48,24 +48,32 @@ final class ProjectAllocations
      */
     public function allocate(ResourceId $resourceId, Capability $capability, TimeSlot $requestedSlot, \DateTimeImmutable $when): Option
     {
-        if ($this->nothingAllocated() || !$this->withinProjectTimeSlot($requestedSlot)) {
+        $allocatedCapability = AllocatedCapability::new($resourceId->id, $capability, $requestedSlot);
+        $newAllocations = $this->allocations->add($allocatedCapability);
+        if ($this->nothingAllocated($newAllocations) || !$this->withinProjectTimeSlot($requestedSlot)) {
             /** @var Option<CapabilitiesAllocated> $none */
             $none = Option::none();
 
             return $none;
         }
 
-        return Option::of(CapabilitiesAllocated::new(Uuid::v7(), $this->projectId, Demands::none(), $when));
+        $this->allocations = $newAllocations;
+
+        return Option::of(CapabilitiesAllocated::new($allocatedCapability->allocatedCapabilityID, $this->projectId, $this->missingDemands(), $when));
     }
 
-    private function nothingAllocated(): bool
+    private function nothingAllocated(Allocations $newAllocations): bool
     {
-        return false;
+        return $newAllocations->all->equals($this->allocations->all);
     }
 
     private function withinProjectTimeSlot(TimeSlot $requestedSlot): bool
     {
-        return false;
+        if (!$this->hasTimeSlot()) {
+            return true;
+        }
+
+        return $requestedSlot->within($this->timeSlot);
     }
 
     /**
@@ -73,19 +81,21 @@ final class ProjectAllocations
      */
     public function release(Uuid $allocatedCapabilityId, TimeSlot $timeSlot, \DateTimeImmutable $when): Option
     {
-        if ($this->nothingReleased()) {
+        $newAllocations = $this->allocations->remove($allocatedCapabilityId, $timeSlot);
+        if ($this->nothingReleased($newAllocations)) {
             /** @var Option<CapabilityReleased> $none */
             $none = Option::none();
 
             return $none;
         }
+        $this->allocations = $newAllocations;
 
-        return Option::of(CapabilityReleased::new($this->projectId, Demands::none(), $when));
+        return Option::of(CapabilityReleased::new($this->projectId, $this->missingDemands(), $when));
     }
 
-    private function nothingReleased(): bool
+    private function nothingReleased(Allocations $newAllocations): bool
     {
-        return false;
+        return $newAllocations->all->equals($this->allocations->all);
     }
 
     public function missingDemands(): Demands
@@ -101,5 +111,25 @@ final class ProjectAllocations
     public function hasTimeSlot(): bool
     {
         return !$this->timeSlot->isEmpty();
+    }
+
+    /**
+     * @return Option<ProjectAllocationScheduled>
+     */
+    public function defineSlot(TimeSlot $timeSlot, \DateTimeImmutable $when): Option
+    {
+        $this->timeSlot = $timeSlot;
+
+        return Option::of(ProjectAllocationScheduled::new($this->projectId, $this->timeSlot, $when));
+    }
+
+    /**
+     * @return Option<ProjectAllocationsDemandsScheduled>
+     */
+    public function addDemands(Demands $demands, \DateTimeImmutable $when): Option
+    {
+        $this->demands = $this->demands->withNew($demands);
+
+        return Option::of(ProjectAllocationsDemandsScheduled::new($this->projectId, $this->missingDemands(), $when));
     }
 }
