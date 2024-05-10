@@ -6,6 +6,9 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Doctrine\ORM\Tools\ToolEvents;
 use DomainDrivers\SmartSchedule\Allocation\AllocationFacade;
+use DomainDrivers\SmartSchedule\Allocation\Cashflow\CashFlowFacade;
+use DomainDrivers\SmartSchedule\Allocation\Cashflow\CashflowRepository;
+use DomainDrivers\SmartSchedule\Allocation\Cashflow\Infrastructure\OrmCashflowRepository;
 use DomainDrivers\SmartSchedule\Allocation\Infrastructure\OrmProjectAllocationsRepository;
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsRepository;
 use DomainDrivers\SmartSchedule\Availability\AvailabilityFacade;
@@ -43,6 +46,12 @@ return static function (ContainerConfigurator $configurator): void {
     $services->alias(ProjectAllocationsRepository::class, OrmProjectAllocationsRepository::class);
 
     $services->set(AllocationFacade::class)
+        ->public();
+
+    $services->set(OrmCashflowRepository::class);
+    $services->alias(CashflowRepository::class, OrmCashflowRepository::class);
+
+    $services->set(CashFlowFacade::class)
         ->public();
 
     if (in_array($configurator->env(), ['dev', 'test'], true)) {

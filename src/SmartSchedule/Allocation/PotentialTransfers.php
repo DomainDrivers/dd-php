@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Allocation;
 
-use Decimal\Decimal;
+use DomainDrivers\SmartSchedule\Allocation\Cashflow\Earnings;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use DomainDrivers\SmartSchedule\Simulation\Demand as SimulationDemand;
 use DomainDrivers\SmartSchedule\Simulation\Demands as SimulationDemands;
@@ -17,7 +17,7 @@ use Munus\Collection\Stream\Collectors;
 final readonly class PotentialTransfers
 {
     /**
-     * @param Map<string, Decimal> $earnings
+     * @param Map<string, Earnings> $earnings
      */
     public function __construct(public ProjectsAllocationsSummary $summary, public Map $earnings)
     {
@@ -53,7 +53,7 @@ final readonly class PotentialTransfers
         return $this->summary->projectAllocations->keys()->toStream()
             ->map(fn (string $projectId) => new SimulatedProject(
                 ProjectId::fromString($projectId),
-                fn () => $this->earnings->get($projectId)->get(),
+                fn () => $this->earnings->get($projectId)->get()->value,
                 $this->getMissingDemands($projectId)))
             ->collect(Collectors::toList());
     }

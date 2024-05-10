@@ -18,6 +18,9 @@ doctrine:
             project_allocations_id: DomainDrivers\SmartSchedule\Allocation\Infrastructure\ProjectAllocationsIdType
             allocation_demands: DomainDrivers\SmartSchedule\Allocation\Infrastructure\DemandsType
             allocations: DomainDrivers\SmartSchedule\Allocation\Infrastructure\AllocationsType
+            cost: DomainDrivers\SmartSchedule\Allocation\Cashflow\Infrastructure\CostType
+            earnings: DomainDrivers\SmartSchedule\Allocation\Cashflow\Infrastructure\EarningsType
+            income: DomainDrivers\SmartSchedule\Allocation\Cashflow\Infrastructure\IncomeType
     orm:
         auto_generate_proxy_classes: true
         enable_lazy_ghost_objects: true

@@ -7,6 +7,7 @@ namespace DomainDrivers\Tests\Unit\SmartSchedule\Allocation;
 use Decimal\Decimal;
 use DomainDrivers\SmartSchedule\Allocation\AllocatedCapability;
 use DomainDrivers\SmartSchedule\Allocation\AllocationFacade;
+use DomainDrivers\SmartSchedule\Allocation\Cashflow\Earnings;
 use DomainDrivers\SmartSchedule\Allocation\Demand;
 use DomainDrivers\SmartSchedule\Allocation\Demands;
 use DomainDrivers\SmartSchedule\Allocation\PotentialTransfers;
@@ -57,8 +58,8 @@ final class PotentialTransferScenariosTest extends TestCase
     public function simulatesMovingCapabilitiesToDifferentProject(): void
     {
         // given
-        $bankingSoft = new Project($this->bankingSoftId, $this->demandForPhpMidInJan, new Decimal(9));
-        $insuranceSoft = new Project($this->insuranceSoftId, $this->demandForPhpMidInJan, new Decimal(90));
+        $bankingSoft = new Project($this->bankingSoftId, $this->demandForPhpMidInJan, Earnings::of(9));
+        $insuranceSoft = new Project($this->insuranceSoftId, $this->demandForPhpMidInJan, Earnings::of(90));
         $bankingSoft->add($this->staszekPhpMid);
         $projects = $this->toPotentialTransfers($bankingSoft, $insuranceSoft);
 
@@ -73,8 +74,8 @@ final class PotentialTransferScenariosTest extends TestCase
     public function simulatesMovingCapabilitiesToDifferentProjectJustForAWhile(): void
     {
         // given
-        $bankingSoft = new Project($this->bankingSoftId, $this->demandForPhpMidInJan, new Decimal(9));
-        $insuranceSoft = new Project($this->insuranceSoftId, $this->demandForPhpJustFor15minInJan, new Decimal(99));
+        $bankingSoft = new Project($this->bankingSoftId, $this->demandForPhpMidInJan, Earnings::of(9));
+        $insuranceSoft = new Project($this->insuranceSoftId, $this->demandForPhpJustFor15minInJan, Earnings::of(99));
         $bankingSoft->add($this->staszekPhpMid);
         $projects = $this->toPotentialTransfers($bankingSoft, $insuranceSoft);
 
@@ -89,8 +90,8 @@ final class PotentialTransferScenariosTest extends TestCase
     public function theMoveGivesZeroProfitWhenThereAreStillMissingDemands(): void
     {
         // given
-        $bankingSoft = new Project($this->bankingSoftId, $this->demandForPhpMidInJan, new Decimal(9));
-        $insuranceSoft = new Project($this->insuranceSoftId, $this->demandsForPhpAndJavaScriptInJan, new Decimal(99));
+        $bankingSoft = new Project($this->bankingSoftId, $this->demandForPhpMidInJan, Earnings::of(9));
+        $insuranceSoft = new Project($this->insuranceSoftId, $this->demandsForPhpAndJavaScriptInJan, Earnings::of(99));
         $bankingSoft->add($this->staszekPhpMid);
         $projects = $this->toPotentialTransfers($bankingSoft, $insuranceSoft);
 
