@@ -69,10 +69,14 @@
         "tests": [
             "@phpunit:unit"
         ],
+        "lint" : [
+            "bin/console lint:container"
+        ],
         "ci": [
             "@composer validate",
             "@composer audit",
             "@code-style:check",
+            "@lint",
             "@phpstan",
             "@phparkitect",
             "@tests:database:reset",
