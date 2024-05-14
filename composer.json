@@ -6,7 +6,7 @@
     "require": {
         "php": "^8.3",
         "ext-decimal": "^1.4",
-        "munusphp/munus": "dev-master",
+        "munusphp/munus": "^0.13",
         "symfony/uid": "^7.0",
         "symfony/console": "7.0.*",
         "symfony/dotenv": "7.0.*",

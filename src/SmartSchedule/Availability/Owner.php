@@ -8,7 +8,7 @@ use Symfony\Component\Uid\Uuid;
 
 final readonly class Owner implements \Stringable
 {
-    private function __construct(public Uuid $id)
+    private function __construct(public ?Uuid $id)
     {
     }
 
@@ -17,19 +17,34 @@ final readonly class Owner implements \Stringable
         return new self(Uuid::v7());
     }
 
+    public static function none(): self
+    {
+        return new self(null);
+    }
+
     public static function fromString(string $id): self
     {
         return new self(Uuid::fromString($id));
     }
 
-    public function toString(): string
+    public function byNone(): bool
     {
-        return $this->id->toRfc4122();
+        return $this->id === null;
+    }
+
+    public function toString(): ?string
+    {
+        return $this->id?->toRfc4122();
+    }
+
+    public function equals(self $other): bool
+    {
+        return $this->toString() === $other->toString();
     }
 
     #[\Override]
     public function __toString(): string
     {
-        return $this->toString();
+        return $this->toString() ?? '';
     }
 }

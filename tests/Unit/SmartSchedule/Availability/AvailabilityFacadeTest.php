@@ -10,16 +10,16 @@ use DomainDrivers\SmartSchedule\Availability\ResourceAvailabilityId;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 #[CoversClass(AvailabilityFacade::class)]
-final class AvailabilityFacadeTest extends TestCase
+final class AvailabilityFacadeTest extends KernelTestCase
 {
     private AvailabilityFacade $availabilityFacade;
 
     protected function setUp(): void
     {
-        $this->availabilityFacade = new AvailabilityFacade();
+        $this->availabilityFacade = self::getContainer()->get(AvailabilityFacade::class);
     }
 
     #[Test]
@@ -33,8 +33,26 @@ final class AvailabilityFacadeTest extends TestCase
         $this->availabilityFacade->createResourceSlots($resourceId, $oneDay);
 
         // then
-        $this->expectNotToPerformAssertions();
-        // todo check that availability(ies) was/were created
+        self::assertSame(96, $this->availabilityFacade->find($resourceId, $oneDay)->size());
+    }
+
+    #[Test]
+    public function canCreateNewAvailabilitySlotsWithParentId(): void
+    {
+        // given
+        $resourceId = ResourceAvailabilityId::newOne();
+        $resourceId2 = ResourceAvailabilityId::newOne();
+        $parentId = ResourceAvailabilityId::newOne();
+        $differentParentId = ResourceAvailabilityId::newOne();
+        $oneDay = TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1);
+
+        // when
+        $this->availabilityFacade->createResourceSlotsWitParent($resourceId, $parentId, $oneDay);
+        $this->availabilityFacade->createResourceSlotsWitParent($resourceId2, $differentParentId, $oneDay);
+
+        // then
+        self::assertSame(96, $this->availabilityFacade->findByParentId($parentId, $oneDay)->size());
+        self::assertSame(96, $this->availabilityFacade->findByParentId($differentParentId, $oneDay)->size());
     }
 
     #[Test]
@@ -51,7 +69,9 @@ final class AvailabilityFacadeTest extends TestCase
 
         // then
         self::assertTrue($result);
-        // todo check that can't be taken
+        $resourceAvailabilities = $this->availabilityFacade->find($resourceId, $oneDay);
+        self::assertSame(96, $resourceAvailabilities->size());
+        self::assertTrue($resourceAvailabilities->blockedEntirelyBy($owner));
     }
 
     #[Test]
@@ -68,7 +88,9 @@ final class AvailabilityFacadeTest extends TestCase
 
         // then
         self::assertTrue($result);
-        // todo check that are disabled
+        $resourceAvailabilities = $this->availabilityFacade->find($resourceId, $oneDay);
+        self::assertSame(96, $resourceAvailabilities->size());
+        self::assertTrue($resourceAvailabilities->isDisabledEntirelyBy($owner));
     }
 
     #[Test]
@@ -87,8 +109,9 @@ final class AvailabilityFacadeTest extends TestCase
         $result = $this->availabilityFacade->block($resourceId, $fifteenMinutes, Owner::newOne());
 
         // then
-        self::assertTrue($result);
-        // todo check that nothing was changed
+        self::assertFalse($result);
+        $resourceAvailabilities = $this->availabilityFacade->find($resourceId, $oneDay);
+        self::assertTrue($resourceAvailabilities->blockedEntirelyBy($owner));
     }
 
     #[Test]
@@ -107,7 +130,8 @@ final class AvailabilityFacadeTest extends TestCase
 
         // then
         self::assertTrue($result);
-        // todo check can be taken again
+        $resourceAvailabilities = $this->availabilityFacade->find($resourceId, $oneDay);
+        self::assertTrue($resourceAvailabilities->isEntirelyAvailable());
     }
 
     #[Test]
@@ -130,7 +154,34 @@ final class AvailabilityFacadeTest extends TestCase
         $result = $this->availabilityFacade->release($resourceId, $jan_1_2, $jan1owner);
 
         // then
+        self::assertFalse($result);
+        $resourceAvailabilities = $this->availabilityFacade->find($resourceId, $jan_1);
+        self::assertTrue($resourceAvailabilities->blockedEntirelyBy($jan1owner));
+    }
+
+    #[Test]
+    public function oneSegmentCanBeTakenBySomeoneElseAfterRealising(): void
+    {
+        // given
+        $resourceId = ResourceAvailabilityId::newOne();
+        $oneDay = TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1);
+        $fifteenMinutes = new TimeSlot($oneDay->from, $oneDay->from->modify('+15 minutes'));
+        $owner = Owner::newOne();
+        $this->availabilityFacade->createResourceSlots($resourceId, $oneDay);
+        // and
+        $this->availabilityFacade->block($resourceId, $oneDay, $owner);
+        // and
+        $this->availabilityFacade->release($resourceId, $fifteenMinutes, $owner);
+
+        // when
+        $newOwner = Owner::newOne();
+        $result = $this->availabilityFacade->block($resourceId, $fifteenMinutes, $newOwner);
+
+        // then
         self::assertTrue($result);
-        // todo check still owned by jan1
+        $resourceAvailabilities = $this->availabilityFacade->find($resourceId, $oneDay);
+        self::assertSame(96, $resourceAvailabilities->size());
+        self::assertSame(95, $resourceAvailabilities->findBlockedBy($owner)->length());
+        self::assertSame(1, $resourceAvailabilities->findBlockedBy($newOwner)->length());
     }
 }

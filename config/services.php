@@ -12,6 +12,8 @@ use DomainDrivers\SmartSchedule\Allocation\Cashflow\Infrastructure\OrmCashflowRe
 use DomainDrivers\SmartSchedule\Allocation\Infrastructure\OrmProjectAllocationsRepository;
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsRepository;
 use DomainDrivers\SmartSchedule\Availability\AvailabilityFacade;
+use DomainDrivers\SmartSchedule\Availability\Infrastructure\DbalResourceAvailabilityRepository;
+use DomainDrivers\SmartSchedule\Availability\ResourceAvailabilityRepository;
 use DomainDrivers\SmartSchedule\Planning\Infrastructure\OrmProjectRepository;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\StageParallelization;
 use DomainDrivers\SmartSchedule\Planning\PlanChosenResources;
@@ -34,7 +36,8 @@ return static function (ContainerConfigurator $configurator): void {
 
     $services->set(PlanChosenResources::class);
 
-    $services->set(AvailabilityFacade::class);
+    $services->set(AvailabilityFacade::class)
+        ->public();
 
     $services->set(OrmProjectRepository::class);
     $services->alias(ProjectRepository::class, OrmProjectRepository::class);
@@ -53,6 +56,9 @@ return static function (ContainerConfigurator $configurator): void {
 
     $services->set(CashFlowFacade::class)
         ->public();
+
+    $services->set(DbalResourceAvailabilityRepository::class);
+    $services->alias(ResourceAvailabilityRepository::class, DbalResourceAvailabilityRepository::class);
 
     if (in_array($configurator->env(), ['dev', 'test'], true)) {
         $services->set(FixSchemaListener::class)

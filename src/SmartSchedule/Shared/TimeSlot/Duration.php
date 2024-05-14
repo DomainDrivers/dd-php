@@ -25,9 +25,23 @@ final readonly class Duration
         return new self($hours * 3600);
     }
 
+    public static function between(\DateTimeImmutable $start, \DateTimeImmutable $end): self
+    {
+        if ($start > $end) {
+            throw new \InvalidArgumentException('Start must be before end');
+        }
+
+        return new self($end->getTimestamp() - $start->getTimestamp());
+    }
+
     public function toDateInterval(): \DateInterval
     {
         return new \DateInterval(sprintf('PT%sS', $this->seconds));
+    }
+
+    public function toMinutes(): int
+    {
+        return (int) ($this->seconds / 60);
     }
 
     public function plus(self $other): self
