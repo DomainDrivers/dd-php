@@ -2,7 +2,7 @@
 
 DOCKER_COMPOSE = docker compose \
 	--project-directory ./ \
-	-p dna_official_php
+	-p domain_drivers_php
 
 up:
 	$(DOCKER_COMPOSE) up -d
