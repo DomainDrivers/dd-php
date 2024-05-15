@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Allocation;
 
+use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\Set;

@@ -7,6 +7,7 @@ namespace DomainDrivers\Tests\Unit\SmartSchedule\Availability;
 use DomainDrivers\SmartSchedule\Availability\Infrastructure\DbalResourceAvailabilityRepository;
 use DomainDrivers\SmartSchedule\Availability\ResourceAvailability;
 use DomainDrivers\SmartSchedule\Availability\ResourceAvailabilityId;
+use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -27,7 +28,7 @@ final class ResourceAvailabilityLoadingTest extends KernelTestCase
     {
         // given
         $resourceAvailabilityId = ResourceAvailabilityId::newOne();
-        $resourceId = ResourceAvailabilityId::newOne();
+        $resourceId = ResourceId::newOne();
         $resourceAvailability = ResourceAvailability::of($resourceAvailabilityId, $resourceId, TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1));
 
         // when

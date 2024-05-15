@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Planning;
 
+use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\ParallelStagesList;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\Stage;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\StageParallelization;
@@ -64,7 +65,7 @@ final readonly class PlanningFacade
     }
 
     /**
-     * @param Set<ResourceName> $chosenResources
+     * @param Set<ResourceId> $chosenResources
      */
     public function defineResourcesWithinDates(ProjectId $projectId, Set $chosenResources, TimeSlot $timeBoundaries): void
     {

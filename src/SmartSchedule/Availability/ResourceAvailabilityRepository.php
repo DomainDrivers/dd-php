@@ -17,12 +17,12 @@ interface ResourceAvailabilityRepository
     /**
      * @return GenericList<ResourceAvailability>
      */
-    public function loadAllWithinSlot(ResourceAvailabilityId $resourceId, TimeSlot $segment): GenericList;
+    public function loadAllWithinSlot(ResourceId $resourceId, TimeSlot $segment): GenericList;
 
     /**
      * @return GenericList<ResourceAvailability>
      */
-    public function loadAllByParentIdWithinSlot(ResourceAvailabilityId $parentId, TimeSlot $segment): GenericList;
+    public function loadAllByParentIdWithinSlot(ResourceId $parentId, TimeSlot $segment): GenericList;
 
     public function saveCheckingVersion(ResourceAvailability $resourceAvailability): bool;
 

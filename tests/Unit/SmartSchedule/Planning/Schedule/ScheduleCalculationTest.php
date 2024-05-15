@@ -6,6 +6,7 @@ namespace DomainDrivers\Tests\Unit\SmartSchedule\Planning\Schedule;
 
 use DomainDrivers\SmartSchedule\Availability\Calendar;
 use DomainDrivers\SmartSchedule\Availability\Calendars;
+use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\ParallelStages;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\ParallelStagesList;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\Stage;
@@ -13,7 +14,6 @@ use DomainDrivers\SmartSchedule\Planning\Schedule\Schedule;
 use DomainDrivers\SmartSchedule\Planning\Schedule\ScheduleBasedOnChosenResourcesAvailabilityCalculator;
 use DomainDrivers\SmartSchedule\Planning\Schedule\ScheduleBasedOnReferenceStageCalculator;
 use DomainDrivers\SmartSchedule\Planning\Schedule\ScheduleBasedOnStartDayCalculator;
-use DomainDrivers\SmartSchedule\Shared\ResourceName;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\Duration;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use DomainDrivers\Tests\Unit\SmartSchedule\Planning\Schedule\Assertions\ScheduleAssert;
@@ -123,9 +123,9 @@ final class ScheduleCalculationTest extends TestCase
     public function canAdjustScheduleToAvailabilityOfNeededResources(): void
     {
         // given
-        $r1 = new ResourceName('r1');
-        $r2 = new ResourceName('r2');
-        $r3 = new ResourceName('r3');
+        $r1 = ResourceId::newOne();
+        $r2 = ResourceId::newOne();
+        $r3 = ResourceId::newOne();
         // and
         $stage1 = Stage::of('Stage1')->ofDuration(Duration::ofDays(3))->withChosenResourceCapabilities($r1);
         $stage2 = Stage::of('Stage2')->ofDuration(Duration::ofDays(10))->withChosenResourceCapabilities($r2, $r3);

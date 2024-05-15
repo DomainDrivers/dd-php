@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace DomainDrivers\SmartSchedule\Planning\Schedule;
 
 use DomainDrivers\SmartSchedule\Availability\Calendars;
+use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\Stage;
-use DomainDrivers\SmartSchedule\Shared\ResourceName;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\Duration;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\GenericList;
@@ -72,7 +72,7 @@ final readonly class ScheduleBasedOnChosenResourcesAvailabilityCalculator
     private function possibleSlots(Calendars $chosenResourcesCalendars, Stage $stage): GenericList
     {
         return $stage->resources()->toStream()->map(
-            fn (ResourceName $resource) => $chosenResourcesCalendars
+            fn (ResourceId $resource) => $chosenResourcesCalendars
                 ->get($resource)
                 ->availableSlots()
                 ->filter(fn (TimeSlot $slot) => $this->isSlotLongEnoughForStage($stage, $slot))

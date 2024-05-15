@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace DomainDrivers\Tests\Unit\SmartSchedule\Planning;
 
-use DomainDrivers\SmartSchedule\Allocation\ResourceId;
+use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\Stage;
 use DomainDrivers\SmartSchedule\Planning\PlanningFacade;
 use DomainDrivers\SmartSchedule\Planning\ProjectId;

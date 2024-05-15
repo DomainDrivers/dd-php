@@ -21,7 +21,7 @@ return static function (Config $config): void {
 
         ->where('Availability')->mayDependOnComponents('Shared')
         ->where('Allocation')->mayDependOnComponents('Shared', 'Availability', 'Cashflow', 'Simulation', 'Optimization')
-        ->where('Parallelization')->mayDependOnComponents('Sorter', 'Shared')
+        ->where('Parallelization')->mayDependOnComponents('Sorter', 'Shared', 'Availability')
         ->where('Sorter')->shouldNotDependOnAnyComponent()
         ->where('Simulation')->mayDependOnComponents('Optimization', 'Shared')
         ->where('Optimization')->mayDependOnComponents('Shared')

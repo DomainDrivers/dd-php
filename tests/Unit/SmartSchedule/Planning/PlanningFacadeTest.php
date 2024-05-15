@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DomainDrivers\Tests\Unit\SmartSchedule\Planning;
 
+use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Planning\ChosenResources;
 use DomainDrivers\SmartSchedule\Planning\Demand;
 use DomainDrivers\SmartSchedule\Planning\Demands;
@@ -12,7 +13,6 @@ use DomainDrivers\SmartSchedule\Planning\Parallelization\Stage;
 use DomainDrivers\SmartSchedule\Planning\PlanningFacade;
 use DomainDrivers\SmartSchedule\Planning\ProjectCard;
 use DomainDrivers\SmartSchedule\Planning\Schedule\Schedule;
-use DomainDrivers\SmartSchedule\Shared\ResourceName;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\Duration;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\Map;
@@ -138,7 +138,7 @@ final class PlanningFacadeTest extends KernelTestCase
         $projectId = $this->projectFacade->addNewProjectWith('project', Stage::of('Stage1'));
 
         // when
-        $neededResources = Set::of(new ResourceName('resource1'));
+        $neededResources = Set::of(ResourceId::newOne());
         $firstHalfOfTheYear = new TimeSlot(new \DateTimeImmutable('2021-01-01 00:00:00.00'), new \DateTimeImmutable('2021-06-01 00:00:00.00'));
         $this->projectFacade->defineResourcesWithinDates($projectId, $neededResources, $firstHalfOfTheYear);
 

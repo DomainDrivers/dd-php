@@ -8,6 +8,7 @@ use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use DomainDrivers\SmartSchedule\Availability\Infrastructure\DbalResourceAvailabilityRepository;
 use DomainDrivers\SmartSchedule\Availability\ResourceAvailability;
 use DomainDrivers\SmartSchedule\Availability\ResourceAvailabilityId;
+use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use DomainDrivers\Tests\Phpunit\AssertThrows;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -30,8 +31,8 @@ final class ResourceAvailabilityUniquenessTest extends KernelTestCase
     public function cantSaveTwoAvailabilitiesWithSameResourceIdAndSegment(): void
     {
         // given
-        $resourceId = ResourceAvailabilityId::newOne();
-        $anotherResourceId = ResourceAvailabilityId::newOne();
+        $resourceId = ResourceId::newOne();
+        $anotherResourceId = ResourceId::newOne();
         $resourceAvailabilityId = ResourceAvailabilityId::newOne();
 
         // when

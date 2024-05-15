@@ -7,6 +7,7 @@ namespace DomainDrivers\Tests\Unit\SmartSchedule\Availability;
 use DomainDrivers\SmartSchedule\Availability\Owner;
 use DomainDrivers\SmartSchedule\Availability\ResourceAvailability;
 use DomainDrivers\SmartSchedule\Availability\ResourceAvailabilityId;
+use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -207,6 +208,6 @@ final class ResourceAvailabilityTest extends TestCase
 
     private function resourceAvailability(): ResourceAvailability
     {
-        return ResourceAvailability::of($this->resourceAvailabilityId, ResourceAvailabilityId::newOne(), TimeSlot::createDailyTimeSlotAtUTC(2000, 1, 1));
+        return ResourceAvailability::of($this->resourceAvailabilityId, ResourceId::newOne(), TimeSlot::createDailyTimeSlotAtUTC(2000, 1, 1));
     }
 }

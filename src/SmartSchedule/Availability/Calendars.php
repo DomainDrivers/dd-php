@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Availability;
 
-use DomainDrivers\SmartSchedule\Shared\ResourceName;
 use Munus\Collection\Map;
 use Munus\Collection\Stream;
 use Munus\Collection\Stream\Collectors;
@@ -20,11 +19,11 @@ final readonly class Calendars
 
     public static function of(Calendar ...$calendars): self
     {
-        return new self(Stream::ofAll($calendars)->collect(Collectors::toMap(fn (Calendar $c) => $c->resourceId->name)));
+        return new self(Stream::ofAll($calendars)->collect(Collectors::toMap(fn (Calendar $c): string => (string) $c->resourceId)));
     }
 
-    public function get(ResourceName $resourceId): Calendar
+    public function get(ResourceId $resourceId): Calendar
     {
-        return $this->calendars->get($resourceId->name)->getOrElse(Calendar::empty($resourceId));
+        return $this->calendars->get((string) $resourceId)->getOrElse(Calendar::empty($resourceId));
     }
 }

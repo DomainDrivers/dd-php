@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Planning\Parallelization;
 
-use DomainDrivers\SmartSchedule\Shared\ResourceName;
+use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\Duration;
 use Munus\Collection\Set;
 
 final readonly class Stage
 {
     /**
-     * @param Set<Stage>        $dependencies
-     * @param Set<ResourceName> $resources
+     * @param Set<Stage>      $dependencies
+     * @param Set<ResourceId> $resources
      */
     public function __construct(
         private string $stageName,
@@ -37,7 +37,7 @@ final readonly class Stage
         return new self($this->stageName, $this->dependencies->add($stage), $this->resources, $this->duration);
     }
 
-    public function withChosenResourceCapabilities(ResourceName ...$resources): self
+    public function withChosenResourceCapabilities(ResourceId ...$resources): self
     {
         return new self($this->stageName, $this->dependencies, Set::ofAll($resources), $this->duration);
     }
@@ -48,7 +48,7 @@ final readonly class Stage
     }
 
     /**
-     * @return Set<ResourceName>
+     * @return Set<ResourceId>
      */
     public function resources(): Set
     {

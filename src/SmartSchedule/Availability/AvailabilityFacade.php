@@ -14,17 +14,17 @@ final readonly class AvailabilityFacade
     {
     }
 
-    public function createResourceSlots(ResourceAvailabilityId $resourceId, TimeSlot $timeSlot): void
+    public function createResourceSlots(ResourceId $resourceId, TimeSlot $timeSlot): void
     {
         $this->availabilityRepository->saveGroup(ResourceGroupedAvailability::of($resourceId, $timeSlot));
     }
 
-    public function createResourceSlotsWitParent(ResourceAvailabilityId $resourceId, ResourceAvailabilityId $parentId, TimeSlot $timeSlot): void
+    public function createResourceSlotsWitParent(ResourceId $resourceId, ResourceId $parentId, TimeSlot $timeSlot): void
     {
         $this->availabilityRepository->saveGroup(ResourceGroupedAvailability::withParent($resourceId, $timeSlot, $parentId));
     }
 
-    public function block(ResourceAvailabilityId $resourceId, TimeSlot $timeSlot, Owner $requester): bool
+    public function block(ResourceId $resourceId, TimeSlot $timeSlot, Owner $requester): bool
     {
         $toBlock = $this->findGrouped($resourceId, $timeSlot);
         if ($toBlock->block($requester)) {
@@ -34,7 +34,7 @@ final readonly class AvailabilityFacade
         return false;
     }
 
-    public function release(ResourceAvailabilityId $resourceId, TimeSlot $timeSlot, Owner $requester): bool
+    public function release(ResourceId $resourceId, TimeSlot $timeSlot, Owner $requester): bool
     {
         $toRelease = $this->findGrouped($resourceId, $timeSlot);
         if ($toRelease->release($requester)) {
@@ -44,7 +44,7 @@ final readonly class AvailabilityFacade
         return false;
     }
 
-    public function disable(ResourceAvailabilityId $resourceId, TimeSlot $timeSlot, Owner $requester): bool
+    public function disable(ResourceId $resourceId, TimeSlot $timeSlot, Owner $requester): bool
     {
         $toDisable = $this->findGrouped($resourceId, $timeSlot);
         if ($toDisable->disable($requester)) {
@@ -54,7 +54,7 @@ final readonly class AvailabilityFacade
         return false;
     }
 
-    public function find(ResourceAvailabilityId $resourceId, TimeSlot $within): ResourceGroupedAvailability
+    public function find(ResourceId $resourceId, TimeSlot $within): ResourceGroupedAvailability
     {
         return new ResourceGroupedAvailability(
             $this->availabilityRepository->loadAllWithinSlot(
@@ -64,7 +64,7 @@ final readonly class AvailabilityFacade
         );
     }
 
-    public function findByParentId(ResourceAvailabilityId $parentId, TimeSlot $within): ResourceGroupedAvailability
+    public function findByParentId(ResourceId $parentId, TimeSlot $within): ResourceGroupedAvailability
     {
         return new ResourceGroupedAvailability(
             $this->availabilityRepository->loadAllByParentIdWithinSlot(
@@ -74,7 +74,7 @@ final readonly class AvailabilityFacade
         );
     }
 
-    private function findGrouped(ResourceAvailabilityId $resourceId, TimeSlot $within): ResourceGroupedAvailability
+    private function findGrouped(ResourceId $resourceId, TimeSlot $within): ResourceGroupedAvailability
     {
         return new ResourceGroupedAvailability(
             $this->availabilityRepository->loadAllWithinSlot(

@@ -6,7 +6,7 @@ namespace DomainDrivers\Tests\Unit\SmartSchedule\Availability;
 
 use DomainDrivers\SmartSchedule\Availability\AvailabilityFacade;
 use DomainDrivers\SmartSchedule\Availability\Owner;
-use DomainDrivers\SmartSchedule\Availability\ResourceAvailabilityId;
+use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -26,7 +26,7 @@ final class AvailabilityFacadeTest extends KernelTestCase
     public function canCreateAvailabilitySlots(): void
     {
         // given
-        $resourceId = ResourceAvailabilityId::newOne();
+        $resourceId = ResourceId::newOne();
         $oneDay = TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1);
 
         // when
@@ -40,10 +40,10 @@ final class AvailabilityFacadeTest extends KernelTestCase
     public function canCreateNewAvailabilitySlotsWithParentId(): void
     {
         // given
-        $resourceId = ResourceAvailabilityId::newOne();
-        $resourceId2 = ResourceAvailabilityId::newOne();
-        $parentId = ResourceAvailabilityId::newOne();
-        $differentParentId = ResourceAvailabilityId::newOne();
+        $resourceId = ResourceId::newOne();
+        $resourceId2 = ResourceId::newOne();
+        $parentId = ResourceId::newOne();
+        $differentParentId = ResourceId::newOne();
         $oneDay = TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1);
 
         // when
@@ -59,7 +59,7 @@ final class AvailabilityFacadeTest extends KernelTestCase
     public function canBlockAvailabilities(): void
     {
         // given
-        $resourceId = ResourceAvailabilityId::newOne();
+        $resourceId = ResourceId::newOne();
         $oneDay = TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1);
         $owner = Owner::newOne();
         $this->availabilityFacade->createResourceSlots($resourceId, $oneDay);
@@ -78,7 +78,7 @@ final class AvailabilityFacadeTest extends KernelTestCase
     public function canDisableAvailabilities(): void
     {
         // given
-        $resourceId = ResourceAvailabilityId::newOne();
+        $resourceId = ResourceId::newOne();
         $oneDay = TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1);
         $owner = Owner::newOne();
         $this->availabilityFacade->createResourceSlots($resourceId, $oneDay);
@@ -97,7 +97,7 @@ final class AvailabilityFacadeTest extends KernelTestCase
     public function cantBlockEvenWhenJustSmallSegmentOfRequestedSlotIsBlocked(): void
     {
         // given
-        $resourceId = ResourceAvailabilityId::newOne();
+        $resourceId = ResourceId::newOne();
         $oneDay = TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1);
         $owner = Owner::newOne();
         $this->availabilityFacade->createResourceSlots($resourceId, $oneDay);
@@ -118,7 +118,7 @@ final class AvailabilityFacadeTest extends KernelTestCase
     public function canReleaseAvailability(): void
     {
         // given
-        $resourceId = ResourceAvailabilityId::newOne();
+        $resourceId = ResourceId::newOne();
         $oneDay = TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1);
         $owner = Owner::newOne();
         $this->availabilityFacade->createResourceSlots($resourceId, $oneDay);
@@ -138,7 +138,7 @@ final class AvailabilityFacadeTest extends KernelTestCase
     public function cantReleaseEvenWhenJustPartOfSlotIsOwnedByTheRequester(): void
     {
         // given
-        $resourceId = ResourceAvailabilityId::newOne();
+        $resourceId = ResourceId::newOne();
         $jan_1 = TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1);
         $jan_2 = TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 2);
         $jan_1_2 = new TimeSlot($jan_1->from, $jan_2->to);
@@ -163,7 +163,7 @@ final class AvailabilityFacadeTest extends KernelTestCase
     public function oneSegmentCanBeTakenBySomeoneElseAfterRealising(): void
     {
         // given
-        $resourceId = ResourceAvailabilityId::newOne();
+        $resourceId = ResourceId::newOne();
         $oneDay = TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1);
         $fifteenMinutes = new TimeSlot($oneDay->from, $oneDay->from->modify('+15 minutes'));
         $owner = Owner::newOne();

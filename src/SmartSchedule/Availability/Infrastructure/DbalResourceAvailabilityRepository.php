@@ -12,11 +12,12 @@ use DomainDrivers\SmartSchedule\Availability\ResourceAvailability;
 use DomainDrivers\SmartSchedule\Availability\ResourceAvailabilityId;
 use DomainDrivers\SmartSchedule\Availability\ResourceAvailabilityRepository;
 use DomainDrivers\SmartSchedule\Availability\ResourceGroupedAvailability;
+use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\GenericList;
 use Munus\Collection\Set;
 
-final class DbalResourceAvailabilityRepository implements ResourceAvailabilityRepository
+final readonly class DbalResourceAvailabilityRepository implements ResourceAvailabilityRepository
 {
     public function __construct(private Connection $connection)
     {
@@ -53,7 +54,7 @@ final class DbalResourceAvailabilityRepository implements ResourceAvailabilityRe
     }
 
     #[\Override]
-    public function loadAllWithinSlot(ResourceAvailabilityId $resourceId, TimeSlot $segment): GenericList
+    public function loadAllWithinSlot(ResourceId $resourceId, TimeSlot $segment): GenericList
     {
         return GenericList::ofAll(array_map(fn ($row) => $this->map($row), $this->connection->fetchAllAssociative(
             'select * from availabilities where resource_id = :resourceId and from_date >= :fromDate and to_date <= :toDate',
@@ -69,7 +70,7 @@ final class DbalResourceAvailabilityRepository implements ResourceAvailabilityRe
     }
 
     #[\Override]
-    public function loadAllByParentIdWithinSlot(ResourceAvailabilityId $parentId, TimeSlot $segment): GenericList
+    public function loadAllByParentIdWithinSlot(ResourceId $parentId, TimeSlot $segment): GenericList
     {
         return GenericList::ofAll(array_map(fn ($row) => $this->map($row), $this->connection->fetchAllAssociative(
             'select * from availabilities where resource_parent_id = :parentId and from_date >= :fromDate and to_date <= :toDate',
@@ -155,8 +156,8 @@ final class DbalResourceAvailabilityRepository implements ResourceAvailabilityRe
         /** @var array{id: string, resource_id: string, resource_parent_id: ?string, from_date: string, to_date: string, taken_by: ?string, disabled: bool, version: int} $row */
         return new ResourceAvailability(
             ResourceAvailabilityId::fromString($row['id']),
-            ResourceAvailabilityId::fromString($row['resource_id']),
-            $row['resource_parent_id'] !== null ? ResourceAvailabilityId::fromString($row['resource_parent_id']) : ResourceAvailabilityId::none(),
+            ResourceId::fromString($row['resource_id']),
+            $row['resource_parent_id'] !== null ? ResourceId::fromString($row['resource_parent_id']) : ResourceId::none(),
             new TimeSlot(new \DateTimeImmutable($row['from_date']), new \DateTimeImmutable($row['to_date'])),
             new Blockade($row['taken_by'] !== null ? Owner::fromString($row['taken_by']) : Owner::none(), $row['disabled']),
             $row['version']

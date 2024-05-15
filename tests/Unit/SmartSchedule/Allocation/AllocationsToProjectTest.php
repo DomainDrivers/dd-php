@@ -14,7 +14,7 @@ use DomainDrivers\SmartSchedule\Allocation\ProjectAllocations;
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationScheduled;
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsDemandsScheduled;
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsId;
-use DomainDrivers\SmartSchedule\Allocation\ResourceId;
+use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\GenericList;
@@ -240,8 +240,8 @@ final class AllocationsToProjectTest extends TestCase
             $this->when
         ));
         self::assertTrue($allocations->allocations()->all->equals(Set::of(
-            AllocatedCapability::new($this->adminId->id, Capability::permission('admin'), $oneHourBefore),
-            AllocatedCapability::new($this->adminId->id, Capability::permission('admin'), $theRest)
+            AllocatedCapability::new($this->adminId->getId(), Capability::permission('admin'), $oneHourBefore),
+            AllocatedCapability::new($this->adminId->getId(), Capability::permission('admin'), $theRest)
         )));
     }
 

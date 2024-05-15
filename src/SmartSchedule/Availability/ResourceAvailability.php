@@ -10,8 +10,8 @@ final class ResourceAvailability
 {
     public function __construct(
         public readonly ResourceAvailabilityId $id,
-        public readonly ResourceAvailabilityId $resourceId,
-        public readonly ResourceAvailabilityId $resourceParentId,
+        public readonly ResourceId $resourceId,
+        public readonly ResourceId $resourceParentId,
         public readonly TimeSlot $segment,
         private Blockade $blockade,
         private int $version = 0
@@ -20,16 +20,16 @@ final class ResourceAvailability
 
     public static function of(
         ResourceAvailabilityId $availabilityId,
-        ResourceAvailabilityId $resourceId,
+        ResourceId $resourceId,
         TimeSlot $segment
     ): self {
-        return new self($availabilityId, $resourceId, ResourceAvailabilityId::none(), $segment, Blockade::none());
+        return new self($availabilityId, $resourceId, ResourceId::none(), $segment, Blockade::none());
     }
 
     public static function withParent(
         ResourceAvailabilityId $availabilityId,
-        ResourceAvailabilityId $resourceId,
-        ResourceAvailabilityId $resourceParentId,
+        ResourceId $resourceId,
+        ResourceId $resourceParentId,
         TimeSlot $segment
     ): self {
         return new self($availabilityId, $resourceId, $resourceParentId, $segment, Blockade::none());

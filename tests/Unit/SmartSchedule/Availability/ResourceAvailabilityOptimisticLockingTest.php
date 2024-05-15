@@ -8,6 +8,7 @@ use DomainDrivers\SmartSchedule\Availability\Infrastructure\DbalResourceAvailabi
 use DomainDrivers\SmartSchedule\Availability\Owner;
 use DomainDrivers\SmartSchedule\Availability\ResourceAvailability;
 use DomainDrivers\SmartSchedule\Availability\ResourceAvailabilityId;
+use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use DomainDrivers\Tests\Phpunit\AssertThrows;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -31,7 +32,7 @@ final class ResourceAvailabilityOptimisticLockingTest extends KernelTestCase
     {
         // given
         $resourceAvailabilityId = ResourceAvailabilityId::newOne();
-        $resourceId = ResourceAvailabilityId::newOne();
+        $resourceId = ResourceId::newOne();
         $resourceAvailability = ResourceAvailability::of($resourceAvailabilityId, $resourceId, TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1));
         $this->repository->saveNew($resourceAvailability);
 
@@ -49,7 +50,7 @@ final class ResourceAvailabilityOptimisticLockingTest extends KernelTestCase
     {
         // given
         $resourceAvailabilityId = ResourceAvailabilityId::newOne();
-        $resourceId = ResourceAvailabilityId::newOne();
+        $resourceId = ResourceId::newOne();
         $this->repository->saveNew(ResourceAvailability::of($resourceAvailabilityId, $resourceId, TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1)));
 
         // when

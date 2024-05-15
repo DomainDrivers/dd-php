@@ -21,14 +21,14 @@ final readonly class ResourceGroupedAvailability
     {
     }
 
-    public static function of(ResourceAvailabilityId $resourceId, TimeSlot $timeSlot): self
+    public static function of(ResourceId $resourceId, TimeSlot $timeSlot): self
     {
         return new self(Segments::split($timeSlot, SegmentInMinutes::defaultSegment())
             ->map(fn (TimeSlot $segment) => ResourceAvailability::of(ResourceAvailabilityId::newOne(), $resourceId, $segment))
         );
     }
 
-    public static function withParent(ResourceAvailabilityId $resourceId, TimeSlot $timeSlot, ResourceAvailabilityId $parentId): self
+    public static function withParent(ResourceId $resourceId, TimeSlot $timeSlot, ResourceId $parentId): self
     {
         return new self(Segments::split($timeSlot, SegmentInMinutes::defaultSegment())
             ->map(fn (TimeSlot $segment) => ResourceAvailability::withParent(ResourceAvailabilityId::newOne(), $resourceId, $parentId, $segment))
@@ -85,7 +85,7 @@ final readonly class ResourceGroupedAvailability
     }
 
     /**
-     * @return Option<ResourceAvailabilityId>
+     * @return Option<ResourceId>
      */
     public function resourceId(): Option
     {

@@ -6,9 +6,9 @@ namespace DomainDrivers\SmartSchedule\Planning\Infrastructure;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\JsonType;
+use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Planning\ChosenResources;
 use DomainDrivers\SmartSchedule\Shared\Infrastructure\TimeSlotNormalizer;
-use DomainDrivers\SmartSchedule\Shared\ResourceName;
 use Munus\Collection\Set;
 
 final class ChosenResourcesType extends JsonType
@@ -36,7 +36,7 @@ final class ChosenResourcesType extends JsonType
     private function mapToArray(ChosenResources $chosenResources): array
     {
         return [
-            'resources' => array_map(fn (ResourceName $name) => $name->name, $chosenResources->resources->toArray()),
+            'resources' => array_map(fn (ResourceId $id): string => (string) $id, $chosenResources->resources->toArray()),
             'time_slot' => TimeSlotNormalizer::normalize($chosenResources->timeSlot),
         ];
     }
@@ -47,7 +47,7 @@ final class ChosenResourcesType extends JsonType
     private function mapFromArray(array $array): ChosenResources
     {
         return new ChosenResources(
-            Set::ofAll(array_map(fn (string $name): ResourceName => new ResourceName($name), $array['resources'])),
+            Set::ofAll(array_map(fn (string $id): ResourceId => ResourceId::fromString($id), $array['resources'])),
             TimeSlotNormalizer::denormalize($array['time_slot'])
         );
     }

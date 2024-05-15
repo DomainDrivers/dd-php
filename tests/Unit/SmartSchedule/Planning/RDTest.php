@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace DomainDrivers\Tests\Unit\SmartSchedule\Planning;
 
-use DomainDrivers\SmartSchedule\Allocation\ResourceId;
+use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\Stage;
 use DomainDrivers\SmartSchedule\Planning\PlanningFacade;
 use DomainDrivers\SmartSchedule\Planning\ProjectCard;
 use DomainDrivers\SmartSchedule\Planning\ProjectId;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
-use DomainDrivers\SmartSchedule\Shared\ResourceName;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\Duration;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use DomainDrivers\Tests\Unit\SmartSchedule\Planning\Schedule\Assertions\ScheduleAssert;
@@ -54,11 +53,11 @@ final class RDTest extends KernelTestCase
         $projectId = $this->projectFacade->addNewProjectWith('waterfall');
 
         // and
-        $r1 = new ResourceName('r1');
+        $r1 = ResourceId::newOne();
         $javaAvailableInJanuary = $this->resourceAvailableForCapabilityInPeriod($r1, Capability::skill('JAVA'), $this->january);
-        $r2 = new ResourceName('r2');
+        $r2 = ResourceId::newOne();
         $phpAvailableInFebruary = $this->resourceAvailableForCapabilityInPeriod($r2, Capability::skill('PHP'), $this->february);
-        $r3 = new ResourceName('r3');
+        $r3 = ResourceId::newOne();
         $csharpAvailableInMarch = $this->resourceAvailableForCapabilityInPeriod($r3, Capability::skill('CSHARP'), $this->march);
         $allResources = Set::of($r1, $r2, $r3);
 
@@ -100,7 +99,7 @@ final class RDTest extends KernelTestCase
         $this->projectIsNotParallelized($loaded);
     }
 
-    private function resourceAvailableForCapabilityInPeriod(ResourceName $resource, Capability $capability, TimeSlot $slot): ResourceId
+    private function resourceAvailableForCapabilityInPeriod(ResourceId $resource, Capability $capability, TimeSlot $slot): ResourceId
     {
         // todo
         return ResourceId::newOne();

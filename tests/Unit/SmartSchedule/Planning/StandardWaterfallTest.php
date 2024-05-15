@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace DomainDrivers\Tests\Unit\SmartSchedule\Planning;
 
+use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Planning\Demand;
 use DomainDrivers\SmartSchedule\Planning\Demands;
 use DomainDrivers\SmartSchedule\Planning\DemandsPerStage;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\Stage;
 use DomainDrivers\SmartSchedule\Planning\PlanningFacade;
 use DomainDrivers\SmartSchedule\Planning\ProjectId;
-use DomainDrivers\SmartSchedule\Shared\ResourceName;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\Duration;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use DomainDrivers\Tests\Unit\SmartSchedule\Planning\Schedule\Assertions\ScheduleAssert;
@@ -22,9 +22,9 @@ final class StandardWaterfallTest extends KernelTestCase
 {
     private PlanningFacade $projectFacade;
     private \DateTimeImmutable $jan_1;
-    private ResourceName $resource_1;
-    private ResourceName $resource_2;
-    private ResourceName $resource_4;
+    private ResourceId $resource_1;
+    private ResourceId $resource_2;
+    private ResourceId $resource_4;
     private TimeSlot $jan_1_2;
     private TimeSlot $jan_2_5;
     private TimeSlot $jan_2_12;
@@ -34,9 +34,9 @@ final class StandardWaterfallTest extends KernelTestCase
     {
         $this->projectFacade = self::getContainer()->get(PlanningFacade::class);
         $this->jan_1 = new \DateTimeImmutable('2020-01-01 00:00:00.00');
-        $this->resource_1 = new ResourceName('r1');
-        $this->resource_2 = new ResourceName('r2');
-        $this->resource_4 = new ResourceName('r4');
+        $this->resource_1 = ResourceId::newOne();
+        $this->resource_2 = ResourceId::newOne();
+        $this->resource_4 = ResourceId::newOne();
         $this->jan_1_2 = TimeSlot::with('2020-01-01 00:00:00', '2020-01-02 00:00:00');
         $this->jan_2_5 = TimeSlot::with('2020-01-02 00:00:00', '2020-01-05 00:00:00');
         $this->jan_2_12 = TimeSlot::with('2020-01-02 00:00:00', '2020-01-12 00:00:00');

@@ -9,7 +9,7 @@ use DomainDrivers\SmartSchedule\Allocation\AllocationFacade;
 use DomainDrivers\SmartSchedule\Allocation\Demand;
 use DomainDrivers\SmartSchedule\Allocation\Demands;
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsId;
-use DomainDrivers\SmartSchedule\Allocation\ResourceId;
+use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\GenericList;
@@ -49,7 +49,7 @@ final class CapabilityAllocatingTest extends KernelTestCase
         // then
         self::assertTrue($result->isPresent());
         $summary = $this->allocationFacade->findAllProjectsAllocations();
-        self::assertTrue($summary->projectAllocations->get($projectId->toString())->get()->all->equals(Set::of(AllocatedCapability::new($allocatableResourceId->id, $skillPhp, $oneDay))));
+        self::assertTrue($summary->projectAllocations->get($projectId->toString())->get()->all->equals(Set::of(AllocatedCapability::new($allocatableResourceId->getId(), $skillPhp, $oneDay))));
         self::assertTrue($summary->demands->get($projectId->toString())->get()->all->equals(GenericList::of($demand)));
     }
 

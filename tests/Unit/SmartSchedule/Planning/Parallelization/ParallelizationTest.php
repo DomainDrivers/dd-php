@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace DomainDrivers\Tests\Unit\SmartSchedule\Planning\Parallelization;
 
+use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\Stage;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\StageParallelization;
-use DomainDrivers\SmartSchedule\Shared\ResourceName;
 use Munus\Collection\Set;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -77,10 +77,10 @@ final class ParallelizationTest extends TestCase
     public function takesIntoAccountSharedResources(): void
     {
         // given
-        $leon = new ResourceName('Leon');
-        $eryk = new ResourceName('Eric');
-        $slawek = new ResourceName('Sławek');
-        $kuba = new ResourceName('Kuba');
+        $leon = ResourceId::newOne();
+        $eryk = ResourceId::newOne();
+        $slawek = ResourceId::newOne();
+        $kuba = ResourceId::newOne();
 
         $stage1 = Stage::of('Stage1')->withChosenResourceCapabilities($leon);
         $stage2 = Stage::of('Stage2')->withChosenResourceCapabilities($eryk, $leon);

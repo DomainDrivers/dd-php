@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace DomainDrivers\SmartSchedule\Planning;
 
 use DomainDrivers\SmartSchedule\Availability\Calendars;
+use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\Stage;
 use DomainDrivers\SmartSchedule\Planning\Schedule\Schedule;
-use DomainDrivers\SmartSchedule\Shared\ResourceName;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\GenericList;
 use Munus\Collection\Set;
@@ -22,7 +22,7 @@ final readonly class PlanChosenResources
     }
 
     /**
-     * @param Set<ResourceName> $chosenResources
+     * @param Set<ResourceId> $chosenResources
      */
     public function defineResourcesWithinDates(ProjectId $projectId, Set $chosenResources, TimeSlot $timeBoundaries): void
     {
@@ -53,7 +53,7 @@ final readonly class PlanChosenResources
     /**
      * @param array<Stage> $stages
      *
-     * @return Set<ResourceName>
+     * @return Set<ResourceId>
      */
     private function neededResources(array $stages): Set
     {

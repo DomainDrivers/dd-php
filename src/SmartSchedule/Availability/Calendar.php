@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Availability;
 
-use DomainDrivers\SmartSchedule\Shared\ResourceName;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\GenericList;
 use Munus\Collection\Map;
@@ -14,16 +13,16 @@ final readonly class Calendar
     /**
      * @param Map<string, GenericList<TimeSlot>> $calendar
      */
-    public function __construct(public ResourceName $resourceId, public Map $calendar)
+    public function __construct(public ResourceId $resourceId, public Map $calendar)
     {
     }
 
-    public static function empty(ResourceName $resourceId): self
+    public static function empty(ResourceId $resourceId): self
     {
         return new self($resourceId, Map::empty());
     }
 
-    public static function withAvailableSlots(ResourceName $resourceId, TimeSlot ...$availableSlots): self
+    public static function withAvailableSlots(ResourceId $resourceId, TimeSlot ...$availableSlots): self
     {
         return new self($resourceId, Map::fromArray(['' => GenericList::ofAll($availableSlots)]));
     }
