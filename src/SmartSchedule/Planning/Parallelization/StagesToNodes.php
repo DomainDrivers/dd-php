@@ -17,7 +17,7 @@ final readonly class StagesToNodes
      *
      * @return Nodes<Stage>
      */
-    public function calculate(GenericList $stages): Nodes
+    public function __invoke(GenericList $stages): Nodes
     {
         $result = $stages->toStream()->collect(Collectors::toMap(
             fn (Stage $stage): string => $stage->name(),

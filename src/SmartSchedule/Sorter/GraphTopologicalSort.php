@@ -15,7 +15,7 @@ final readonly class GraphTopologicalSort
      *
      * @return SortedNodes<T>
      */
-    public function sort(Nodes $nodes): SortedNodes
+    public function __invoke(Nodes $nodes): SortedNodes
     {
         /** @var SortedNodes<T> $empty */
         $empty = SortedNodes::empty();
