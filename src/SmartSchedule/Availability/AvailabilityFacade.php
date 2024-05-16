@@ -7,11 +7,14 @@ namespace DomainDrivers\SmartSchedule\Availability;
 use DomainDrivers\SmartSchedule\Availability\Segment\SegmentInMinutes;
 use DomainDrivers\SmartSchedule\Availability\Segment\Segments;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
+use Munus\Collection\Set;
 
 final readonly class AvailabilityFacade
 {
-    public function __construct(private ResourceAvailabilityRepository $availabilityRepository)
-    {
+    public function __construct(
+        private ResourceAvailabilityRepository $availabilityRepository,
+        private ResourceAvailabilityReadModel $availabilityReadModel
+    ) {
     }
 
     public function createResourceSlots(ResourceId $resourceId, TimeSlot $timeSlot): void
@@ -72,6 +75,23 @@ final readonly class AvailabilityFacade
                 Segments::normalizeToSegmentBoundaries($within, SegmentInMinutes::defaultSegment()
                 ))
         );
+    }
+
+    public function loadCalendar(ResourceId $resourceId, TimeSlot $within): Calendar
+    {
+        $normalized = Segments::normalizeToSegmentBoundaries($within, SegmentInMinutes::defaultSegment());
+
+        return $this->availabilityReadModel->load($resourceId, $normalized);
+    }
+
+    /**
+     * @param Set<ResourceId> $resourceIds
+     */
+    public function loadCalendars(Set $resourceIds, TimeSlot $within): Calendars
+    {
+        $normalized = Segments::normalizeToSegmentBoundaries($within, SegmentInMinutes::defaultSegment());
+
+        return $this->availabilityReadModel->loadAll($resourceIds, $normalized);
     }
 
     private function findGrouped(ResourceId $resourceId, TimeSlot $within): ResourceGroupedAvailability

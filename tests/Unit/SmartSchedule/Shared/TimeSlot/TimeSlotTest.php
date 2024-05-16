@@ -22,7 +22,7 @@ final class TimeSlotTest extends TestCase
 
         // then
         self::assertEquals(new \DateTimeImmutable('2023-01-01 00:00:00'), $january2023->from);
-        self::assertEquals(new \DateTimeImmutable('2023-01-31 23:59:59'), $january2023->to);
+        self::assertEquals(new \DateTimeImmutable('2023-02-01 00:00:00'), $january2023->to);
     }
 
     #[Test]
@@ -33,7 +33,7 @@ final class TimeSlotTest extends TestCase
 
         // then
         self::assertEquals(new \DateTimeImmutable('2023-01-15 00:00:00'), $givenDay->from);
-        self::assertEquals(new \DateTimeImmutable('2023-01-15 23:59:59'), $givenDay->to);
+        self::assertEquals(new \DateTimeImmutable('2023-01-16 00:00:00'), $givenDay->to);
     }
 
     #[Test]

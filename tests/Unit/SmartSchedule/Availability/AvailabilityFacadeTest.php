@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace DomainDrivers\Tests\Unit\SmartSchedule\Availability;
 
 use DomainDrivers\SmartSchedule\Availability\AvailabilityFacade;
+use DomainDrivers\SmartSchedule\Availability\Calendar;
 use DomainDrivers\SmartSchedule\Availability\Owner;
 use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
+use Munus\Collection\GenericList;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -33,7 +35,9 @@ final class AvailabilityFacadeTest extends KernelTestCase
         $this->availabilityFacade->createResourceSlots($resourceId, $oneDay);
 
         // then
-        self::assertSame(96, $this->availabilityFacade->find($resourceId, $oneDay)->size());
+        $entireMonth = TimeSlot::createMonthlyTimeSlotAtUTC(2021, 1);
+        $monthlyCalendar = $this->availabilityFacade->loadCalendar($resourceId, $entireMonth);
+        self::assertEquals(Calendar::withAvailableSlots($resourceId, $oneDay), $monthlyCalendar);
     }
 
     #[Test]
@@ -69,9 +73,10 @@ final class AvailabilityFacadeTest extends KernelTestCase
 
         // then
         self::assertTrue($result);
-        $resourceAvailabilities = $this->availabilityFacade->find($resourceId, $oneDay);
-        self::assertSame(96, $resourceAvailabilities->size());
-        self::assertTrue($resourceAvailabilities->blockedEntirelyBy($owner));
+        $entireMonth = TimeSlot::createMonthlyTimeSlotAtUTC(2021, 1);
+        $monthlyCalendar = $this->availabilityFacade->loadCalendar($resourceId, $entireMonth);
+        self::assertTrue($monthlyCalendar->availableSlots()->isEmpty());
+        self::assertTrue($monthlyCalendar->takenBy($owner)->equals(GenericList::of($oneDay)));
     }
 
     #[Test]
@@ -179,9 +184,9 @@ final class AvailabilityFacadeTest extends KernelTestCase
 
         // then
         self::assertTrue($result);
-        $resourceAvailabilities = $this->availabilityFacade->find($resourceId, $oneDay);
-        self::assertSame(96, $resourceAvailabilities->size());
-        self::assertSame(95, $resourceAvailabilities->findBlockedBy($owner)->length());
-        self::assertSame(1, $resourceAvailabilities->findBlockedBy($newOwner)->length());
+        $dailyCalendar = $this->availabilityFacade->loadCalendar($resourceId, $oneDay);
+        self::assertTrue($dailyCalendar->availableSlots()->isEmpty());
+        self::assertTrue($dailyCalendar->takenBy($owner)->equals($oneDay->leftoverAfterRemovingCommonWith($fifteenMinutes)));
+        self::assertTrue($dailyCalendar->takenBy($newOwner)->equals(GenericList::of($fifteenMinutes)));
     }
 }

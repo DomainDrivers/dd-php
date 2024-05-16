@@ -37,4 +37,12 @@ final readonly class Calendar
 
         return GenericList::ofAll($slots);
     }
+
+    /**
+     * @return GenericList<TimeSlot>
+     */
+    public function takenBy(Owner $requester): GenericList
+    {
+        return $this->calendar->get((string) $requester)->getOrElse(GenericList::empty());
+    }
 }

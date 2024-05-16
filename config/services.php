@@ -12,7 +12,9 @@ use DomainDrivers\SmartSchedule\Allocation\Cashflow\Infrastructure\OrmCashflowRe
 use DomainDrivers\SmartSchedule\Allocation\Infrastructure\OrmProjectAllocationsRepository;
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsRepository;
 use DomainDrivers\SmartSchedule\Availability\AvailabilityFacade;
+use DomainDrivers\SmartSchedule\Availability\Infrastructure\DbalResourceAvailabilityReadModel;
 use DomainDrivers\SmartSchedule\Availability\Infrastructure\DbalResourceAvailabilityRepository;
+use DomainDrivers\SmartSchedule\Availability\ResourceAvailabilityReadModel;
 use DomainDrivers\SmartSchedule\Availability\ResourceAvailabilityRepository;
 use DomainDrivers\SmartSchedule\Planning\Infrastructure\OrmProjectRepository;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\StageParallelization;
@@ -56,6 +58,9 @@ return static function (ContainerConfigurator $configurator): void {
 
     $services->set(CashFlowFacade::class)
         ->public();
+
+    $services->set(DbalResourceAvailabilityReadModel::class);
+    $services->alias(ResourceAvailabilityReadModel::class, DbalResourceAvailabilityReadModel::class);
 
     $services->set(DbalResourceAvailabilityRepository::class);
     $services->alias(ResourceAvailabilityRepository::class, DbalResourceAvailabilityRepository::class);
