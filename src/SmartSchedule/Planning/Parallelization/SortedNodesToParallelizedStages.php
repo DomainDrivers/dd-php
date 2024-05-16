@@ -13,7 +13,7 @@ final readonly class SortedNodesToParallelizedStages
     /**
      * @param SortedNodes<Stage> $sortedNodes
      */
-    public function __invoke(SortedNodes $sortedNodes): ParallelStagesList
+    public function calculate(SortedNodes $sortedNodes): ParallelStagesList
     {
         return new ParallelStagesList($sortedNodes->all
             ->map(fn (Nodes $nodes) => new ParallelStages($nodes->all()

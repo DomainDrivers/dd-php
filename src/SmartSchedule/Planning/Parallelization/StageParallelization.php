@@ -15,10 +15,9 @@ final class StageParallelization
      */
     public function of(Set $stages): ParallelStagesList
     {
-        return (new SortedNodesToParallelizedStages())(
-            (new GraphTopologicalSort())(
-                (new StagesToNodes())(GenericList::ofAll($stages->toArray()))
-            )
-        );
+        $nodes = (new StagesToNodes())->calculate(GenericList::ofAll($stages->toArray()));
+        $sortedNodes = (new GraphTopologicalSort())->sort($nodes);
+
+        return (new SortedNodesToParallelizedStages())->calculate($sortedNodes);
     }
 }

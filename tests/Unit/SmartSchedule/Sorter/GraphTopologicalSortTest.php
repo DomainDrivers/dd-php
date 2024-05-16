@@ -35,7 +35,7 @@ final class GraphTopologicalSortTest extends TestCase
         $node4 = $node4->dependsOn($node2);
 
         // when
-        $sortedNodes = ($this->graphTopologicalSort)(Nodes::of($node1, $node2, $node3, $node4));
+        $sortedNodes = $this->graphTopologicalSort->sort(Nodes::of($node1, $node2, $node3, $node4));
 
         // then
         self::assertSame(3, $sortedNodes->all->length());
@@ -67,7 +67,7 @@ final class GraphTopologicalSortTest extends TestCase
         $node1 = $node1->dependsOn($node2);
 
         // when
-        $sortedNodes = ($this->graphTopologicalSort)(Nodes::of($node1, $node2, $node3, $node4, $node5));
+        $sortedNodes = $this->graphTopologicalSort->sort(Nodes::of($node1, $node2, $node3, $node4, $node5));
 
         // then
         self::assertSame(5, $sortedNodes->all->length());
@@ -97,7 +97,7 @@ final class GraphTopologicalSortTest extends TestCase
         $node2 = Node::with('Node2');
 
         // when
-        $sortedNodes = ($this->graphTopologicalSort)(Nodes::of($node1, $node2));
+        $sortedNodes = $this->graphTopologicalSort->sort(Nodes::of($node1, $node2));
 
         // then
         self::assertSame(1, $sortedNodes->all->length());
@@ -113,7 +113,7 @@ final class GraphTopologicalSortTest extends TestCase
         $node1 = $node1->dependsOn($node2); // making it cyclic
 
         // when
-        $sortedNodes = ($this->graphTopologicalSort)(Nodes::of($node1, $node2));
+        $sortedNodes = $this->graphTopologicalSort->sort(Nodes::of($node1, $node2));
 
         // then
         self::assertTrue($sortedNodes->all->isEmpty());
