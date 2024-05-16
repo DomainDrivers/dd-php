@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Planning;
 
+use DomainDrivers\SmartSchedule\Availability\AvailabilityFacade;
 use DomainDrivers\SmartSchedule\Availability\Calendars;
 use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\Stage;
@@ -17,7 +18,8 @@ use Munus\Collection\Stream\Collectors;
 final readonly class PlanChosenResources
 {
     public function __construct(
-        private ProjectRepository $projectRepository
+        private ProjectRepository $projectRepository,
+        private AvailabilityFacade $availabilityFacade
     ) {
     }
 
@@ -36,8 +38,7 @@ final readonly class PlanChosenResources
         $neededResources = $this->neededResources($stages);
         $project = $this->projectRepository->getById($projectId);
         $this->defineResourcesWithinDates($projectId, $neededResources, $timeBoundaries);
-        // TODO when availability is implemented
-        $neededResourcesCalendars = Calendars::of();
+        $neededResourcesCalendars = $this->availabilityFacade->loadCalendars($neededResources, $timeBoundaries);
         $project->addSchedule($this->createScheduleAdjustingToCalendars($neededResourcesCalendars, GenericList::ofAll($stages)));
         $this->projectRepository->save($project);
     }

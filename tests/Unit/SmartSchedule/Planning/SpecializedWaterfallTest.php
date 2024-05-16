@@ -9,7 +9,6 @@ use DomainDrivers\SmartSchedule\Planning\Parallelization\Stage;
 use DomainDrivers\SmartSchedule\Planning\PlanningFacade;
 use DomainDrivers\SmartSchedule\Planning\ProjectId;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
-use DomainDrivers\SmartSchedule\Shared\ResourceName;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\Duration;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use DomainDrivers\Tests\Unit\SmartSchedule\Planning\Schedule\Assertions\ScheduleAssert;
@@ -53,7 +52,7 @@ final class SpecializedWaterfallTest extends KernelTestCase
         $this->projectFacade->defineProjectStages($projectId, $stageBeforeCritical, $criticalStage, $stageAfterCritical);
 
         // and
-        $criticalResourceName = new ResourceName('criticalResourceName');
+        $criticalResourceName = ResourceId::newOne();
         $criticalCapabilityAvailability = $this->resourceAvailableForCapabilityInPeriod($criticalResourceName, Capability::skill('JAVA'), $this->jan_1_6);
 
         // when
@@ -76,7 +75,7 @@ final class SpecializedWaterfallTest extends KernelTestCase
             ->hasStage('stage3')->withSlot($this->jan_1_4);
     }
 
-    private function resourceAvailableForCapabilityInPeriod(ResourceName $resource, Capability $capability, TimeSlot $slot): ResourceId
+    private function resourceAvailableForCapabilityInPeriod(ResourceId $resource, Capability $capability, TimeSlot $slot): ResourceId
     {
         return ResourceId::newOne();
     }

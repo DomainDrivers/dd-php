@@ -9,7 +9,6 @@ use DomainDrivers\SmartSchedule\Planning\Parallelization\ParallelStagesList;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\Stage;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\StageParallelization;
 use DomainDrivers\SmartSchedule\Planning\Schedule\Schedule;
-use DomainDrivers\SmartSchedule\Shared\ResourceName;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\GenericList;
 use Munus\Collection\Set;
@@ -77,7 +76,7 @@ final readonly class PlanningFacade
         $this->planChosenResources->adjustStagesToResourceAvailability($projectId, $timeBoundaries, ...$stages);
     }
 
-    public function planCriticalStageWithResource(ProjectId $projectId, Stage $criticalStage, ResourceName $criticalResource, TimeSlot $stageTimeSlot): void
+    public function planCriticalStageWithResource(ProjectId $projectId, Stage $criticalStage, ResourceId $resourceId, TimeSlot $stageTimeSlot): void
     {
         $project = $this->projectRepository->getById($projectId);
         $project->addScheduleOnStageTimeSlot($criticalStage, $stageTimeSlot);
