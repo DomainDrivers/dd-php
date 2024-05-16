@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Shared\Capability;
 
-use Munus\Collection\GenericList;
+use Munus\Collection\Set;
 use Munus\Collection\Stream;
 use Munus\Collection\Stream\Collectors;
+use Munus\Value\Comparable;
 
-final readonly class Capability
+final readonly class Capability implements Comparable
 {
     public function __construct(public string $name, public string $type)
     {
@@ -30,15 +31,36 @@ final readonly class Capability
     }
 
     /**
-     * @return GenericList<self>
+     * @return Set<self>
      */
-    public static function skills(string ...$skills): GenericList
+    public static function skills(string ...$skills): Set
     {
-        return Stream::ofAll($skills)->map(fn (string $s) => self::skill($s))->collect(Collectors::toList());
+        return Stream::ofAll($skills)->map(fn (string $s) => self::skill($s))->collect(Collectors::toSet());
     }
 
-    public function equals(self $other): bool
+    /**
+     * @return Set<self>
+     */
+    public static function assets(string ...$assets): Set
     {
-        return $this->name === $other->name && $this->type === $other->type;
+        return Stream::ofAll($assets)->map(fn (string $a) => self::asset($a))->collect(Collectors::toSet());
+    }
+
+    /**
+     * @return Set<self>
+     */
+    public static function permissions(string ...$permissions): Set
+    {
+        return Stream::ofAll($permissions)->map(fn (string $p) => self::permission($p))->collect(Collectors::toSet());
+    }
+
+    public function isOfType(string $type): bool
+    {
+        return $this->type === $type;
+    }
+
+    public function equals(Comparable $other): bool
+    {
+        return self::class === $other::class && $this->name === $other->name && $this->type === $other->type;
     }
 }

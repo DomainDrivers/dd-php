@@ -16,6 +16,9 @@ doctrine:
             cost: DomainDrivers\SmartSchedule\Allocation\Cashflow\Infrastructure\CostType
             earnings: DomainDrivers\SmartSchedule\Allocation\Cashflow\Infrastructure\EarningsType
             income: DomainDrivers\SmartSchedule\Allocation\Cashflow\Infrastructure\IncomeType
+            capabilities: DomainDrivers\SmartSchedule\Shared\Infrastructure\CapabilitiesType
+            device_id: DomainDrivers\SmartSchedule\Resource\Device\Infrastructure\DeviceIdType
+            employee_id: DomainDrivers\SmartSchedule\Resource\Employee\Infrastructure\EmployeeIdType
         schema_filter: '~^(?!availabilities)~'
     orm:
         auto_generate_proxy_classes: true
@@ -37,6 +40,12 @@ doctrine:
                 dir: '%kernel.project_dir%/src/SmartSchedule/Allocation'
                 prefix: 'DomainDrivers\SmartSchedule\Allocation'
                 alias: Allocation
+            Resource:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/SmartSchedule/Resource'
+                prefix: 'DomainDrivers\SmartSchedule\Resource'
+                alias: Resource
             Shared:
                 type: attribute
                 is_bundle: false

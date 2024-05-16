@@ -21,6 +21,12 @@ use DomainDrivers\SmartSchedule\Planning\Parallelization\StageParallelization;
 use DomainDrivers\SmartSchedule\Planning\PlanChosenResources;
 use DomainDrivers\SmartSchedule\Planning\PlanningFacade;
 use DomainDrivers\SmartSchedule\Planning\ProjectRepository;
+use DomainDrivers\SmartSchedule\Resource\Device\DeviceFacade;
+use DomainDrivers\SmartSchedule\Resource\Device\DeviceRepository;
+use DomainDrivers\SmartSchedule\Resource\Device\Infrastructure\OrmDeviceRepository;
+use DomainDrivers\SmartSchedule\Resource\Employee\EmployeeFacade;
+use DomainDrivers\SmartSchedule\Resource\Employee\EmployeeRepository;
+use DomainDrivers\SmartSchedule\Resource\Employee\Infrastructure\OrmEmployeeRepository;
 use DomainDrivers\SmartSchedule\Shared\Infrastructure\FixSchemaListener;
 use Symfony\Component\Clock\ClockInterface;
 use Symfony\Component\Clock\NativeClock;
@@ -64,6 +70,18 @@ return static function (ContainerConfigurator $configurator): void {
 
     $services->set(DbalResourceAvailabilityRepository::class);
     $services->alias(ResourceAvailabilityRepository::class, DbalResourceAvailabilityRepository::class);
+
+    $services->set(OrmDeviceRepository::class);
+    $services->alias(DeviceRepository::class, OrmDeviceRepository::class);
+
+    $services->set(DeviceFacade::class)
+        ->public();
+
+    $services->set(OrmEmployeeRepository::class);
+    $services->alias(EmployeeRepository::class, OrmEmployeeRepository::class);
+
+    $services->set(EmployeeFacade::class)
+        ->public();
 
     if (in_array($configurator->env(), ['dev', 'test'], true)) {
         $services->set(FixSchemaListener::class)

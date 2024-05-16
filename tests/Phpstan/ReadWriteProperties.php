@@ -6,6 +6,8 @@ namespace DomainDrivers\Tests\Phpstan;
 
 use DomainDrivers\SmartSchedule\Allocation\Cashflow\Cashflow;
 use DomainDrivers\SmartSchedule\Planning\Project;
+use DomainDrivers\SmartSchedule\Resource\Device\Device;
+use DomainDrivers\SmartSchedule\Resource\Employee\Employee;
 use PHPStan\Reflection\PropertyReflection;
 use PHPStan\Rules\Properties\ReadWritePropertiesExtension;
 
@@ -14,6 +16,8 @@ final readonly class ReadWriteProperties implements ReadWritePropertiesExtension
     private const array READ_CLASS_LIST = [
         Project::class,
         Cashflow::class,
+        Device::class,
+        Employee::class,
     ];
 
     #[\Override]

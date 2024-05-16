@@ -8,11 +8,9 @@ services:
       dockerfile: ./Dockerfile
     environment:
       COMPOSER_HOME: "/tmp/.composer"
-      SSH_AUTH_SOCK: "/run/ssh-agent"
     volumes:
       - ".:/app"
       - "~/.composer:/tmp/.composer"
-      - "${SSH_AUTH_SOCK}:/run/ssh-agent"
 
   postgres:
     image: 'postgres:16'

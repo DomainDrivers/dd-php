@@ -5,3 +5,4 @@ COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr
 RUN install-php-extensions decimal pdo_pgsql
 RUN curl -sS https://getcomposer.org/installer | php
 RUN mv composer.phar /usr/local/bin/composer
+RUN echo "memory_limit=-1" > $PHP_INI_DIR/conf.d/memory-limit.ini
