@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Allocation;
 
+use DomainDrivers\SmartSchedule\Availability\AvailabilityFacade;
+use DomainDrivers\SmartSchedule\Availability\Owner;
 use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
@@ -16,6 +18,7 @@ final readonly class AllocationFacade
 {
     public function __construct(
         private ProjectAllocationsRepository $projectAllocationsRepository,
+        private AvailabilityFacade $availabilityFacade,
         private ClockInterface $clock
     ) {
     }
@@ -46,7 +49,13 @@ final readonly class AllocationFacade
      */
     public function allocateToProject(ProjectAllocationsId $projectId, ResourceId $resourceId, Capability $capability, TimeSlot $timeSlot): Option
     {
-        // TODO WHAT TO DO WITH AVAILABILITY HERE? - implement
+        // yes, one transaction crossing 2 modules.
+        if (!$this->availabilityFacade->block($resourceId, $timeSlot, Owner::of($projectId->id))) {
+            /** @var Option<Uuid> $empty */
+            $empty = Option::none();
+
+            return $empty;
+        }
         $allocations = $this->projectAllocationsRepository->getById($projectId);
         $event = $allocations->allocate($resourceId, $capability, $timeSlot, $this->clock->now());
         $this->projectAllocationsRepository->save($allocations);
@@ -56,7 +65,7 @@ final readonly class AllocationFacade
 
     public function releaseFromProject(ProjectAllocationsId $projectId, Uuid $allocatableCapabilityId, TimeSlot $timeSlot): bool
     {
-        // TODO WHAT TO DO WITH AVAILABILITY HERE? - just think about it, don't implement
+        // TODO WHAT TO DO WITH AVAILABILITY HERE?
         $allocations = $this->projectAllocationsRepository->getById($projectId);
         $event = $allocations->release($allocatableCapabilityId, $timeSlot, $this->clock->now());
         $this->projectAllocationsRepository->save($allocations);
