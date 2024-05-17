@@ -80,6 +80,21 @@ final class AvailabilityFacadeTest extends KernelTestCase
     }
 
     #[Test]
+    public function cantBlockWhenNoSlotsCreated(): void
+    {
+        // given
+        $resourceId = ResourceId::newOne();
+        $oneDay = TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1);
+        $owner = Owner::newOne();
+
+        // when
+        $result = $this->availabilityFacade->block($resourceId, $oneDay, $owner);
+
+        // then
+        self::assertFalse($result);
+    }
+
+    #[Test]
     public function canDisableAvailabilities(): void
     {
         // given
@@ -96,6 +111,21 @@ final class AvailabilityFacadeTest extends KernelTestCase
         $resourceAvailabilities = $this->availabilityFacade->find($resourceId, $oneDay);
         self::assertSame(96, $resourceAvailabilities->size());
         self::assertTrue($resourceAvailabilities->isDisabledEntirelyBy($owner));
+    }
+
+    #[Test]
+    public function cantDisableWhenNoSlotsCreated(): void
+    {
+        // given
+        $resourceId = ResourceId::newOne();
+        $oneDay = TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1);
+        $owner = Owner::newOne();
+
+        // when
+        $result = $this->availabilityFacade->disable($resourceId, $oneDay, $owner);
+
+        // then
+        self::assertFalse($result);
     }
 
     #[Test]
@@ -137,6 +167,21 @@ final class AvailabilityFacadeTest extends KernelTestCase
         self::assertTrue($result);
         $resourceAvailabilities = $this->availabilityFacade->find($resourceId, $oneDay);
         self::assertTrue($resourceAvailabilities->isEntirelyAvailable());
+    }
+
+    #[Test]
+    public function cantReleaseWhenNoSlotsCreated(): void
+    {
+        // given
+        $resourceId = ResourceId::newOne();
+        $oneDay = TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1);
+        $owner = Owner::newOne();
+
+        // when
+        $result = $this->availabilityFacade->release($resourceId, $oneDay, $owner);
+
+        // then
+        self::assertFalse($result);
     }
 
     #[Test]

@@ -114,4 +114,9 @@ final readonly class ResourceGroupedAvailability
     {
         return $this->resourceAvailabilities->allMatch(fn (ResourceAvailability $r) => $r->blockedBy()->byNone());
     }
+
+    public function hasNoSlots(): bool
+    {
+        return $this->resourceAvailabilities->isEmpty();
+    }
 }
