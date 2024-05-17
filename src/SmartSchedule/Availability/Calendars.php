@@ -13,7 +13,7 @@ final readonly class Calendars
     /**
      * @param Map<string, Calendar> $calendars
      */
-    public function __construct(private Map $calendars)
+    public function __construct(public Map $calendars)
     {
     }
 

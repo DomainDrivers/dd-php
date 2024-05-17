@@ -46,6 +46,7 @@ final readonly class AllocationFacade
      */
     public function allocateToProject(ProjectAllocationsId $projectId, ResourceId $resourceId, Capability $capability, TimeSlot $timeSlot): Option
     {
+        // TODO WHAT TO DO WITH AVAILABILITY HERE? - implement
         $allocations = $this->projectAllocationsRepository->getById($projectId);
         $event = $allocations->allocate($resourceId, $capability, $timeSlot, $this->clock->now());
         $this->projectAllocationsRepository->save($allocations);
@@ -55,6 +56,7 @@ final readonly class AllocationFacade
 
     public function releaseFromProject(ProjectAllocationsId $projectId, Uuid $allocatableCapabilityId, TimeSlot $timeSlot): bool
     {
+        // TODO WHAT TO DO WITH AVAILABILITY HERE? - just think about it, don't implement
         $allocations = $this->projectAllocationsRepository->getById($projectId);
         $event = $allocations->release($allocatableCapabilityId, $timeSlot, $this->clock->now());
         $this->projectAllocationsRepository->save($allocations);

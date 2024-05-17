@@ -30,6 +30,9 @@ final readonly class AvailabilityFacade
     public function block(ResourceId $resourceId, TimeSlot $timeSlot, Owner $requester): bool
     {
         $toBlock = $this->findGrouped($resourceId, $timeSlot);
+        if ($toBlock->hasNoSlots()) {
+            return false;
+        }
         if ($toBlock->block($requester)) {
             return $this->availabilityRepository->saveCheckingVersions($toBlock);
         }
@@ -40,6 +43,9 @@ final readonly class AvailabilityFacade
     public function release(ResourceId $resourceId, TimeSlot $timeSlot, Owner $requester): bool
     {
         $toRelease = $this->findGrouped($resourceId, $timeSlot);
+        if ($toRelease->hasNoSlots()) {
+            return false;
+        }
         if ($toRelease->release($requester)) {
             return $this->availabilityRepository->saveCheckingVersions($toRelease);
         }
@@ -50,6 +56,9 @@ final readonly class AvailabilityFacade
     public function disable(ResourceId $resourceId, TimeSlot $timeSlot, Owner $requester): bool
     {
         $toDisable = $this->findGrouped($resourceId, $timeSlot);
+        if ($toDisable->hasNoSlots()) {
+            return false;
+        }
         if ($toDisable->disable($requester)) {
             return $this->availabilityRepository->saveCheckingVersions($toDisable);
         }

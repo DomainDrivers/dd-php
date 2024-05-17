@@ -17,6 +17,11 @@ final readonly class Owner implements \Stringable
         return new self(Uuid::v7());
     }
 
+    public static function of(Uuid $id): self
+    {
+        return new self($id);
+    }
+
     public static function none(): self
     {
         return new self(null);
