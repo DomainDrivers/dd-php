@@ -10,7 +10,9 @@ use Munus\Collection\Map;
 final class FeedbackArcSetOnGraph
 {
     /**
-     * @param GenericList<Node<string>> $initialNodes
+     * @template T
+     *
+     * @param GenericList<Node<T>> $initialNodes
      *
      * @return GenericList<Edge>
      */
@@ -40,7 +42,9 @@ final class FeedbackArcSetOnGraph
     }
 
     /**
-     * @param GenericList<Node<string>> $initialNodes
+     * @template T
+     *
+     * @param GenericList<Node<T>> $initialNodes
      *
      * @return Map<string, GenericList<int>>
      */
@@ -52,8 +56,7 @@ final class FeedbackArcSetOnGraph
         for ($i = 0; $i < $initialNodes->length(); ++$i) {
             $dependencies = GenericList::empty();
             foreach ($initialNodesArray[$i]->dependencies->all() as $dependency) {
-                /** @var int $key */
-                $key = array_search($dependency, $initialNodesArray, true);
+                $key = $initialNodes->indexOf($dependency);
                 $dependencies = $dependencies->append($key + 1);
             }
             $adjacencyList = $adjacencyList->put((string) ($i + 1), $dependencies);

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7cd5894bcb4c96faec71ee8a7acd71ea",
+    "content-hash": "e1f4f22d8811e1dc2b79a99e761d0b2a",
     "packages": [
         {
             "name": "doctrine/cache",
@@ -1222,16 +1222,16 @@
         },
         {
             "name": "munusphp/munus",
-            "version": "0.13.0",
+            "version": "0.14.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/munusphp/munus.git",
-                "reference": "1f4f6efce1bbc2b92c50759753dc4ecd9475f964"
+                "reference": "3c4eb7653a1039666da6752a9fb874a735395efd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/munusphp/munus/zipball/1f4f6efce1bbc2b92c50759753dc4ecd9475f964",
-                "reference": "1f4f6efce1bbc2b92c50759753dc4ecd9475f964",
+                "url": "https://api.github.com/repos/munusphp/munus/zipball/3c4eb7653a1039666da6752a9fb874a735395efd",
+                "reference": "3c4eb7653a1039666da6752a9fb874a735395efd",
                 "shasum": ""
             },
             "require": {
@@ -1265,9 +1265,9 @@
             "description": "Power of object-oriented programming with the elegance of functional programming.",
             "support": {
                 "issues": "https://github.com/munusphp/munus/issues",
-                "source": "https://github.com/munusphp/munus/tree/0.13.0"
+                "source": "https://github.com/munusphp/munus/tree/0.14.0"
             },
-            "time": "2024-05-14T05:46:04+00:00"
+            "time": "2024-05-17T05:39:43+00:00"
         },
         {
             "name": "psr/cache",

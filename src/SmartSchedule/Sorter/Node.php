@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Sorter;
 
+use Munus\Value\Comparable;
+
 /**
  * @template T
  */
-final readonly class Node
+final readonly class Node implements Comparable
 {
     /**
      * @param Nodes<T> $dependencies
@@ -41,5 +43,11 @@ final readonly class Node
     public function dependsOn(Node $node): self
     {
         return new self($this->name, $this->dependencies->add($node), $this->content);
+    }
+
+    #[\Override]
+    public function equals(Comparable $other): bool
+    {
+        return self::class === $other::class && $this->name === $other->name;
     }
 }
