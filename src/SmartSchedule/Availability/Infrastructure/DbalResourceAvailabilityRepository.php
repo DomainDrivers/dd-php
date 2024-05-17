@@ -13,6 +13,7 @@ use DomainDrivers\SmartSchedule\Availability\ResourceAvailabilityId;
 use DomainDrivers\SmartSchedule\Availability\ResourceAvailabilityRepository;
 use DomainDrivers\SmartSchedule\Availability\ResourceGroupedAvailability;
 use DomainDrivers\SmartSchedule\Availability\ResourceId;
+use DomainDrivers\SmartSchedule\Shared\Infrastructure\BulkInsertQuery;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\GenericList;
 use Munus\Collection\Set;
@@ -48,8 +49,31 @@ final readonly class DbalResourceAvailabilityRepository implements ResourceAvail
     #[\Override]
     public function saveGroup(ResourceGroupedAvailability $groupedAvailability): void
     {
-        foreach ($groupedAvailability->resourceAvailabilities->toArray() as $resourceAvailability) {
-            $this->saveNew($resourceAvailability);
+        $bulkInsert = (new BulkInsertQuery($this->connection, 'availabilities'))
+            ->setColumns(['id', 'resource_id', 'resource_parent_id', 'from_date', 'to_date', 'taken_by', 'disabled', 'version']);
+
+        foreach (array_chunk($groupedAvailability->resourceAvailabilities->toArray(), 500) as $chunk) {
+            $bulkInsert
+                ->setValues(array_map(fn (ResourceAvailability $resourceAvailability) => [
+                    $resourceAvailability->id->toString(),
+                    $resourceAvailability->resourceId->toString(),
+                    $resourceAvailability->resourceParentId->toString(),
+                    $resourceAvailability->segment->from,
+                    $resourceAvailability->segment->to,
+                    null,
+                    false,
+                    0,
+                ], $chunk), [
+                    Types::STRING,
+                    Types::STRING,
+                    Types::STRING,
+                    Types::DATETIME_IMMUTABLE,
+                    Types::DATETIME_IMMUTABLE,
+                    Types::STRING,
+                    Types::BOOLEAN,
+                    Types::BIGINT,
+                ])
+                ->execute();
         }
     }
 
