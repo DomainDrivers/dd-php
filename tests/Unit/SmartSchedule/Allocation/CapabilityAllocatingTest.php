@@ -6,6 +6,9 @@ namespace DomainDrivers\Tests\Unit\SmartSchedule\Allocation;
 
 use DomainDrivers\SmartSchedule\Allocation\AllocatedCapability;
 use DomainDrivers\SmartSchedule\Allocation\AllocationFacade;
+use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableCapabilityId;
+use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableResourceId;
+use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\CapabilityScheduler;
 use DomainDrivers\SmartSchedule\Allocation\Demand;
 use DomainDrivers\SmartSchedule\Allocation\Demands;
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsId;
@@ -14,6 +17,7 @@ use DomainDrivers\SmartSchedule\Availability\Calendar;
 use DomainDrivers\SmartSchedule\Availability\Owner;
 use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
+use DomainDrivers\SmartSchedule\Shared\CapabilitySelector;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\GenericList;
 use Munus\Collection\Set;
@@ -26,12 +30,16 @@ final class CapabilityAllocatingTest extends KernelTestCase
 {
     private AllocationFacade $allocationFacade;
     private AvailabilityFacade $availabilityFacade;
+    private AllocatableResourceId $resourceId;
+    private CapabilityScheduler $capabilityScheduler;
 
     #[\Override]
     protected function setUp(): void
     {
         $this->allocationFacade = self::getContainer()->get(AllocationFacade::class);
         $this->availabilityFacade = self::getContainer()->get(AvailabilityFacade::class);
+        $this->capabilityScheduler = self::getContainer()->get(CapabilityScheduler::class);
+        $this->resourceId = AllocatableResourceId::newOne();
     }
 
     #[Test]
@@ -42,21 +50,21 @@ final class CapabilityAllocatingTest extends KernelTestCase
         $skillPhp = Capability::skill('php');
         $demand = new Demand($skillPhp, $oneDay);
         // and
-        $allocatableResourceId = $this->createAllocatableResource($oneDay);
+        $allocatableCapabilityId = $this->createAllocatableResource($oneDay, $skillPhp, $this->resourceId);
         // and
         $projectId = ProjectAllocationsId::newOne();
         // and
         $this->allocationFacade->scheduleProjectAllocationDemands($projectId, Demands::of($demand));
 
         // when
-        $result = $this->allocationFacade->allocateToProject($projectId, $allocatableResourceId, $skillPhp, $oneDay);
+        $result = $this->allocationFacade->allocateToProject($projectId, $allocatableCapabilityId, $skillPhp, $oneDay);
 
         // then
         self::assertTrue($result->isPresent());
         $summary = $this->allocationFacade->findAllProjectsAllocations();
-        self::assertTrue($summary->projectAllocations->get($projectId->toString())->get()->all->equals(Set::of(AllocatedCapability::new($allocatableResourceId->getId(), $skillPhp, $oneDay))));
+        self::assertTrue($summary->projectAllocations->get($projectId->toString())->get()->all->equals(Set::of(new AllocatedCapability($allocatableCapabilityId, $skillPhp, $oneDay))));
         self::assertTrue($summary->demands->get($projectId->toString())->get()->all->equals(GenericList::of($demand)));
-        self::assertTrue($this->availabilityWasBlocked($allocatableResourceId, $oneDay, $projectId));
+        self::assertTrue($this->availabilityWasBlocked($allocatableCapabilityId->toAvailabilityResourceId(), $oneDay, $projectId));
     }
 
     #[Test]
@@ -67,16 +75,16 @@ final class CapabilityAllocatingTest extends KernelTestCase
         $skillPhp = Capability::skill('php');
         $demand = new Demand($skillPhp, $oneDay);
         // and
-        $allocatableResourceId = $this->createAllocatableResource($oneDay);
+        $allocatableCapabilityId = $this->createAllocatableResource($oneDay, $skillPhp, $this->resourceId);
         // and
-        $this->availabilityFacade->block($allocatableResourceId, $oneDay, Owner::newOne());
+        $this->availabilityFacade->block($allocatableCapabilityId->toAvailabilityResourceId(), $oneDay, Owner::newOne());
         // and
         $projectId = ProjectAllocationsId::newOne();
         // and
         $this->allocationFacade->scheduleProjectAllocationDemands($projectId, Demands::of($demand));
 
         // when
-        $result = $this->allocationFacade->allocateToProject($projectId, $allocatableResourceId, $skillPhp, $oneDay);
+        $result = $this->allocationFacade->allocateToProject($projectId, $allocatableCapabilityId, $skillPhp, $oneDay);
 
         // then
         self::assertFalse($result->isPresent());
@@ -90,17 +98,17 @@ final class CapabilityAllocatingTest extends KernelTestCase
         // given
         $oneDay = TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1);
         // and
-        $allocatableResourceId = $this->createAllocatableResource($oneDay);
+        $allocatableCapabilityId = $this->createAllocatableResource($oneDay, Capability::skill('php'), $this->resourceId);
         // and
         $projectId = ProjectAllocationsId::newOne();
         // and
         $this->allocationFacade->scheduleProjectAllocationDemands($projectId, Demands::none());
         // and
         $chosenCapability = Capability::skill('php');
-        $allocatedId = $this->allocationFacade->allocateToProject($projectId, $allocatableResourceId, $chosenCapability, $oneDay);
+        $this->allocationFacade->allocateToProject($projectId, $allocatableCapabilityId, $chosenCapability, $oneDay);
 
         // when
-        $result = $this->allocationFacade->releaseFromProject($projectId, $allocatedId->get(), $oneDay);
+        $result = $this->allocationFacade->releaseFromProject($projectId, $allocatableCapabilityId, $oneDay);
 
         // then
         self::assertTrue($result);
@@ -108,12 +116,12 @@ final class CapabilityAllocatingTest extends KernelTestCase
         self::assertTrue($summary->projectAllocations->get($projectId->toString())->get()->all->isEmpty());
     }
 
-    private function createAllocatableResource(TimeSlot $period): ResourceId
+    private function createAllocatableResource(TimeSlot $period, Capability $capability, AllocatableResourceId $resourceId): AllocatableCapabilityId
     {
-        $resourceId = ResourceId::newOne();
-        $this->availabilityFacade->createResourceSlots($resourceId, $period);
+        $allocatableCapabilityIds = $this->capabilityScheduler->scheduleResourceCapabilitiesForPeriod($resourceId, GenericList::of(CapabilitySelector::canJustPerform($capability)), $period);
+        \assert($allocatableCapabilityIds->length() === 1);
 
-        return $resourceId;
+        return $allocatableCapabilityIds->get();
     }
 
     private function availabilityWasBlocked(ResourceId $resourceId, TimeSlot $period, ProjectAllocationsId $projectId): bool

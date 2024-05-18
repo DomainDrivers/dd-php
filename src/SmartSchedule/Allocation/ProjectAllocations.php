@@ -9,11 +9,10 @@ use Doctrine\ORM\Mapping\Embedded;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\Table;
-use DomainDrivers\SmartSchedule\Availability\ResourceId;
+use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableCapabilityId;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Control\Option;
-use Symfony\Component\Uid\Uuid;
 
 #[Entity]
 #[Table(name: 'project_allocations')]
@@ -57,9 +56,9 @@ final class ProjectAllocations
     /**
      * @return Option<CapabilitiesAllocated>
      */
-    public function allocate(ResourceId $resourceId, Capability $capability, TimeSlot $requestedSlot, \DateTimeImmutable $when): Option
+    public function allocate(AllocatableCapabilityId $allocatableCapabilityId, Capability $capability, TimeSlot $requestedSlot, \DateTimeImmutable $when): Option
     {
-        $allocatedCapability = AllocatedCapability::new($resourceId->getId(), $capability, $requestedSlot);
+        $allocatedCapability = new AllocatedCapability($allocatableCapabilityId, $capability, $requestedSlot);
         $newAllocations = $this->allocations->add($allocatedCapability);
         if ($this->nothingAllocated($newAllocations) || !$this->withinProjectTimeSlot($requestedSlot)) {
             /** @var Option<CapabilitiesAllocated> $none */
@@ -70,7 +69,7 @@ final class ProjectAllocations
 
         $this->allocations = $newAllocations;
 
-        return Option::of(CapabilitiesAllocated::new($allocatedCapability->allocatedCapabilityID, $this->projectId, $this->missingDemands(), $when));
+        return Option::of(CapabilitiesAllocated::new($allocatedCapability->allocatedCapabilityID->id, $this->projectId, $this->missingDemands(), $when));
     }
 
     private function nothingAllocated(Allocations $newAllocations): bool
@@ -90,7 +89,7 @@ final class ProjectAllocations
     /**
      * @return Option<CapabilityReleased>
      */
-    public function release(Uuid $allocatedCapabilityId, TimeSlot $timeSlot, \DateTimeImmutable $when): Option
+    public function release(AllocatableCapabilityId $allocatedCapabilityId, TimeSlot $timeSlot, \DateTimeImmutable $when): Option
     {
         $newAllocations = $this->allocations->remove($allocatedCapabilityId, $timeSlot);
         if ($this->nothingReleased($newAllocations)) {

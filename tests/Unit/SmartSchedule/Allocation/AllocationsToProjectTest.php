@@ -8,13 +8,13 @@ use DomainDrivers\SmartSchedule\Allocation\AllocatedCapability;
 use DomainDrivers\SmartSchedule\Allocation\Allocations;
 use DomainDrivers\SmartSchedule\Allocation\CapabilitiesAllocated;
 use DomainDrivers\SmartSchedule\Allocation\CapabilityReleased;
+use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableCapabilityId;
 use DomainDrivers\SmartSchedule\Allocation\Demand;
 use DomainDrivers\SmartSchedule\Allocation\Demands;
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocations;
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationScheduled;
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsDemandsScheduled;
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsId;
-use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\GenericList;
@@ -22,14 +22,13 @@ use Munus\Collection\Set;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Uid\Uuid;
 
 #[CoversClass(ProjectAllocations::class)]
 final class AllocationsToProjectTest extends TestCase
 {
     private \DateTimeImmutable $when;
     private ProjectAllocationsId $projectId;
-    private ResourceId $adminId;
+    private AllocatableCapabilityId $adminId;
     private TimeSlot $feb_1;
     private TimeSlot $feb_2;
     private TimeSlot $january;
@@ -40,7 +39,7 @@ final class AllocationsToProjectTest extends TestCase
     {
         $this->when = new \DateTimeImmutable('1970-01-01');
         $this->projectId = ProjectAllocationsId::newOne();
-        $this->adminId = ResourceId::newOne();
+        $this->adminId = AllocatableCapabilityId::newOne();
         $this->feb_1 = TimeSlot::createDailyTimeSlotAtUTC(2020, 2, 1);
         $this->feb_2 = TimeSlot::createDailyTimeSlotAtUTC(2020, 2, 2);
         $this->january = TimeSlot::createMonthlyTimeSlotAtUTC(2020, 1);
@@ -153,7 +152,8 @@ final class AllocationsToProjectTest extends TestCase
         $allocatedAdmin = $allocations->allocate($this->adminId, Capability::permission('admin'), $this->feb_1, $this->when);
 
         // when
-        $event = $allocations->release($allocatedAdmin->get()->allocatedCapabilityId, $this->feb_1, $this->when);
+        $adminId = new AllocatableCapabilityId($allocatedAdmin->get()->allocatedCapabilityId);
+        $event = $allocations->release($adminId, $this->feb_1, $this->when);
 
         // then
         self::assertTrue($event->isPresent());
@@ -172,7 +172,7 @@ final class AllocationsToProjectTest extends TestCase
         $allocations = ProjectAllocations::empty($this->projectId);
 
         // when
-        $event = $allocations->release(Uuid::v7(), $this->feb_1, $this->when);
+        $event = $allocations->release(AllocatableCapabilityId::newOne(), $this->feb_1, $this->when);
 
         // then
         self::assertTrue($event->isEmpty());
@@ -187,9 +187,9 @@ final class AllocationsToProjectTest extends TestCase
         $allocations = ProjectAllocations::withDemands($this->projectId, Demands::of($demandForPhp, $demandForAdmin));
         // and
         $allocatedAdmin = $allocations->allocate($this->adminId, Capability::permission('admin'), $this->feb_1, $this->when);
-        $allocations->allocate($this->adminId, Capability::skill('php'), $this->feb_1, $this->when);
+        $allocations->allocate(AllocatableCapabilityId::newOne(), Capability::skill('php'), $this->feb_1, $this->when);
         // when
-        $event = $allocations->release($allocatedAdmin->get()->allocatedCapabilityId, $this->feb_1, $this->when);
+        $event = $allocations->release(new AllocatableCapabilityId($allocatedAdmin->get()->allocatedCapabilityId), $this->feb_1, $this->when);
         // then
         self::assertTrue($event->isPresent());
         self::assertEquals($event->get(), new CapabilityReleased(
@@ -209,7 +209,7 @@ final class AllocationsToProjectTest extends TestCase
         $allocatedAdmin = $allocations->allocate($this->adminId, Capability::permission('admin'), $this->feb_1, $this->when);
 
         // when
-        $event = $allocations->release($allocatedAdmin->get()->allocatedCapabilityId, $this->feb_2, $this->when);
+        $event = $allocations->release(new AllocatableCapabilityId($allocatedAdmin->get()->allocatedCapabilityId), $this->feb_2, $this->when);
 
         // then
         self::assertTrue($event->isEmpty());
@@ -229,7 +229,7 @@ final class AllocationsToProjectTest extends TestCase
         $theRest = new TimeSlot($this->feb_1->from->modify('+2 hour'), $this->feb_1->to);
 
         // when
-        $event = $allocations->release($allocatedAdmin->get()->allocatedCapabilityId, $fifteenMinutesIn1Feb, $this->when);
+        $event = $allocations->release(new AllocatableCapabilityId($allocatedAdmin->get()->allocatedCapabilityId), $fifteenMinutesIn1Feb, $this->when);
 
         // then
         self::assertTrue($event->isPresent());
@@ -240,8 +240,8 @@ final class AllocationsToProjectTest extends TestCase
             $this->when
         ));
         self::assertTrue($allocations->allocations()->all->equals(Set::of(
-            AllocatedCapability::new($this->adminId->getId(), Capability::permission('admin'), $oneHourBefore),
-            AllocatedCapability::new($this->adminId->getId(), Capability::permission('admin'), $theRest)
+            new AllocatedCapability($this->adminId, Capability::permission('admin'), $oneHourBefore),
+            new AllocatedCapability($this->adminId, Capability::permission('admin'), $theRest)
         )));
     }
 

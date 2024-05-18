@@ -26,7 +26,7 @@ final readonly class PotentialTransfers
     public function transfer(
         ProjectAllocationsId $projectFrom,
         ProjectAllocationsId $projectTo,
-        AllocatedCapability $capability,
+        AllocatedCapability $allocatedCapability,
         TimeSlot $forSlot): self
     {
         $from = $this->summary->projectAllocations->get($projectFrom->toString());
@@ -34,12 +34,12 @@ final readonly class PotentialTransfers
         if ($from->isEmpty() || $to->isEmpty()) {
             return $this;
         }
-        $newAllocationsProjectFrom = $from->get()->remove($capability->allocatedCapabilityID, $forSlot);
+        $newAllocationsProjectFrom = $from->get()->remove($allocatedCapability->allocatedCapabilityID, $forSlot);
         if ($from->equals($newAllocationsProjectFrom)) {
             return $this;
         }
         $newAllocations = $this->summary->projectAllocations->put($projectFrom->toString(), $newAllocationsProjectFrom);
-        $newAllocationsProjectTo = $to->get()->add(AllocatedCapability::new($capability->resourceId, $capability->capability, $forSlot));
+        $newAllocationsProjectTo = $to->get()->add(new AllocatedCapability($allocatedCapability->allocatedCapabilityID, $allocatedCapability->capability, $forSlot));
         $newAllocations = $newAllocations->put($projectTo->toString(), $newAllocationsProjectTo);
 
         return new self(new ProjectsAllocationsSummary($this->summary->timeSlots, $newAllocations, $this->summary->demands), $this->earnings);

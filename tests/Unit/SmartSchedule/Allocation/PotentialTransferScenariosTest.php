@@ -7,6 +7,7 @@ namespace DomainDrivers\Tests\Unit\SmartSchedule\Allocation;
 use Decimal\Decimal;
 use DomainDrivers\SmartSchedule\Allocation\AllocatedCapability;
 use DomainDrivers\SmartSchedule\Allocation\AllocationFacade;
+use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableCapabilityId;
 use DomainDrivers\SmartSchedule\Allocation\Cashflow\Earnings;
 use DomainDrivers\SmartSchedule\Allocation\Demand;
 use DomainDrivers\SmartSchedule\Allocation\Demands;
@@ -22,7 +23,6 @@ use Munus\Collection\Map;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Uid\Uuid;
 
 #[CoversClass(AllocationFacade::class)]
 final class PotentialTransferScenariosTest extends TestCase
@@ -50,7 +50,7 @@ final class PotentialTransferScenariosTest extends TestCase
         );
         $this->bankingSoftId = ProjectAllocationsId::newOne();
         $this->insuranceSoftId = ProjectAllocationsId::newOne();
-        $this->staszekPhpMid = AllocatedCapability::new(Uuid::v7(), Capability::skill('php-mid'), $this->jan1);
+        $this->staszekPhpMid = new AllocatedCapability(AllocatableCapabilityId::newOne(), Capability::skill('php-mid'), $this->jan1);
         $this->potentialTransfers = new PotentialTransfersService(new SimulationFacade(new OptimizationFacade()));
     }
 

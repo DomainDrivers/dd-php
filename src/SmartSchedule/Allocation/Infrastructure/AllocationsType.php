@@ -8,10 +8,10 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\JsonType;
 use DomainDrivers\SmartSchedule\Allocation\AllocatedCapability;
 use DomainDrivers\SmartSchedule\Allocation\Allocations;
+use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableCapabilityId;
 use DomainDrivers\SmartSchedule\Shared\Infrastructure\CapabilityNormalizer;
 use DomainDrivers\SmartSchedule\Shared\Infrastructure\TimeSlotNormalizer;
 use Munus\Collection\Set;
-use Symfony\Component\Uid\Uuid;
 
 final class AllocationsType extends JsonType
 {
@@ -21,8 +21,7 @@ final class AllocationsType extends JsonType
         \assert($value instanceof Allocations);
 
         return parent::convertToDatabaseValue($value->all->map(fn (AllocatedCapability $a): array => [
-            'id' => $a->allocatedCapabilityID->toRfc4122(),
-            'resource_id' => $a->resourceId->toRfc4122(),
+            'id' => $a->allocatedCapabilityID->toString(),
             'capability' => CapabilityNormalizer::normalize($a->capability),
             'time_slot' => TimeSlotNormalizer::normalize($a->timeSlot),
         ])->toArray(), $platform);
@@ -35,8 +34,7 @@ final class AllocationsType extends JsonType
         $array = parent::convertToPHPValue($value, $platform);
 
         return new Allocations(Set::ofAll(array_map(fn (array $a) => new AllocatedCapability(
-            Uuid::fromString($a['id']),
-            Uuid::fromString($a['resource_id']),
+            AllocatableCapabilityId::fromString($a['id']),
             CapabilityNormalizer::denormalize($a['capability']),
             TimeSlotNormalizer::denormalize($a['time_slot'])
         ), $array)));

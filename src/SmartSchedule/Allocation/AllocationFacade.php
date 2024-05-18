@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Allocation;
 
+use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableCapabilityId;
 use DomainDrivers\SmartSchedule\Availability\AvailabilityFacade;
 use DomainDrivers\SmartSchedule\Availability\Owner;
-use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\Set;
@@ -47,10 +47,10 @@ final readonly class AllocationFacade
     /**
      * @return Option<Uuid>
      */
-    public function allocateToProject(ProjectAllocationsId $projectId, ResourceId $resourceId, Capability $capability, TimeSlot $timeSlot): Option
+    public function allocateToProject(ProjectAllocationsId $projectId, AllocatableCapabilityId $resourceId, Capability $capability, TimeSlot $timeSlot): Option
     {
         // yes, one transaction crossing 2 modules.
-        if (!$this->availabilityFacade->block($resourceId, $timeSlot, Owner::of($projectId->id))) {
+        if (!$this->availabilityFacade->block($resourceId->toAvailabilityResourceId(), $timeSlot, Owner::of($projectId->id))) {
             /** @var Option<Uuid> $empty */
             $empty = Option::none();
 
@@ -63,7 +63,7 @@ final readonly class AllocationFacade
         return $event->map(fn (CapabilitiesAllocated $c) => $c->allocatedCapabilityId);
     }
 
-    public function releaseFromProject(ProjectAllocationsId $projectId, Uuid $allocatableCapabilityId, TimeSlot $timeSlot): bool
+    public function releaseFromProject(ProjectAllocationsId $projectId, AllocatableCapabilityId $allocatableCapabilityId, TimeSlot $timeSlot): bool
     {
         // TODO WHAT TO DO WITH AVAILABILITY HERE?
         $allocations = $this->projectAllocationsRepository->getById($projectId);
