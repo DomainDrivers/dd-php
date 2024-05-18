@@ -22,6 +22,7 @@ doctrine:
             employee_id: DomainDrivers\SmartSchedule\Resource\Employee\Infrastructure\EmployeeIdType
             allocatable_resource_id: DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\Infrastructure\AllocatableResourceIdType
             allocatable_capability_id: DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\Infrastructure\AllocatableCapabilityIdType
+            capability_selector: DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\Infrastructure\CapabilitySelectorType
         schema_filter: '~^(?!availabilities)~'
     orm:
         auto_generate_proxy_classes: true
@@ -30,6 +31,9 @@ doctrine:
         validate_xml_mapping: true
         naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
         auto_mapping: true
+        dql:
+            string_functions:
+                JSONB_CONTAINS: Scienta\DoctrineJsonFunctions\Query\AST\Functions\Postgresql\JsonbContains
         mappings:
             Planning:
                 type: attribute

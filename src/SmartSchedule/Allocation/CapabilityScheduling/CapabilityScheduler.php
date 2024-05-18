@@ -20,7 +20,7 @@ final readonly class CapabilityScheduler
     }
 
     /**
-     * @param GenericList<Capability> $capabilities
+     * @param GenericList<CapabilitySelector> $capabilities
      *
      * @return GenericList<AllocatableCapabilityId>
      */
@@ -40,21 +40,41 @@ final readonly class CapabilityScheduler
     public function scheduleMultipleResourcesForPeriod(Set $resources, Capability $capability, TimeSlot $timeSlot): GenericList
     {
         /** @var GenericList<AllocatableCapability> $allocatableCapability */
-        $allocatableCapability = $resources->toStream()->map(fn (AllocatableResourceId $id): AllocatableCapability => new AllocatableCapability($id, $capability, $timeSlot))->collect(Collectors::toList());
+        $allocatableCapability = $resources->toStream()->map(fn (AllocatableResourceId $id): AllocatableCapability => new AllocatableCapability($id, CapabilitySelector::canJustPerform($capability), $timeSlot))->collect(Collectors::toList());
         $this->allocatableCapabilityRepository->saveAll($allocatableCapability);
         $allocatableCapability->forEach(fn (AllocatableCapability $a) => $this->availabilityFacade->createResourceSlots($a->id()->toAvailabilityResourceId(), $timeSlot));
 
         return $allocatableCapability->map(fn (AllocatableCapability $a): AllocatableCapabilityId => $a->id());
     }
 
+    public function findResourceCapabilities(AllocatableResourceId $resourceId, Capability $capability, TimeSlot $period): ?AllocatableCapabilityId
+    {
+        return $this->allocatableCapabilityRepository->findByResourceIdAndCapabilityAndTimeSlot($resourceId, $capability, $period)
+            ->map(fn (AllocatableCapability $a) => $a->id())
+            ->findFirst()
+            ->getOrNull();
+    }
+
     /**
-     * @param GenericList<Capability> $capabilities
+     * @param Set<Capability> $capabilities
+     */
+    public function findResourceCapabilitiesFromSet(AllocatableResourceId $resourceId, Set $capabilities, TimeSlot $timeSlot): ?AllocatableCapabilityId
+    {
+        return $this->allocatableCapabilityRepository->findByResourceIdAndTimeSlot($resourceId, $timeSlot)
+            ->filter(fn (AllocatableCapability $a) => $a->canPerformAll($capabilities))
+            ->map(fn (AllocatableCapability $a) => $a->id())
+            ->findFirst()
+            ->getOrNull();
+    }
+
+    /**
+     * @param GenericList<CapabilitySelector> $capabilities
      *
      * @return GenericList<AllocatableCapabilityId>
      */
     private function createAllocatableResources(AllocatableResourceId $resourceId, GenericList $capabilities, TimeSlot $timeSlot): GenericList
     {
-        $allocatableResources = $capabilities->map(fn (Capability $c): AllocatableCapability => new AllocatableCapability($resourceId, $c, $timeSlot));
+        $allocatableResources = $capabilities->map(fn (CapabilitySelector $c): AllocatableCapability => new AllocatableCapability($resourceId, $c, $timeSlot));
         $this->allocatableCapabilityRepository->saveAll($allocatableResources);
 
         return $allocatableResources->map(fn (AllocatableCapability $a): AllocatableCapabilityId => $a->id());

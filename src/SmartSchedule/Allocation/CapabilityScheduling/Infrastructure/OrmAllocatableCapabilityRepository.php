@@ -7,7 +7,9 @@ namespace DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\Infrastruc
 use Doctrine\ORM\EntityManagerInterface;
 use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableCapability;
 use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableCapabilityRepository;
+use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableResourceId;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
+use DomainDrivers\SmartSchedule\Shared\Infrastructure\CapabilityNormalizer;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\GenericList;
 
@@ -40,15 +42,58 @@ final readonly class OrmAllocatableCapabilityRepository implements AllocatableCa
         /** @var AllocatableCapability[] $all */
         $all = $this->entityManager->getRepository(AllocatableCapability::class)
             ->createQueryBuilder('ac')
-            ->where('ac.capability = :capability')
+            ->where('JSONB_CONTAINS(ac.possibleCapabilities, :capability) = true')
             ->andWhere('ac.timeSlot.from <= :from')
             ->andWhere('ac.timeSlot.to >= :to')
-            ->setParameter('capability', $capability, 'capability')
+            ->setParameter('capability', $this->prepareCapabilityParam($capability))
             ->setParameter('from', $timeSlot->from)
             ->setParameter('to', $timeSlot->to)
             ->getQuery()
             ->getResult();
 
         return GenericList::ofAll($all);
+    }
+
+    #[\Override]
+    public function findByResourceIdAndCapabilityAndTimeSlot(AllocatableResourceId $allocatableResourceId, Capability $capability, TimeSlot $timeSlot): GenericList
+    {
+        /** @var AllocatableCapability[] $all */
+        $all = $this->entityManager->getRepository(AllocatableCapability::class)
+            ->createQueryBuilder('ac')
+            ->where('ac.resourceId = :resourceId')
+            ->andWhere('JSONB_CONTAINS(ac.possibleCapabilities, :capability) = true')
+            ->andWhere('ac.timeSlot.from <= :from')
+            ->andWhere('ac.timeSlot.to >= :to')
+            ->setParameter('resourceId', $allocatableResourceId, 'allocatable_resource_id')
+            ->setParameter('capability', $this->prepareCapabilityParam($capability))
+            ->setParameter('from', $timeSlot->from)
+            ->setParameter('to', $timeSlot->to)
+            ->getQuery()
+            ->getResult();
+
+        return GenericList::ofAll($all);
+    }
+
+    #[\Override]
+    public function findByResourceIdAndTimeSlot(AllocatableResourceId $allocatableResourceId, TimeSlot $timeSlot): GenericList
+    {
+        /** @var AllocatableCapability[] $all */
+        $all = $this->entityManager->getRepository(AllocatableCapability::class)
+            ->createQueryBuilder('ac')
+            ->where('ac.resourceId = :resourceId')
+            ->andWhere('ac.timeSlot.from <= :from')
+            ->andWhere('ac.timeSlot.to >= :to')
+            ->setParameter('resourceId', $allocatableResourceId, 'allocatable_resource_id')
+            ->setParameter('from', $timeSlot->from)
+            ->setParameter('to', $timeSlot->to)
+            ->getQuery()
+            ->getResult();
+
+        return GenericList::ofAll($all);
+    }
+
+    private function prepareCapabilityParam(Capability $capability): string
+    {
+        return (string) \json_encode(['capabilities' => [CapabilityNormalizer::normalize($capability)]]);
     }
 }

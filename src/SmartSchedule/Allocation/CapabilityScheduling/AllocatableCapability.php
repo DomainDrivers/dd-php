@@ -11,6 +11,7 @@ use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\Table;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
+use Munus\Collection\Set;
 
 #[Entity]
 #[Table('allocatable_capabilities')]
@@ -20,8 +21,8 @@ final class AllocatableCapability
     #[Column(type: 'allocatable_capability_id')]
     private AllocatableCapabilityId $id;
 
-    #[Column(type: 'capability', options: ['jsonb' => true])]
-    private Capability $capability;
+    #[Column(type: 'capability_selector', options: ['jsonb' => true])]
+    private CapabilitySelector $possibleCapabilities;
 
     #[Column(type: 'allocatable_resource_id')]
     private AllocatableResourceId $resourceId;
@@ -29,10 +30,10 @@ final class AllocatableCapability
     #[Embedded(class: TimeSlot::class, columnPrefix: 'date_')]
     private TimeSlot $timeSlot;
 
-    public function __construct(AllocatableResourceId $resourceId, Capability $capability, TimeSlot $timeSlot)
+    public function __construct(AllocatableResourceId $resourceId, CapabilitySelector $possibleCapabilities, TimeSlot $timeSlot)
     {
         $this->id = AllocatableCapabilityId::newOne();
-        $this->capability = $capability;
+        $this->possibleCapabilities = $possibleCapabilities;
         $this->resourceId = $resourceId;
         $this->timeSlot = $timeSlot;
     }
@@ -42,9 +43,9 @@ final class AllocatableCapability
         return $this->id;
     }
 
-    public function capability(): Capability
+    public function capabilities(): CapabilitySelector
     {
-        return $this->capability;
+        return $this->possibleCapabilities;
     }
 
     public function resourceId(): AllocatableResourceId
@@ -59,6 +60,14 @@ final class AllocatableCapability
 
     public function canPerform(Capability $capability): bool
     {
-        return $this->capability->equals($capability);
+        return $this->possibleCapabilities->canPerform($capability);
+    }
+
+    /**
+     * @param Set<Capability> $capabilities
+     */
+    public function canPerformAll(Set $capabilities): bool
+    {
+        return $this->possibleCapabilities->canPerformAll($capabilities);
     }
 }

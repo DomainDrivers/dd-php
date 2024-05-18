@@ -60,7 +60,7 @@ final readonly class CapabilityFinder
         return new AllocatableCapabilitiesSummary($from->map(fn (AllocatableCapability $a) => new AllocatableCapabilitySummary(
             $a->id(),
             $a->resourceId(),
-            $a->capability(),
+            $a->capabilities(),
             $a->timeSlot()
         )));
     }

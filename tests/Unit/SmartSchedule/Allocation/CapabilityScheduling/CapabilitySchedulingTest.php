@@ -8,6 +8,7 @@ use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableCapab
 use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableResourceId;
 use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\CapabilityFinder;
 use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\CapabilityScheduler;
+use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\CapabilitySelector;
 use DomainDrivers\SmartSchedule\Availability\AvailabilityFacade;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
@@ -37,8 +38,8 @@ final class CapabilitySchedulingTest extends KernelTestCase
     public function canScheduleAllocatableCapabilities(): void
     {
         // given
-        $phpSkill = Capability::skill('php');
-        $rustSkill = Capability::skill('rust');
+        $phpSkill = CapabilitySelector::canJustPerform(Capability::skill('php'));
+        $rustSkill = CapabilitySelector::canJustPerform(Capability::skill('rust'));
         $oneDay = TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1);
 
         // when
@@ -54,20 +55,21 @@ final class CapabilitySchedulingTest extends KernelTestCase
     public function capabilityIsFoundWhenCapabilityPresentInTimeSlot(): void
     {
         // given
-        $uniqueSkill = Capability::skill('FITNESS-CLASS');
+        $fitnessClass = Capability::skill('FITNESS-CLASS');
+        $uniqueSkill = CapabilitySelector::canJustPerform($fitnessClass);
         $oneDay = TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1);
         $anotherDay = TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 2);
         // and
         $this->capabilityScheduler->scheduleResourceCapabilitiesForPeriod(AllocatableResourceId::newOne(), GenericList::of($uniqueSkill), $oneDay);
 
         // when
-        $found = $this->capabilityFinder->findAvailableCapabilities($uniqueSkill, $oneDay);
-        $notFound = $this->capabilityFinder->findAvailableCapabilities($uniqueSkill, $anotherDay);
+        $found = $this->capabilityFinder->findAvailableCapabilities($fitnessClass, $oneDay);
+        $notFound = $this->capabilityFinder->findAvailableCapabilities($fitnessClass, $anotherDay);
 
         // then
         self::assertSame(1, $found->all->length());
         self::assertTrue($notFound->all->isEmpty());
-        self::assertTrue($found->all->get()->capability->equals($uniqueSkill));
+        self::assertTrue($found->all->get()->capabilities->equals($uniqueSkill));
         self::assertTrue($found->all->get()->timeSlot->equals($oneDay));
     }
 
@@ -75,14 +77,14 @@ final class CapabilitySchedulingTest extends KernelTestCase
     public function capabilityNotFoundWhenCapabilityNotPresent(): void
     {
         // given
-        $admin = Capability::permission('admin');
+        $admin = CapabilitySelector::canJustPerform(Capability::permission('admin'));
         $oneDay = TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1);
         // and
         $this->capabilityScheduler->scheduleResourceCapabilitiesForPeriod(AllocatableResourceId::newOne(), GenericList::of($admin), $oneDay);
 
         // when
-        $rust = Capability::skill('RUST JUST FOR NINJAS');
-        $found = $this->capabilityFinder->findAvailableCapabilities($rust, $oneDay);
+        $rustSkill = Capability::skill('RUST JUST FOR NINJAS');
+        $found = $this->capabilityFinder->findAvailableCapabilities($rustSkill, $oneDay);
 
         // then
         self::assertTrue($found->all->isEmpty());
@@ -111,7 +113,8 @@ final class CapabilitySchedulingTest extends KernelTestCase
     public function canFindCapabilityIgnoringAvailability(): void
     {
         // given
-        $admin = Capability::permission('REALLY_UNIQUE_ADMIN');
+        $adminPermission = Capability::permission('REALLY_UNIQUE_ADMIN');
+        $admin = CapabilitySelector::canJustPerform($adminPermission);
         $oneDay = TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1);
         $differentDay = TimeSlot::createDailyTimeSlotAtUTC(2021, 2, 1);
         $hourWithinDay = new TimeSlot($oneDay->from, $oneDay->from->modify('+1 hour'));
@@ -120,16 +123,40 @@ final class CapabilitySchedulingTest extends KernelTestCase
         $this->capabilityScheduler->scheduleResourceCapabilitiesForPeriod(AllocatableResourceId::newOne(), GenericList::of($admin), $oneDay);
 
         // when
-        $onTheExactDay = $this->capabilityFinder->findCapabilities($admin, $oneDay);
-        $onDifferentDay = $this->capabilityFinder->findCapabilities($admin, $differentDay);
-        $inSlotWithin = $this->capabilityFinder->findCapabilities($admin, $hourWithinDay);
-        $inOverlappingSlot = $this->capabilityFinder->findCapabilities($admin, $partiallyOverlappingDay);
+        $onTheExactDay = $this->capabilityFinder->findCapabilities($adminPermission, $oneDay);
+        $onDifferentDay = $this->capabilityFinder->findCapabilities($adminPermission, $differentDay);
+        $inSlotWithin = $this->capabilityFinder->findCapabilities($adminPermission, $hourWithinDay);
+        $inOverlappingSlot = $this->capabilityFinder->findCapabilities($adminPermission, $partiallyOverlappingDay);
 
         // then
         self::assertSame(1, $onTheExactDay->all->length());
         self::assertSame(1, $inSlotWithin->all->length());
         self::assertTrue($onDifferentDay->all->isEmpty());
         self::assertTrue($inOverlappingSlot->all->isEmpty());
+    }
+
+    #[Test]
+    public function findingTakesIntoAccountSimulationsCapabilities(): void
+    {
+        // given
+        $truckAssets = Capability::assets('LOADING', 'CARRYING');
+        $truckCapabilities = CapabilitySelector::canPerformAllAtTheTime($truckAssets);
+        $oneDay = TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1);
+        // and
+        $truckResourceId = AllocatableResourceId::newOne();
+        $this->capabilityScheduler->scheduleResourceCapabilitiesForPeriod($truckResourceId, GenericList::of($truckCapabilities), $oneDay);
+
+        // when
+        $canPerformBoth = $this->capabilityScheduler->findResourceCapabilitiesFromSet($truckResourceId, $truckAssets, $oneDay);
+        $canPerformJustLoading = $this->capabilityScheduler->findResourceCapabilities($truckResourceId, Capability::asset('LOADING'), $oneDay);
+        $canPerformJustCarrying = $this->capabilityScheduler->findResourceCapabilities($truckResourceId, Capability::asset('LOADING'), $oneDay);
+        $canPerformPhp = $this->capabilityScheduler->findResourceCapabilities($truckResourceId, Capability::skill('php'), $oneDay);
+
+        // then
+        self::assertNotNull($canPerformBoth);
+        self::assertNotNull($canPerformJustLoading);
+        self::assertNotNull($canPerformJustCarrying);
+        self::assertNull($canPerformPhp);
     }
 
     private function availabilitySlotsAreCreated(AllocatableCapabilitySummary $allocatableCapability, TimeSlot $oneDay): bool

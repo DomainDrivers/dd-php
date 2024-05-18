@@ -26,4 +26,14 @@ interface AllocatableCapabilityRepository
      * @return GenericList<AllocatableCapability>
      */
     public function findByCapabilityWithin(Capability $capability, TimeSlot $timeSlot): GenericList;
+
+    /**
+     * @return GenericList<AllocatableCapability>
+     */
+    public function findByResourceIdAndCapabilityAndTimeSlot(AllocatableResourceId $allocatableResourceId, Capability $capability, TimeSlot $timeSlot): GenericList;
+
+    /**
+     * @return GenericList<AllocatableCapability>
+     */
+    public function findByResourceIdAndTimeSlot(AllocatableResourceId $allocatableResourceId, TimeSlot $timeSlot): GenericList;
 }
