@@ -16,7 +16,7 @@ use Munus\Control\Option;
 
 #[Entity]
 #[Table(name: 'project_allocations')]
-final class ProjectAllocations
+class ProjectAllocations
 {
     #[Id]
     #[Column(type: 'project_allocations_id')]

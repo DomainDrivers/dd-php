@@ -17,7 +17,7 @@ use Munus\Collection\Stream\Collectors;
 
 #[Entity]
 #[Table(name: 'projects')]
-final class Project
+class Project
 {
     #[Id]
     #[Column(type: 'project_id')]

@@ -16,7 +16,7 @@ use Munus\Collection\Set;
 
 #[Entity]
 #[Table('allocatable_capabilities')]
-final class AllocatableCapability
+class AllocatableCapability
 {
     #[Id]
     #[Column(type: 'allocatable_capability_id')]

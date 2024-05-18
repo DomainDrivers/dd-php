@@ -12,7 +12,7 @@ use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsId;
 
 #[Entity]
 #[Table(name: 'cashflows')]
-final class Cashflow
+class Cashflow
 {
     #[Id]
     #[Column(type: 'project_allocations_id')]

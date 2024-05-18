@@ -14,7 +14,7 @@ use Munus\Collection\Set;
 
 #[Entity]
 #[Table('devices')]
-final class Device
+class Device
 {
     #[Id]
     #[Column(type: 'device_id')]

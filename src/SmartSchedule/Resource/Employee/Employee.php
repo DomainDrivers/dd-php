@@ -14,7 +14,7 @@ use Munus\Collection\Set;
 
 #[Entity]
 #[Table('employees')]
-final class Employee
+class Employee
 {
     #[Id]
     #[Column(type: 'employee_id')]
