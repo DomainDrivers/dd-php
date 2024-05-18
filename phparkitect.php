@@ -32,8 +32,8 @@ return static function (Config $config): void {
         ->where('Optimization')->mayDependOnComponents('Shared')
         ->where('Cashflow')->mayDependOnComponents('Allocation', 'Shared')
         ->where('CapabilityScheduling')->mayDependOnComponents('Availability', 'Allocation', 'Shared', 'CapabilityScheduling-Acl')
-        ->where('Employee')->mayDependOnComponents('Allocation', 'Resource', 'Shared')
-        ->where('Device')->mayDependOnComponents('Allocation', 'Resource', 'Shared')
+        ->where('Employee')->mayDependOnComponents('CapabilityScheduling', 'Allocation', 'Resource', 'Shared')
+        ->where('Device')->mayDependOnComponents('CapabilityScheduling', 'Allocation', 'Resource', 'Shared')
         ->where('Shared')->shouldNotDependOnAnyComponent()
 
         ->rules();

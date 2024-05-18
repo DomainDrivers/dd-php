@@ -28,9 +28,11 @@ use DomainDrivers\SmartSchedule\Planning\ProjectRepository;
 use DomainDrivers\SmartSchedule\Resource\Device\DeviceFacade;
 use DomainDrivers\SmartSchedule\Resource\Device\DeviceRepository;
 use DomainDrivers\SmartSchedule\Resource\Device\Infrastructure\OrmDeviceRepository;
+use DomainDrivers\SmartSchedule\Resource\Device\ScheduleDeviceCapabilities;
 use DomainDrivers\SmartSchedule\Resource\Employee\EmployeeFacade;
 use DomainDrivers\SmartSchedule\Resource\Employee\EmployeeRepository;
 use DomainDrivers\SmartSchedule\Resource\Employee\Infrastructure\OrmEmployeeRepository;
+use DomainDrivers\SmartSchedule\Resource\Employee\ScheduleEmployeeCapabilities;
 use DomainDrivers\SmartSchedule\Shared\Infrastructure\FixSchemaListener;
 use Symfony\Component\Clock\ClockInterface;
 use Symfony\Component\Clock\NativeClock;
@@ -95,6 +97,10 @@ return static function (ContainerConfigurator $configurator): void {
 
     $services->set(CapabilityScheduler::class)
         ->public();
+
+    $services->set(ScheduleDeviceCapabilities::class);
+
+    $services->set(ScheduleEmployeeCapabilities::class);
 
     if (in_array($configurator->env(), ['dev', 'test'], true)) {
         $services->set(FixSchemaListener::class)

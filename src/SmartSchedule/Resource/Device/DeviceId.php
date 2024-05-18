@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Resource\Device;
 
+use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableResourceId;
 use Symfony\Component\Uid\Uuid;
 
 final readonly class DeviceId implements \Stringable
@@ -20,6 +21,11 @@ final readonly class DeviceId implements \Stringable
     public static function fromString(string $id): self
     {
         return new self(Uuid::fromString($id));
+    }
+
+    public function toAllocatableResourceId(): AllocatableResourceId
+    {
+        return new AllocatableResourceId($this->id);
     }
 
     public function toString(): string

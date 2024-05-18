@@ -9,5 +9,5 @@ enum Seniority: string
     case JUNIOR = 'junior';
     case MID = 'mid';
     case SENIOR = 'senior';
-    case LEAS = 'lead';
+    case LEAD = 'lead';
 }
