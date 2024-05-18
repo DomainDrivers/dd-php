@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling;
+namespace DomainDrivers\SmartSchedule\Shared;
 
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
 use Munus\Collection\Set;

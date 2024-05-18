@@ -6,6 +6,7 @@ namespace DomainDrivers\SmartSchedule\Simulation;
 
 use DomainDrivers\SmartSchedule\Optimization\CapacityDimension;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
+use DomainDrivers\SmartSchedule\Shared\CapabilitySelector;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Symfony\Component\Uid\Uuid;
 
@@ -13,13 +14,13 @@ final readonly class AvailableResourceCapability implements CapacityDimension
 {
     public function __construct(
         public Uuid $resourceId,
-        public Capability $capability,
+        public CapabilitySelector $capabilitySelector,
         public TimeSlot $timeSlot
     ) {
     }
 
     public function performs(Capability $capability): bool
     {
-        return $this->capability->equals($capability);
+        return $this->capabilitySelector->canPerform($capability);
     }
 }

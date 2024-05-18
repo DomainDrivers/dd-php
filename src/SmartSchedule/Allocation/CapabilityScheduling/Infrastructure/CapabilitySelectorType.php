@@ -6,10 +6,10 @@ namespace DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\Infrastruc
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\JsonType;
-use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\CapabilitySelector;
-use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\SelectingPolicy;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
+use DomainDrivers\SmartSchedule\Shared\CapabilitySelector;
 use DomainDrivers\SmartSchedule\Shared\Infrastructure\CapabilityNormalizer;
+use DomainDrivers\SmartSchedule\Shared\SelectingPolicy;
 use Munus\Collection\Set;
 
 final class CapabilitySelectorType extends JsonType

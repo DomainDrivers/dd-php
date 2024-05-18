@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\Table;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
+use DomainDrivers\SmartSchedule\Shared\CapabilitySelector;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\Set;
 

@@ -7,6 +7,7 @@ namespace DomainDrivers\Tests\Unit\SmartSchedule\Simulation;
 use Decimal\Decimal;
 use DomainDrivers\SmartSchedule\Optimization\OptimizationFacade;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
+use DomainDrivers\SmartSchedule\Shared\CapabilitySelector;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use DomainDrivers\SmartSchedule\Simulation\AdditionalPricedCapability;
 use DomainDrivers\SmartSchedule\Simulation\AvailableResourceCapability;
@@ -124,7 +125,7 @@ final class SimulationScenariosTest extends TestCase
             ->build();
 
         // and there are
-        $extraCapability = new AvailableResourceCapability(Uuid::v7(), Capability::skill('YT DRAMA COMMENTS'), $this->jan_1);
+        $extraCapability = new AvailableResourceCapability(Uuid::v7(), CapabilitySelector::canJustPerform(Capability::skill('YT DRAMA COMMENTS')), $this->jan_1);
 
         // when
         $resultWithoutExtraResource = $this->simulationFacade->whatIsTheOptimalSetup($simulatedProjects, $simulatedAvailability);
@@ -186,8 +187,8 @@ final class SimulationScenariosTest extends TestCase
             ->build();
 
         // and there are
-        $slawek = new AdditionalPricedCapability(new Decimal(9999), new AvailableResourceCapability(Uuid::v7(), Capability::skill('PHP-MID'), $this->jan_1));
-        $staszek = new AdditionalPricedCapability(new Decimal(3), new AvailableResourceCapability(Uuid::v7(), Capability::skill('PHP-MID'), $this->jan_1));
+        $slawek = new AdditionalPricedCapability(new Decimal(9999), new AvailableResourceCapability(Uuid::v7(), CapabilitySelector::canJustPerform(Capability::skill('PHP-MID')), $this->jan_1));
+        $staszek = new AdditionalPricedCapability(new Decimal(3), new AvailableResourceCapability(Uuid::v7(), CapabilitySelector::canJustPerform(Capability::skill('PHP-MID')), $this->jan_1));
 
         // when
         $buyingSlawek = $this->simulationFacade->profitAfterBuyingNewCapability($simulatedProjects, $simulatedAvailability, $slawek);
@@ -196,6 +197,35 @@ final class SimulationScenariosTest extends TestCase
         // then
         self::assertTrue($buyingSlawek->equals(new Decimal(-9959))); // we pay 9999 and get the project for 40
         self::assertTrue($buyingStaszek->equals(new Decimal(37))); // we pay 3 and get the project for 40
+    }
+
+    #[Test]
+    public function takesIntoAccountSimulationsCapabilities(): void
+    {
+        // given
+        $simulatedProjects = $this->simulatedProjects()
+            ->withProject($this->project_1)
+            ->thatRequires(Demand::for(Capability::skill('PHP-MID'), $this->jan_1))
+            ->thatCanEarn(new Decimal(9))
+            ->withProject($this->project_2)
+            ->thatRequires(Demand::for(Capability::skill('PHP-MID'), $this->jan_1))
+            ->thatRequires(Demand::for(Capability::skill('PYTHON'), $this->jan_1))
+            ->thatCanEarn(new Decimal(99))
+            ->build();
+
+        // and there are
+        $simulatedAvailability = $this->simulatedCapabilities()
+            ->withEmployee($this->staszek)
+            ->thatBringsSimultaneously(Capability::skill('PHP-MID'), Capability::skill('PYTHON'))
+            ->thatIsAvailableAt($this->jan_1)
+            ->build();
+
+        // when
+        $result = $this->simulationFacade->whatIsTheOptimalSetup($simulatedProjects, $simulatedAvailability);
+
+        // then
+        self::assertTrue($result->profit->equals(new Decimal(99)));
+        self::assertSame(1, $result->chosenItems->length());
     }
 
     private function simulatedProjects(): SimulatedProjectsBuilder

@@ -8,9 +8,9 @@ use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableCapab
 use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableResourceId;
 use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\CapabilityFinder;
 use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\CapabilityScheduler;
-use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\CapabilitySelector;
 use DomainDrivers\SmartSchedule\Availability\AvailabilityFacade;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
+use DomainDrivers\SmartSchedule\Shared\CapabilitySelector;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\GenericList;
 use Munus\Collection\Set;

@@ -6,6 +6,7 @@ namespace DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling;
 
 use DomainDrivers\SmartSchedule\Availability\AvailabilityFacade;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
+use DomainDrivers\SmartSchedule\Shared\CapabilitySelector;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\GenericList;
 use Munus\Collection\Set;

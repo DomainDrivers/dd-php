@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace DomainDrivers\Tests\Unit\SmartSchedule\Allocation\CapabilityScheduling;
+namespace DomainDrivers\Tests\Unit\SmartSchedule\Shared;
 
-use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\CapabilitySelector;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
+use DomainDrivers\SmartSchedule\Shared\CapabilitySelector;
 use Munus\Collection\Set;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
