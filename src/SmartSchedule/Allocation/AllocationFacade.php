@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Allocation;
 
+use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableCapabilitiesSummary;
 use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableCapabilityId;
+use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableCapabilitySummary;
 use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\CapabilityFinder;
 use DomainDrivers\SmartSchedule\Availability\AvailabilityFacade;
 use DomainDrivers\SmartSchedule\Availability\Owner;
+use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\Set;
@@ -58,11 +61,21 @@ final readonly class AllocationFacade
         if (!$this->availabilityFacade->block($allocatableCapabilityId->toAvailabilityResourceId(), $timeSlot, Owner::of($projectId->id))) {
             return $this->empty();
         }
+
+        return $this->allocate($projectId, $allocatableCapabilityId, $capability, $timeSlot)
+            ->map(fn (CapabilitiesAllocated $c) => $c->allocatedCapabilityId);
+    }
+
+    /**
+     * @return Option<CapabilitiesAllocated>
+     */
+    private function allocate(ProjectAllocationsId $projectId, AllocatableCapabilityId $allocatableCapabilityId, Capability $capability, TimeSlot $timeSlot): Option
+    {
         $allocations = $this->projectAllocationsRepository->getById($projectId);
         $event = $allocations->allocate($allocatableCapabilityId, $capability, $timeSlot, $this->clock->now());
         $this->projectAllocationsRepository->save($allocations);
 
-        return $event->map(fn (CapabilitiesAllocated $c) => $c->allocatedCapabilityId);
+        return $event;
     }
 
     public function releaseFromProject(ProjectAllocationsId $projectId, AllocatableCapabilityId $allocatableCapabilityId, TimeSlot $timeSlot): bool
@@ -89,6 +102,20 @@ final readonly class AllocationFacade
         $allocations->addDemands($demands, $this->clock->now());
         $this->projectAllocationsRepository->save($allocations);
     }
+
+    public function allocateCapabilityToProjectForPeriod(ProjectAllocationsId $projectId, Capability $capability, TimeSlot $timeSlot): bool
+    {
+        return false;
+    }
+
+    //    private function findChosenAllocatableCapability(AllocatableCapabilitiesSummary $proposedCapabilities, ResourceId $chosen): ?AllocatableCapabilityId
+    //    {
+    //        return $proposedCapabilities->all
+    //            ->map(fn (AllocatableCapabilitySummary $s) => $s->id)
+    //            ->filter(fn (AllocatableCapabilityId $id) => $id->toAvailabilityResourceId()->getId()->equals($chosen->getId()))
+    //            ->findFirst()
+    //            ->getOrNull();
+    //    }
 
     /**
      * @return Option<Uuid>
