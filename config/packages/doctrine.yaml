@@ -17,8 +17,11 @@ doctrine:
             earnings: DomainDrivers\SmartSchedule\Allocation\Cashflow\Infrastructure\EarningsType
             income: DomainDrivers\SmartSchedule\Allocation\Cashflow\Infrastructure\IncomeType
             capabilities: DomainDrivers\SmartSchedule\Shared\Infrastructure\CapabilitiesType
+            capability: DomainDrivers\SmartSchedule\Shared\Infrastructure\CapabilityType
             device_id: DomainDrivers\SmartSchedule\Resource\Device\Infrastructure\DeviceIdType
             employee_id: DomainDrivers\SmartSchedule\Resource\Employee\Infrastructure\EmployeeIdType
+            allocatable_resource_id: DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\Infrastructure\AllocatableResourceIdType
+            allocatable_capability_id: DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\Infrastructure\AllocatableCapabilityIdType
         schema_filter: '~^(?!availabilities)~'
     orm:
         auto_generate_proxy_classes: true

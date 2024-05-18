@@ -26,7 +26,8 @@
         "phpstan/phpstan-strict-rules": "^1.5",
         "phparkitect/phparkitect": "^0.3.29",
         "rector/rector": "^1.0.4",
-        "phpstan/phpstan-symfony": "^1.3"
+        "phpstan/phpstan-symfony": "^1.3",
+        "dama/doctrine-test-bundle": "^8.0"
     },
     "autoload": {
         "psr-4": {

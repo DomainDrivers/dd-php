@@ -12,6 +12,7 @@ return static function (Config $config): void {
     $layeredArchitectureRules = Architecture::withComponents()
         ->component('Availability')->definedBy('DomainDrivers\SmartSchedule\Planning\Availability\*')
         ->component('Allocation')->definedBy('DomainDrivers\SmartSchedule\Allocation\*')
+        ->component('CapabilityScheduling')->definedBy('DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\*')
         ->component('Cashflow')->definedBy('DomainDrivers\SmartSchedule\Allocation\Cashflow\*')
         ->component('Parallelization')->definedBy('DomainDrivers\SmartSchedule\Planning\Parallelization\*')
         ->component('Sorter')->definedBy('DomainDrivers\SmartSchedule\Sorter\*')
@@ -20,11 +21,13 @@ return static function (Config $config): void {
         ->component('Shared')->definedBy('DomainDrivers\SmartSchedule\Shared\*')
 
         ->where('Availability')->mayDependOnComponents('Shared')
-        ->where('Allocation')->mayDependOnComponents('Shared', 'Availability', 'Cashflow', 'Simulation', 'Optimization')
+        ->where('Allocation')->mayDependOnComponents('Shared', 'Availability', 'Cashflow', 'Simulation', 'Optimization', 'CapabilityScheduling')
         ->where('Parallelization')->mayDependOnComponents('Sorter', 'Shared', 'Availability')
         ->where('Sorter')->shouldNotDependOnAnyComponent()
         ->where('Simulation')->mayDependOnComponents('Optimization', 'Shared')
         ->where('Optimization')->mayDependOnComponents('Shared')
+        ->where('Cashflow')->mayDependOnComponents('Allocation', 'Shared')
+        ->where('CapabilityScheduling')->mayDependOnComponents('Availability', 'Allocation', 'Shared')
         ->where('Shared')->shouldNotDependOnAnyComponent()
 
         ->rules();

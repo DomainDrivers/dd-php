@@ -6,9 +6,9 @@ namespace DomainDrivers\SmartSchedule\Availability;
 
 use Symfony\Component\Uid\Uuid;
 
-final class ResourceId implements \Stringable
+final readonly class ResourceId implements \Stringable
 {
-    private function __construct(public ?Uuid $id)
+    public function __construct(public ?Uuid $id)
     {
     }
 

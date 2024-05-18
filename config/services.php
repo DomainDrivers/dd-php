@@ -6,6 +6,10 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Doctrine\ORM\Tools\ToolEvents;
 use DomainDrivers\SmartSchedule\Allocation\AllocationFacade;
+use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableCapabilityRepository;
+use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\CapabilityFinder;
+use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\CapabilityScheduler;
+use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\Infrastructure\OrmAllocatableCapabilityRepository;
 use DomainDrivers\SmartSchedule\Allocation\Cashflow\CashFlowFacade;
 use DomainDrivers\SmartSchedule\Allocation\Cashflow\CashflowRepository;
 use DomainDrivers\SmartSchedule\Allocation\Cashflow\Infrastructure\OrmCashflowRepository;
@@ -81,6 +85,15 @@ return static function (ContainerConfigurator $configurator): void {
     $services->alias(EmployeeRepository::class, OrmEmployeeRepository::class);
 
     $services->set(EmployeeFacade::class)
+        ->public();
+
+    $services->set(OrmAllocatableCapabilityRepository::class);
+    $services->alias(AllocatableCapabilityRepository::class, OrmAllocatableCapabilityRepository::class);
+
+    $services->set(CapabilityFinder::class)
+        ->public();
+
+    $services->set(CapabilityScheduler::class)
         ->public();
 
     if (in_array($configurator->env(), ['dev', 'test'], true)) {
