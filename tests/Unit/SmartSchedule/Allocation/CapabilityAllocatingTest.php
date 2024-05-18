@@ -93,6 +93,29 @@ final class CapabilityAllocatingTest extends KernelTestCase
     }
 
     #[Test]
+    public function cantAllocateWhenCapabilityHasNotBeenScheduled(): void
+    {
+        // given
+        $oneDay = TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1);
+        $skillPhp = Capability::skill('php');
+        $demand = new Demand($skillPhp, $oneDay);
+        // and
+        $notScheduledCapability = AllocatableCapabilityId::newOne();
+        // and
+        $projectId = ProjectAllocationsId::newOne();
+        // and
+        $this->allocationFacade->scheduleProjectAllocationDemands($projectId, Demands::of($demand));
+
+        // when
+        $result = $this->allocationFacade->allocateToProject($projectId, $notScheduledCapability, $skillPhp, $oneDay);
+
+        // then
+        self::assertFalse($result->isPresent());
+        $summary = $this->allocationFacade->findAllProjectsAllocations();
+        self::assertTrue($summary->projectAllocations->get($projectId->toString())->get()->all->isEmpty());
+    }
+
+    #[Test]
     public function canReleaseCapabilityFromProject(): void
     {
         // given
@@ -114,6 +137,7 @@ final class CapabilityAllocatingTest extends KernelTestCase
         self::assertTrue($result);
         $summary = $this->allocationFacade->findAllProjectsAllocations();
         self::assertTrue($summary->projectAllocations->get($projectId->toString())->get()->all->isEmpty());
+        self::assertTrue($this->availabilityIsReleased($oneDay, $allocatableCapabilityId, $projectId));
     }
 
     private function createAllocatableResource(TimeSlot $period, Capability $capability, AllocatableResourceId $resourceId): AllocatableCapabilityId
@@ -130,5 +154,10 @@ final class CapabilityAllocatingTest extends KernelTestCase
             ->calendars
             ->values()
             ->allMatch(fn (Calendar $c) => $c->takenBy(Owner::of($projectId->id))->equals(GenericList::of($period)));
+    }
+
+    private function availabilityIsReleased(TimeSlot $period, AllocatableCapabilityId $allocatableCapabilityId, ProjectAllocationsId $projectId): bool
+    {
+        return !$this->availabilityWasBlocked($allocatableCapabilityId->toAvailabilityResourceId(), $period, $projectId);
     }
 }

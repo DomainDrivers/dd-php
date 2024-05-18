@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace DomainDrivers\SmartSchedule\Allocation;
 
 use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableCapabilityId;
+use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\CapabilityFinder;
 use DomainDrivers\SmartSchedule\Availability\AvailabilityFacade;
 use DomainDrivers\SmartSchedule\Availability\Owner;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
@@ -19,6 +20,7 @@ final readonly class AllocationFacade
     public function __construct(
         private ProjectAllocationsRepository $projectAllocationsRepository,
         private AvailabilityFacade $availabilityFacade,
+        private CapabilityFinder $capabilityFinder,
         private ClockInterface $clock
     ) {
     }
@@ -47,17 +49,17 @@ final readonly class AllocationFacade
     /**
      * @return Option<Uuid>
      */
-    public function allocateToProject(ProjectAllocationsId $projectId, AllocatableCapabilityId $resourceId, Capability $capability, TimeSlot $timeSlot): Option
+    public function allocateToProject(ProjectAllocationsId $projectId, AllocatableCapabilityId $allocatableCapabilityId, Capability $capability, TimeSlot $timeSlot): Option
     {
         // yes, one transaction crossing 2 modules.
-        if (!$this->availabilityFacade->block($resourceId->toAvailabilityResourceId(), $timeSlot, Owner::of($projectId->id))) {
-            /** @var Option<Uuid> $empty */
-            $empty = Option::none();
-
-            return $empty;
+        if (!$this->capabilityFinder->isPresent($allocatableCapabilityId)) {
+            return $this->empty();
+        }
+        if (!$this->availabilityFacade->block($allocatableCapabilityId->toAvailabilityResourceId(), $timeSlot, Owner::of($projectId->id))) {
+            return $this->empty();
         }
         $allocations = $this->projectAllocationsRepository->getById($projectId);
-        $event = $allocations->allocate($resourceId, $capability, $timeSlot, $this->clock->now());
+        $event = $allocations->allocate($allocatableCapabilityId, $capability, $timeSlot, $this->clock->now());
         $this->projectAllocationsRepository->save($allocations);
 
         return $event->map(fn (CapabilitiesAllocated $c) => $c->allocatedCapabilityId);
@@ -65,7 +67,8 @@ final readonly class AllocationFacade
 
     public function releaseFromProject(ProjectAllocationsId $projectId, AllocatableCapabilityId $allocatableCapabilityId, TimeSlot $timeSlot): bool
     {
-        // TODO WHAT TO DO WITH AVAILABILITY HERE?
+        // can release not scheduled capability - at least for now. Hence no check to capabilityFinder
+        $this->availabilityFacade->release($allocatableCapabilityId->toAvailabilityResourceId(), $timeSlot, Owner::of($projectId->id));
         $allocations = $this->projectAllocationsRepository->getById($projectId);
         $event = $allocations->release($allocatableCapabilityId, $timeSlot, $this->clock->now());
         $this->projectAllocationsRepository->save($allocations);
@@ -85,5 +88,16 @@ final readonly class AllocationFacade
         $allocations = $this->projectAllocationsRepository->findById($projectId)->getOrElse(ProjectAllocations::empty($projectId));
         $allocations->addDemands($demands, $this->clock->now());
         $this->projectAllocationsRepository->save($allocations);
+    }
+
+    /**
+     * @return Option<Uuid>
+     */
+    private function empty(): Option
+    {
+        /** @var Option<Uuid> $option */
+        $option = Option::none();
+
+        return $option;
     }
 }

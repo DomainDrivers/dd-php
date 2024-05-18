@@ -39,6 +39,11 @@ final readonly class CapabilityFinder
         return $this->createSummary($this->allocatableCapabilityRepository->findAllById($allocatableCapabilityIds));
     }
 
+    public function isPresent(AllocatableCapabilityId $allocatableCapabilityId): bool
+    {
+        return $this->allocatableCapabilityRepository->existsById($allocatableCapabilityId);
+    }
+
     /**
      * @param GenericList<AllocatableCapability> $findAllocatableCapability
      *

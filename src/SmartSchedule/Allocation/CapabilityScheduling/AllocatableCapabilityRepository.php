@@ -22,6 +22,8 @@ interface AllocatableCapabilityRepository
      */
     public function findAllById(GenericList $ids): GenericList;
 
+    public function existsById(AllocatableCapabilityId $allocatableCapabilityId): bool;
+
     /**
      * @return GenericList<AllocatableCapability>
      */

@@ -6,6 +6,7 @@ namespace DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\Infrastruc
 
 use Doctrine\ORM\EntityManagerInterface;
 use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableCapability;
+use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableCapabilityId;
 use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableCapabilityRepository;
 use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableResourceId;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
@@ -34,6 +35,12 @@ final readonly class OrmAllocatableCapabilityRepository implements AllocatableCa
         return GenericList::ofAll($this->entityManager->getRepository(AllocatableCapability::class)->findBy([
             'id' => $ids->toArray(),
         ]));
+    }
+
+    #[\Override]
+    public function existsById(AllocatableCapabilityId $allocatableCapabilityId): bool
+    {
+        return $this->entityManager->getRepository(AllocatableCapability::class)->count(['id' => $allocatableCapabilityId]) === 1;
     }
 
     #[\Override]
