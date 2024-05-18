@@ -8,7 +8,7 @@ use Symfony\Component\Uid\Uuid;
 
 final readonly class AllocatableResourceId implements \Stringable
 {
-    private function __construct(public Uuid $id)
+    public function __construct(public Uuid $id)
     {
     }
 
