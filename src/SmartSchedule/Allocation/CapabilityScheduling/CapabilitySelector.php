@@ -12,22 +12,29 @@ final readonly class CapabilitySelector
     /**
      * @param Set<Capability> $capabilities
      */
-    public static function canPerformOneOf(Set $capabilities): self
+    public function __construct(public Set $capabilities, public SelectingPolicy $selectingPolicy)
     {
-        return new self();
     }
 
     /**
-     * @param Set<Capability> $beingAnAdmin
+     * @param Set<Capability> $capabilities
      */
-    public static function canPerformAllAtTheTime(Set $beingAnAdmin): self
+    public static function canPerformOneOf(Set $capabilities): self
     {
-        return new self();
+        return new self($capabilities, SelectingPolicy::ONE_OF_ALL);
+    }
+
+    /**
+     * @param Set<Capability> $capabilities
+     */
+    public static function canPerformAllAtTheTime(Set $capabilities): self
+    {
+        return new self($capabilities, SelectingPolicy::ALL_SIMULTANEOUSLY);
     }
 
     public function canPerform(Capability $capability): bool
     {
-        return false;
+        return $this->capabilities->contains($capability);
     }
 
     /**
@@ -35,6 +42,10 @@ final readonly class CapabilitySelector
      */
     public function canPerformAll(Set $capabilities): bool
     {
-        return false;
+        if ($capabilities->length() === 1) {
+            return $this->canPerform($capabilities->get());
+        }
+
+        return $this->selectingPolicy === SelectingPolicy::ALL_SIMULTANEOUSLY && $this->capabilities->containsAll($capabilities);
     }
 }
