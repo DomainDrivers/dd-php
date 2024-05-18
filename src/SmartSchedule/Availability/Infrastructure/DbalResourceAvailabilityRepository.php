@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Availability\Infrastructure;
 
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Types;
 use DomainDrivers\SmartSchedule\Availability\Blockade;
@@ -149,12 +150,13 @@ final readonly class DbalResourceAvailabilityRepository implements ResourceAvail
     public function loadAvailabilitiesOfRandomResourceWithin(Set $resourcesId, TimeSlot $normalized): ResourceGroupedAvailability
     {
         $randomResource = $this->connection->fetchOne(
-            'select * from availabilities where resource_id = ANY(:ids) and taken_by is null and from_date >= :fromDate and to_date <= :toDate order by random() limit 1',
+            'select resource_id from availabilities where resource_id IN (:ids) and taken_by is null and from_date >= :fromDate and to_date <= :toDate order by random() limit 1',
             [
-                'ids' => $resourcesId->map(fn (ResourceAvailabilityId $i) => $i->toString())->toArray(),
+                'ids' => $resourcesId->map(fn (ResourceId $i) => (string) $i)->toArray(),
                 'fromDate' => $normalized->from,
                 'toDate' => $normalized->to,
             ], [
+                'ids' => ArrayParameterType::STRING,
                 'fromDate' => Types::DATETIME_IMMUTABLE,
                 'toDate' => Types::DATETIME_IMMUTABLE,
             ]

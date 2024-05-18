@@ -123,7 +123,7 @@ final class CapabilityAllocatingTest extends KernelTestCase
     {
         return $this->allocationFacade->findAllProjectsAllocations()
             ->projectAllocations
-            ->get($projectId)
+            ->get((string) $projectId)
             ->get()
             ->all
             ->map(fn (AllocatedCapability $ac) => $ac->allocatedCapabilityID);

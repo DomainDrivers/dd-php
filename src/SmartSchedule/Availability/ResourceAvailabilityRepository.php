@@ -31,7 +31,7 @@ interface ResourceAvailabilityRepository
     public function loadById(ResourceAvailabilityId $availabilityId): ?ResourceAvailability;
 
     /**
-     * @param Set<ResourceAvailabilityId> $resourcesId
+     * @param Set<ResourceId> $resourcesId
      */
     public function loadAvailabilitiesOfRandomResourceWithin(Set $resourcesId, TimeSlot $normalized): ResourceGroupedAvailability;
 }

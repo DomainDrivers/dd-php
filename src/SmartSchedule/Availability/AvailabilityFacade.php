@@ -8,6 +8,7 @@ use DomainDrivers\SmartSchedule\Availability\Segment\SegmentInMinutes;
 use DomainDrivers\SmartSchedule\Availability\Segment\Segments;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\Set;
+use Munus\Control\Option;
 
 final readonly class AvailabilityFacade
 {
@@ -30,6 +31,12 @@ final readonly class AvailabilityFacade
     public function block(ResourceId $resourceId, TimeSlot $timeSlot, Owner $requester): bool
     {
         $toBlock = $this->findGrouped($resourceId, $timeSlot);
+
+        return $this->doBlock($requester, $toBlock);
+    }
+
+    private function doBlock(Owner $requester, ResourceGroupedAvailability $toBlock): bool
+    {
         if ($toBlock->hasNoSlots()) {
             return false;
         }
@@ -38,6 +45,24 @@ final readonly class AvailabilityFacade
         }
 
         return false;
+    }
+
+    /**
+     * @param Set<ResourceId> $resourceIds
+     *
+     * @return Option<ResourceId>
+     */
+    public function blockRandomAvailable(Set $resourceIds, TimeSlot $within, Owner $owner): Option
+    {
+        $normalized = Segments::normalizeToSegmentBoundaries($within, SegmentInMinutes::defaultSegment());
+        $groupedAvailability = $this->availabilityRepository->loadAvailabilitiesOfRandomResourceWithin($resourceIds, $normalized);
+        if ($this->doBlock($owner, $groupedAvailability)) {
+            return $groupedAvailability->resourceId();
+        }
+        /** @var Option<ResourceId> $empty */
+        $empty = Option::none();
+
+        return $empty;
     }
 
     public function release(ResourceId $resourceId, TimeSlot $timeSlot, Owner $requester): bool

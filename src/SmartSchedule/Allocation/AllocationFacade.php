@@ -14,6 +14,7 @@ use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\Set;
+use Munus\Collection\Stream\Collectors;
 use Munus\Control\Option;
 use Symfony\Component\Clock\ClockInterface;
 use Symfony\Component\Uid\Uuid;
@@ -105,17 +106,29 @@ final readonly class AllocationFacade
 
     public function allocateCapabilityToProjectForPeriod(ProjectAllocationsId $projectId, Capability $capability, TimeSlot $timeSlot): bool
     {
-        return false;
+        $proposedCapabilities = $this->capabilityFinder->findCapabilities($capability, $timeSlot);
+        if ($proposedCapabilities->all->isEmpty()) {
+            return false;
+        }
+        $availabilityResourceIds = $proposedCapabilities->all->toStream()->map(fn (AllocatableCapabilitySummary $acs) => $acs->id->toAvailabilityResourceId())->collect(Collectors::toSet());
+        $chosen = $this->availabilityFacade->blockRandomAvailable($availabilityResourceIds, $timeSlot, Owner::of($projectId->id));
+        if ($chosen->isEmpty()) {
+            return false;
+        }
+        $toAllocate = $this->findChosenAllocatableCapability($proposedCapabilities, $chosen->get());
+        \assert($toAllocate !== null);
+
+        return $this->allocate($projectId, $toAllocate, $capability, $timeSlot)->isPresent();
     }
 
-    //    private function findChosenAllocatableCapability(AllocatableCapabilitiesSummary $proposedCapabilities, ResourceId $chosen): ?AllocatableCapabilityId
-    //    {
-    //        return $proposedCapabilities->all
-    //            ->map(fn (AllocatableCapabilitySummary $s) => $s->id)
-    //            ->filter(fn (AllocatableCapabilityId $id) => $id->toAvailabilityResourceId()->getId()->equals($chosen->getId()))
-    //            ->findFirst()
-    //            ->getOrNull();
-    //    }
+    private function findChosenAllocatableCapability(AllocatableCapabilitiesSummary $proposedCapabilities, ResourceId $chosen): ?AllocatableCapabilityId
+    {
+        return $proposedCapabilities->all
+            ->map(fn (AllocatableCapabilitySummary $s) => $s->id)
+            ->filter(fn (AllocatableCapabilityId $id) => $id->toAvailabilityResourceId()->getId()->equals($chosen->getId()))
+            ->findFirst()
+            ->getOrNull();
+    }
 
     /**
      * @return Option<Uuid>
