@@ -33,7 +33,9 @@ use DomainDrivers\SmartSchedule\Resource\Employee\EmployeeFacade;
 use DomainDrivers\SmartSchedule\Resource\Employee\EmployeeRepository;
 use DomainDrivers\SmartSchedule\Resource\Employee\Infrastructure\OrmEmployeeRepository;
 use DomainDrivers\SmartSchedule\Resource\Employee\ScheduleEmployeeCapabilities;
+use DomainDrivers\SmartSchedule\Shared\EventsPublisher;
 use DomainDrivers\SmartSchedule\Shared\Infrastructure\FixSchemaListener;
+use DomainDrivers\SmartSchedule\Shared\Infrastructure\MessengerEventPublisher;
 use Symfony\Component\Clock\ClockInterface;
 use Symfony\Component\Clock\NativeClock;
 
@@ -101,6 +103,9 @@ return static function (ContainerConfigurator $configurator): void {
     $services->set(ScheduleDeviceCapabilities::class);
 
     $services->set(ScheduleEmployeeCapabilities::class);
+
+    $services->set(MessengerEventPublisher::class);
+    $services->alias(EventsPublisher::class, MessengerEventPublisher::class);
 
     if (in_array($configurator->env(), ['dev', 'test'], true)) {
         $services->set(FixSchemaListener::class)
