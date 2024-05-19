@@ -9,16 +9,20 @@ use DomainDrivers\SmartSchedule\Planning\Parallelization\ParallelStagesList;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\Stage;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\StageParallelization;
 use DomainDrivers\SmartSchedule\Planning\Schedule\Schedule;
+use DomainDrivers\SmartSchedule\Shared\EventsPublisher;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\GenericList;
 use Munus\Collection\Set;
+use Symfony\Component\Clock\ClockInterface;
 
 final readonly class PlanningFacade
 {
     public function __construct(
         private ProjectRepository $projectRepository,
         private StageParallelization $stageParallelization,
-        private PlanChosenResources $planChosenResources
+        private PlanChosenResources $planChosenResources,
+        private EventsPublisher $eventsPublisher,
+        private ClockInterface $clock
     ) {
     }
 
@@ -54,6 +58,7 @@ final readonly class PlanningFacade
         $project = $this->projectRepository->getById($projectId);
         $project->addDemands($demands);
         $this->projectRepository->save($project);
+        $this->eventsPublisher->publish(CapabilitiesDemanded::new($projectId, $project->demands(), $this->clock->now()));
     }
 
     public function defineDemandsPerStage(ProjectId $projectId, DemandsPerStage $demandsPerStage): void
@@ -61,6 +66,7 @@ final readonly class PlanningFacade
         $project = $this->projectRepository->getById($projectId);
         $project->addDemandsPerStage($demandsPerStage);
         $this->projectRepository->save($project);
+        $this->eventsPublisher->publish(CapabilitiesDemanded::new($projectId, $project->demands(), $this->clock->now()));
     }
 
     /**
@@ -81,6 +87,7 @@ final readonly class PlanningFacade
         $project = $this->projectRepository->getById($projectId);
         $project->addScheduleOnStageTimeSlot($criticalStage, $stageTimeSlot);
         $this->projectRepository->save($project);
+        $this->eventsPublisher->publish(CriticalStagePlanned::new($projectId, $stageTimeSlot, $resourceId, $this->clock->now()));
     }
 
     public function planCriticalStage(ProjectId $projectId, Stage $criticalStage, TimeSlot $stageTimeSlot): void
@@ -88,6 +95,7 @@ final readonly class PlanningFacade
         $project = $this->projectRepository->getById($projectId);
         $project->addScheduleOnStageTimeSlot($criticalStage, $stageTimeSlot);
         $this->projectRepository->save($project);
+        $this->eventsPublisher->publish(CriticalStagePlanned::new($projectId, $stageTimeSlot, null, $this->clock->now()));
     }
 
     public function defineManualSchedule(ProjectId $projectId, Schedule $schedule): void

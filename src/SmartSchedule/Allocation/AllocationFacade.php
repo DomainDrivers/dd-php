@@ -12,6 +12,7 @@ use DomainDrivers\SmartSchedule\Availability\AvailabilityFacade;
 use DomainDrivers\SmartSchedule\Availability\Owner;
 use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
+use DomainDrivers\SmartSchedule\Shared\EventsPublisher;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\Set;
 use Munus\Collection\Stream\Collectors;
@@ -25,6 +26,7 @@ final readonly class AllocationFacade
         private ProjectAllocationsRepository $projectAllocationsRepository,
         private AvailabilityFacade $availabilityFacade,
         private CapabilityFinder $capabilityFinder,
+        private EventsPublisher $eventsPublisher,
         private ClockInterface $clock
     ) {
     }
@@ -33,6 +35,7 @@ final readonly class AllocationFacade
     {
         $projectId = ProjectAllocationsId::newOne();
         $this->projectAllocationsRepository->save(new ProjectAllocations($projectId, Allocations::none(), $scheduledDemands, $timeSlot));
+        $this->eventsPublisher->publish(ProjectAllocationScheduled::new($projectId, $timeSlot, $this->clock->now()));
 
         return $projectId;
     }
@@ -95,12 +98,15 @@ final readonly class AllocationFacade
         $allocations = $this->projectAllocationsRepository->getById($projectId);
         $allocations->defineSlot($fromTo, $this->clock->now());
         $this->projectAllocationsRepository->save($allocations);
+        $this->eventsPublisher->publish(ProjectAllocationScheduled::new($projectId, $fromTo, $this->clock->now()));
     }
 
     public function scheduleProjectAllocationDemands(ProjectAllocationsId $projectId, Demands $demands): void
     {
         $allocations = $this->projectAllocationsRepository->findById($projectId)->getOrElse(ProjectAllocations::empty($projectId));
-        $allocations->addDemands($demands, $this->clock->now());
+        $allocations->addDemands($demands, $this->clock->now())->ifPresent(
+            fn (ProjectAllocationsDemandsScheduled $event) => $this->eventsPublisher->publish($event)
+        );
         $this->projectAllocationsRepository->save($allocations);
     }
 

@@ -8,15 +8,20 @@ use DomainDrivers\SmartSchedule\Availability\AvailabilityFacade;
 use DomainDrivers\SmartSchedule\Availability\Calendar;
 use DomainDrivers\SmartSchedule\Availability\Owner;
 use DomainDrivers\SmartSchedule\Availability\ResourceId;
+use DomainDrivers\SmartSchedule\Availability\ResourceTakenOver;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\GenericList;
+use Munus\Collection\Set;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Zenstruck\Messenger\Test\InteractsWithMessenger;
 
 #[CoversClass(AvailabilityFacade::class)]
 final class AvailabilityFacadeTest extends KernelTestCase
 {
+    use InteractsWithMessenger;
+
     private AvailabilityFacade $availabilityFacade;
 
     protected function setUp(): void
@@ -233,5 +238,29 @@ final class AvailabilityFacadeTest extends KernelTestCase
         self::assertTrue($dailyCalendar->availableSlots()->isEmpty());
         self::assertTrue($dailyCalendar->takenBy($owner)->equals($oneDay->leftoverAfterRemovingCommonWith($fifteenMinutes)));
         self::assertTrue($dailyCalendar->takenBy($newOwner)->equals(GenericList::of($fifteenMinutes)));
+    }
+
+    #[Test]
+    public function resourceTakenOverEventIsEmittedAfterTakingOverTheResource(): void
+    {
+        // given
+        $resourceId = ResourceId::newOne();
+        $oneDay = TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1);
+        $initialOwner = Owner::newOne();
+        $newOwner = Owner::newOne();
+        $this->availabilityFacade->createResourceSlots($resourceId, $oneDay);
+        $this->availabilityFacade->block($resourceId, $oneDay, $initialOwner);
+
+        // when
+        $result = $this->availabilityFacade->disable($resourceId, $oneDay, $newOwner);
+
+        // then
+        self::assertTrue($result);
+        $this->transport()->queue()
+            ->assertCount(1)
+            ->first(fn (ResourceTakenOver $event): bool => $event->resourceId->getId()->equals($resourceId->getId())
+                && $event->previousOwners->equals(Set::of($initialOwner))
+            )
+        ;
     }
 }

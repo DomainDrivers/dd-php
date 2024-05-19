@@ -9,17 +9,21 @@ use DomainDrivers\SmartSchedule\Availability\Calendars;
 use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\Stage;
 use DomainDrivers\SmartSchedule\Planning\Schedule\Schedule;
+use DomainDrivers\SmartSchedule\Shared\EventsPublisher;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\GenericList;
 use Munus\Collection\Set;
 use Munus\Collection\Stream;
 use Munus\Collection\Stream\Collectors;
+use Symfony\Component\Clock\ClockInterface;
 
 final readonly class PlanChosenResources
 {
     public function __construct(
         private ProjectRepository $projectRepository,
-        private AvailabilityFacade $availabilityFacade
+        private AvailabilityFacade $availabilityFacade,
+        private EventsPublisher $eventsPublisher,
+        private ClockInterface $clock
     ) {
     }
 
@@ -31,6 +35,7 @@ final readonly class PlanChosenResources
         $project = $this->projectRepository->getById($projectId);
         $project->addChosenResources(new ChosenResources($chosenResources, $timeBoundaries));
         $this->projectRepository->save($project);
+        $this->eventsPublisher->publish(NeededResourcesChosen::new($projectId, $chosenResources, $timeBoundaries, $this->clock->now()));
     }
 
     public function adjustStagesToResourceAvailability(ProjectId $projectId, TimeSlot $timeBoundaries, Stage ...$stages): void

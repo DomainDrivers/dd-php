@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace DomainDrivers\Tests\Unit\SmartSchedule\Planning;
 
 use DomainDrivers\SmartSchedule\Availability\ResourceId;
+use DomainDrivers\SmartSchedule\Planning\CapabilitiesDemanded;
 use DomainDrivers\SmartSchedule\Planning\ChosenResources;
 use DomainDrivers\SmartSchedule\Planning\Demand;
 use DomainDrivers\SmartSchedule\Planning\Demands;
@@ -20,10 +21,13 @@ use Munus\Collection\Set;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Zenstruck\Messenger\Test\InteractsWithMessenger;
 
 #[CoversClass(PlanningFacade::class)]
 final class PlanningFacadeTest extends KernelTestCase
 {
+    use InteractsWithMessenger;
+
     private PlanningFacade $projectFacade;
 
     #[\Override]
@@ -206,5 +210,23 @@ final class PlanningFacadeTest extends KernelTestCase
         // then
         $loaded = $this->projectFacade->load($projectId);
         self::assertTrue($loaded->schedule->dates->equals(Map::fromArray($manualSchedule)));
+    }
+
+    #[Test]
+    public function capabilitiesDemandedEventIsEmittedAfterAddingDemands(): void
+    {
+        // given
+        $projectId = $this->projectFacade->addNewProjectWith('project', Stage::of('Stage1'));
+
+        // when
+        $demandForPhp = Demands::of(Demand::forSkill('php'));
+        $this->projectFacade->addDemands($projectId, $demandForPhp);
+
+        // then
+        $this->transport()->queue()
+            ->assertCount(1)
+            ->first(fn (CapabilitiesDemanded $event): bool => $event->projectId->id->equals($projectId->id) && $event->demands->all->equals($demandForPhp->all)
+            )
+        ;
     }
 }

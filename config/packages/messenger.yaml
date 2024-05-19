@@ -1,7 +1,17 @@
 framework:
     messenger:
+        buses:
+            event:
+                default_middleware:
+                    allow_no_handlers: true
         transports:
             sync: 'sync://'
 
         routing:
+            'DomainDrivers\SmartSchedule\*': sync
 
+when@test:
+    framework:
+        messenger:
+            transports:
+                sync: 'test://'

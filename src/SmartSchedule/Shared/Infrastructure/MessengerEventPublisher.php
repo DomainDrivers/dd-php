@@ -9,14 +9,14 @@ use DomainDrivers\SmartSchedule\Shared\EventsPublisher;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DispatchAfterCurrentBusStamp;
 
-final class MessengerEventPublisher implements EventsPublisher
+final readonly class MessengerEventPublisher implements EventsPublisher
 {
     public function __construct(private MessageBusInterface $eventBus)
     {
     }
 
     #[\Override]
-    public function publishAfterCommit(Event $event): void
+    public function publish(Event $event): void
     {
         $this->eventBus->dispatch($event, [new DispatchAfterCurrentBusStamp()]);
     }

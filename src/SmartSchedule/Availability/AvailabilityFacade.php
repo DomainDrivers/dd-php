@@ -6,15 +6,19 @@ namespace DomainDrivers\SmartSchedule\Availability;
 
 use DomainDrivers\SmartSchedule\Availability\Segment\SegmentInMinutes;
 use DomainDrivers\SmartSchedule\Availability\Segment\Segments;
+use DomainDrivers\SmartSchedule\Shared\EventsPublisher;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\Set;
 use Munus\Control\Option;
+use Symfony\Component\Clock\ClockInterface;
 
 final readonly class AvailabilityFacade
 {
     public function __construct(
         private ResourceAvailabilityRepository $availabilityRepository,
-        private ResourceAvailabilityReadModel $availabilityReadModel
+        private ResourceAvailabilityReadModel $availabilityReadModel,
+        private EventsPublisher $eventsPublisher,
+        private ClockInterface $clock
     ) {
     }
 
@@ -84,8 +88,14 @@ final readonly class AvailabilityFacade
         if ($toDisable->hasNoSlots()) {
             return false;
         }
+        $previousOwners = $toDisable->owners();
         if ($toDisable->disable($requester)) {
-            return $this->availabilityRepository->saveCheckingVersions($toDisable);
+            $result = $this->availabilityRepository->saveCheckingVersions($toDisable);
+            if ($result) {
+                $this->eventsPublisher->publish(ResourceTakenOver::new($resourceId, $previousOwners, $timeSlot, $this->clock->now()));
+            }
+
+            return $result;
         }
 
         return false;

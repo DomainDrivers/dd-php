@@ -7,16 +7,20 @@ namespace DomainDrivers\Tests\Unit\SmartSchedule\Allocation;
 use DomainDrivers\SmartSchedule\Allocation\AllocationFacade;
 use DomainDrivers\SmartSchedule\Allocation\Demand;
 use DomainDrivers\SmartSchedule\Allocation\Demands;
+use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationScheduled;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\Set;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Zenstruck\Messenger\Test\InteractsWithMessenger;
 
 #[CoversClass(AllocationFacade::class)]
 final class CreatingNewProjectTest extends KernelTestCase
 {
+    use InteractsWithMessenger;
+
     private AllocationFacade $allocationFacade;
     private TimeSlot $jan;
     private TimeSlot $feb;
@@ -43,6 +47,12 @@ final class CreatingNewProjectTest extends KernelTestCase
         $projectSummary = $this->allocationFacade->findAllProjectsAllocationsBy(Set::of($newProject));
         self::assertTrue($projectSummary->demands->get($newProject->toString())->get()->all->equals($demands->all));
         self::assertTrue($projectSummary->timeSlots->get($newProject->toString())->get()->equals($this->jan));
+
+        $this->transport()->queue()
+            ->assertCount(1)
+            ->first(fn (ProjectAllocationScheduled $event): bool => $event->projectId->id->equals($newProject->id) && $event->fromTo->equals($this->jan)
+            )
+        ;
     }
 
     #[Test]
