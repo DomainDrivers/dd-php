@@ -101,8 +101,8 @@ final class CapabilityAllocatingTest extends KernelTestCase
         $project1 = $this->allocationFacade->createAllocation($oneDay, Demands::of(new Demand(Capability::skill('DEBUGGING'), $oneDay)));
         $project2 = $this->allocationFacade->createAllocation($oneDay, Demands::of(new Demand(Capability::skill('DEBUGGING'), $oneDay)));
         // and
-        $this->allocationFacade->allocateToProject($project1, $allocatableCapabilityId1, Capability::skill('DEBUGGING'), $oneDay);
-        $this->allocationFacade->allocateToProject($project2, $allocatableCapabilityId2, Capability::skill('DEBUGGING'), $oneDay);
+        $this->allocationFacade->allocateToProject($project1, $allocatableCapabilityId1, $oneDay);
+        $this->allocationFacade->allocateToProject($project2, $allocatableCapabilityId2, $oneDay);
         // and
         $projectId = ProjectAllocationsId::newOne();
         $this->allocationFacade->scheduleProjectAllocationDemands($projectId, Demands::none());

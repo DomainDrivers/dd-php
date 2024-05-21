@@ -20,7 +20,7 @@ final readonly class CapabilityFinder
 
     public function findAvailableCapabilities(Capability $capability, TimeSlot $timeSlot): AllocatableCapabilitiesSummary
     {
-        return $this->createSummary($this->filterAvailabilityInTimeSlot(
+        return $this->createCapabilitiesSummary($this->filterAvailabilityInTimeSlot(
             $this->allocatableCapabilityRepository->findByCapabilityWithin($capability, $timeSlot),
             $timeSlot
         ));
@@ -28,7 +28,7 @@ final readonly class CapabilityFinder
 
     public function findCapabilities(Capability $capability, TimeSlot $timeSlot): AllocatableCapabilitiesSummary
     {
-        return $this->createSummary($this->allocatableCapabilityRepository->findByCapabilityWithin($capability, $timeSlot));
+        return $this->createCapabilitiesSummary($this->allocatableCapabilityRepository->findByCapabilityWithin($capability, $timeSlot));
     }
 
     /**
@@ -36,7 +36,12 @@ final readonly class CapabilityFinder
      */
     public function findById(GenericList $allocatableCapabilityIds): AllocatableCapabilitiesSummary
     {
-        return $this->createSummary($this->allocatableCapabilityRepository->findAllById($allocatableCapabilityIds));
+        return $this->createCapabilitiesSummary($this->allocatableCapabilityRepository->findAllById($allocatableCapabilityIds));
+    }
+
+    public function findOneById(AllocatableCapabilityId $allocatableCapabilityId): ?AllocatableCapabilitySummary
+    {
+        return $this->allocatableCapabilityRepository->findById($allocatableCapabilityId)->map($this->createSummary(...))->getOrNull();
     }
 
     public function isPresent(AllocatableCapabilityId $allocatableCapabilityId): bool
@@ -60,13 +65,18 @@ final readonly class CapabilityFinder
     /**
      * @param GenericList<AllocatableCapability> $from
      */
-    private function createSummary(GenericList $from): AllocatableCapabilitiesSummary
+    private function createCapabilitiesSummary(GenericList $from): AllocatableCapabilitiesSummary
     {
-        return new AllocatableCapabilitiesSummary($from->map(fn (AllocatableCapability $a) => new AllocatableCapabilitySummary(
-            $a->id(),
-            $a->resourceId(),
-            $a->capabilities(),
-            $a->timeSlot()
-        )));
+        return new AllocatableCapabilitiesSummary($from->map($this->createSummary(...)));
+    }
+
+    private function createSummary(AllocatableCapability $capability): AllocatableCapabilitySummary
+    {
+        return new AllocatableCapabilitySummary(
+            $capability->id(),
+            $capability->resourceId(),
+            $capability->capabilities(),
+            $capability->timeSlot()
+        );
     }
 }

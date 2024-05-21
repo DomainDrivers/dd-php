@@ -49,7 +49,7 @@ final readonly class Demands
     private function satisfiedBy(Demand $d, Allocations $allocations): bool
     {
         return !$allocations->all->find(
-            fn (AllocatedCapability $ac) => $ac->capability->equals($d->capability) && $d->slot->within($ac->timeSlot)
+            fn (AllocatedCapability $ac) => $ac->capability->canPerform($d->capability) && $d->slot->within($ac->timeSlot)
         )->isEmpty();
     }
 }

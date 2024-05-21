@@ -16,6 +16,7 @@ use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationScheduled;
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsDemandsScheduled;
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsId;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
+use DomainDrivers\SmartSchedule\Shared\CapabilitySelector;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\GenericList;
 use Munus\Collection\Set;
@@ -53,7 +54,7 @@ final class AllocationsToProjectTest extends TestCase
         $allocations = ProjectAllocations::empty($this->projectId);
 
         // when
-        $event = $allocations->allocate($this->adminId, Capability::permission('admin'), $this->feb_1, $this->when);
+        $event = $allocations->allocate($this->adminId, CapabilitySelector::canJustPerform(Capability::permission('admin')), $this->feb_1, $this->when);
 
         // then
         self::assertTrue($event->isPresent());
@@ -74,7 +75,7 @@ final class AllocationsToProjectTest extends TestCase
         $allocations = new ProjectAllocations($this->projectId, Allocations::none(), Demands::none(), $this->january);
 
         // when
-        $event = $allocations->allocate($this->adminId, Capability::permission('admin'), $this->feb_1, $this->when);
+        $event = $allocations->allocate($this->adminId, CapabilitySelector::canJustPerform(Capability::permission('admin')), $this->feb_1, $this->when);
 
         // then
         self::assertTrue($event->isEmpty());
@@ -87,10 +88,10 @@ final class AllocationsToProjectTest extends TestCase
         $allocations = ProjectAllocations::empty($this->projectId);
 
         // and
-        $allocations->allocate($this->adminId, Capability::permission('admin'), $this->feb_1, $this->when);
+        $allocations->allocate($this->adminId, CapabilitySelector::canJustPerform(Capability::permission('admin')), $this->feb_1, $this->when);
 
         // when
-        $event = $allocations->allocate($this->adminId, Capability::permission('admin'), $this->feb_1, $this->when);
+        $event = $allocations->allocate($this->adminId, CapabilitySelector::canJustPerform(Capability::permission('admin')), $this->feb_1, $this->when);
 
         // then
         self::assertTrue($event->isEmpty());
@@ -104,9 +105,9 @@ final class AllocationsToProjectTest extends TestCase
         // and
         $allocations = ProjectAllocations::withDemands($this->projectId, $demands);
         // and
-        $allocations->allocate($this->adminId, Capability::permission('admin'), $this->feb_1, $this->when);
+        $allocations->allocate($this->adminId, CapabilitySelector::canJustPerform(Capability::permission('admin')), $this->feb_1, $this->when);
         // when
-        $event = $allocations->allocate($this->adminId, Capability::skill('java'), $this->feb_1, $this->when);
+        $event = $allocations->allocate($this->adminId, CapabilitySelector::canJustPerform(Capability::skill('java')), $this->feb_1, $this->when);
         // then
         self::assertTrue($event->isPresent());
         $capabilitiesAllocated = $event->get();
@@ -127,9 +128,9 @@ final class AllocationsToProjectTest extends TestCase
         // and
         $allocations = ProjectAllocations::withDemands($this->projectId, $demands);
         // and
-        $allocations->allocate($this->adminId, Capability::permission('admin'), $this->feb_1, $this->when);
+        $allocations->allocate($this->adminId, CapabilitySelector::canJustPerform(Capability::permission('admin')), $this->feb_1, $this->when);
         // when
-        $event = $allocations->allocate($this->adminId, Capability::skill('java'), $this->feb_2, $this->when);
+        $event = $allocations->allocate($this->adminId, CapabilitySelector::canJustPerform(Capability::skill('java')), $this->feb_2, $this->when);
         // then
         self::assertTrue($event->isPresent());
         self::assertTrue($allocations->missingDemands()->all->equals(GenericList::of(new Demand(Capability::skill('java'), $this->feb_1))));
@@ -149,7 +150,7 @@ final class AllocationsToProjectTest extends TestCase
         // given
         $allocations = ProjectAllocations::empty($this->projectId);
         // and
-        $allocatedAdmin = $allocations->allocate($this->adminId, Capability::permission('admin'), $this->feb_1, $this->when);
+        $allocatedAdmin = $allocations->allocate($this->adminId, CapabilitySelector::canJustPerform(Capability::permission('admin')), $this->feb_1, $this->when);
 
         // when
         $adminId = new AllocatableCapabilityId($allocatedAdmin->get()->allocatedCapabilityId);
@@ -186,8 +187,8 @@ final class AllocationsToProjectTest extends TestCase
         $demandForAdmin = new Demand(Capability::permission('admin'), $this->feb_1);
         $allocations = ProjectAllocations::withDemands($this->projectId, Demands::of($demandForPhp, $demandForAdmin));
         // and
-        $allocatedAdmin = $allocations->allocate($this->adminId, Capability::permission('admin'), $this->feb_1, $this->when);
-        $allocations->allocate(AllocatableCapabilityId::newOne(), Capability::skill('php'), $this->feb_1, $this->when);
+        $allocatedAdmin = $allocations->allocate($this->adminId, CapabilitySelector::canJustPerform(Capability::permission('admin')), $this->feb_1, $this->when);
+        $allocations->allocate(AllocatableCapabilityId::newOne(), CapabilitySelector::canJustPerform(Capability::skill('php')), $this->feb_1, $this->when);
         // when
         $event = $allocations->release(new AllocatableCapabilityId($allocatedAdmin->get()->allocatedCapabilityId), $this->feb_1, $this->when);
         // then
@@ -206,7 +207,7 @@ final class AllocationsToProjectTest extends TestCase
         // given
         $allocations = ProjectAllocations::empty($this->projectId);
         // and
-        $allocatedAdmin = $allocations->allocate($this->adminId, Capability::permission('admin'), $this->feb_1, $this->when);
+        $allocatedAdmin = $allocations->allocate($this->adminId, CapabilitySelector::canJustPerform(Capability::permission('admin')), $this->feb_1, $this->when);
 
         // when
         $event = $allocations->release(new AllocatableCapabilityId($allocatedAdmin->get()->allocatedCapabilityId), $this->feb_2, $this->when);
@@ -221,7 +222,7 @@ final class AllocationsToProjectTest extends TestCase
         // given
         $allocations = ProjectAllocations::empty($this->projectId);
         // and
-        $allocatedAdmin = $allocations->allocate($this->adminId, Capability::permission('admin'), $this->feb_1, $this->when);
+        $allocatedAdmin = $allocations->allocate($this->adminId, CapabilitySelector::canJustPerform(Capability::permission('admin')), $this->feb_1, $this->when);
 
         // when
         $fifteenMinutesIn1Feb = new TimeSlot($this->feb_1->from->modify('+1 hour'), $this->feb_1->from->modify('+2 hours'));
@@ -240,8 +241,8 @@ final class AllocationsToProjectTest extends TestCase
             $this->when
         ));
         self::assertTrue($allocations->allocations()->all->equals(Set::of(
-            new AllocatedCapability($this->adminId, Capability::permission('admin'), $oneHourBefore),
-            new AllocatedCapability($this->adminId, Capability::permission('admin'), $theRest)
+            new AllocatedCapability($this->adminId, CapabilitySelector::canJustPerform(Capability::permission('admin')), $oneHourBefore),
+            new AllocatedCapability($this->adminId, CapabilitySelector::canJustPerform(Capability::permission('admin')), $theRest)
         )));
     }
 
@@ -253,7 +254,7 @@ final class AllocationsToProjectTest extends TestCase
         // and
         $allocations = ProjectAllocations::withDemands($this->projectId, $demands);
         // and
-        $allocations->allocate($this->adminId, Capability::permission('admin'), $this->feb_1, $this->when);
+        $allocations->allocate($this->adminId, CapabilitySelector::canJustPerform(Capability::permission('admin')), $this->feb_1, $this->when);
         // when
         $event = $allocations->addDemands(Demands::of(new Demand(Capability::skill('python'), $this->feb_1)), $this->when);
         // then

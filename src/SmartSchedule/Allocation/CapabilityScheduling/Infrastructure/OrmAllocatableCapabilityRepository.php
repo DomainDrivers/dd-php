@@ -13,6 +13,7 @@ use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
 use DomainDrivers\SmartSchedule\Shared\Infrastructure\CapabilityNormalizer;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\GenericList;
+use Munus\Control\Option;
 
 final readonly class OrmAllocatableCapabilityRepository implements AllocatableCapabilityRepository
 {
@@ -35,6 +36,12 @@ final readonly class OrmAllocatableCapabilityRepository implements AllocatableCa
         return GenericList::ofAll($this->entityManager->getRepository(AllocatableCapability::class)->findBy([
             'id' => $ids->toArray(),
         ]));
+    }
+
+    #[\Override]
+    public function findById(AllocatableCapabilityId $id): Option
+    {
+        return Option::of($this->entityManager->find(AllocatableCapability::class, $id));
     }
 
     #[\Override]

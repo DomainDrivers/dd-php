@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Allocation;
 
+use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableCapabilityId;
+use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableCapabilitySummary;
 use DomainDrivers\SmartSchedule\Allocation\Cashflow\Earnings;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use DomainDrivers\SmartSchedule\Simulation\Demand as SimulationDemand;
@@ -63,5 +65,30 @@ final readonly class PotentialTransfers
         $allDemands = $this->summary->demands->get($projectId)->get()->missingDemands($this->summary->projectAllocations->get($projectId)->get());
 
         return new SimulationDemands($allDemands->all->map(fn (Demand $demand) => SimulationDemand::for($demand->capability, $demand->slot)));
+    }
+
+    public function transferTo(ProjectAllocationsId $projectTo, AllocatableCapabilitySummary $capabilityToTransfer, TimeSlot $timeSlot): self
+    {
+        $projectToMoveFrom = $this->findProjectToMoveFrom($capabilityToTransfer->id, $timeSlot);
+        if ($projectToMoveFrom !== null) {
+            return $this->transfer($projectToMoveFrom, $projectTo, new AllocatedCapability($capabilityToTransfer->id, $capabilityToTransfer->capabilities, $capabilityToTransfer->timeSlot), $timeSlot);
+        }
+
+        return $this;
+    }
+
+    private function findProjectToMoveFrom(AllocatableCapabilityId $cap, TimeSlot $inSlot): ?ProjectAllocationsId
+    {
+        /**
+         * @var string      $id
+         * @var Allocations $allocations
+         */
+        foreach ($this->summary->projectAllocations->toArray() as $id => $allocations) {
+            if ($allocations->find($cap)->isPresent()) {
+                return ProjectAllocationsId::fromString($id);
+            }
+        }
+
+        return null;
     }
 }

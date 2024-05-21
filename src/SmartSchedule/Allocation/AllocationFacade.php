@@ -12,6 +12,7 @@ use DomainDrivers\SmartSchedule\Availability\AvailabilityFacade;
 use DomainDrivers\SmartSchedule\Availability\Owner;
 use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
+use DomainDrivers\SmartSchedule\Shared\CapabilitySelector;
 use DomainDrivers\SmartSchedule\Shared\EventsPublisher;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\Set;
@@ -56,24 +57,25 @@ final readonly class AllocationFacade
     /**
      * @return Option<Uuid>
      */
-    public function allocateToProject(ProjectAllocationsId $projectId, AllocatableCapabilityId $allocatableCapabilityId, Capability $capability, TimeSlot $timeSlot): Option
+    public function allocateToProject(ProjectAllocationsId $projectId, AllocatableCapabilityId $allocatableCapabilityId, TimeSlot $timeSlot): Option
     {
         // yes, one transaction crossing 2 modules.
-        if (!$this->capabilityFinder->isPresent($allocatableCapabilityId)) {
+        $capability = $this->capabilityFinder->findOneById($allocatableCapabilityId);
+        if ($capability === null) {
             return $this->empty();
         }
         if (!$this->availabilityFacade->block($allocatableCapabilityId->toAvailabilityResourceId(), $timeSlot, Owner::of($projectId->id))) {
             return $this->empty();
         }
 
-        return $this->allocate($projectId, $allocatableCapabilityId, $capability, $timeSlot)
+        return $this->allocate($projectId, $allocatableCapabilityId, $capability->capabilities, $timeSlot)
             ->map(fn (CapabilitiesAllocated $c) => $c->allocatedCapabilityId);
     }
 
     /**
      * @return Option<CapabilitiesAllocated>
      */
-    private function allocate(ProjectAllocationsId $projectId, AllocatableCapabilityId $allocatableCapabilityId, Capability $capability, TimeSlot $timeSlot): Option
+    private function allocate(ProjectAllocationsId $projectId, AllocatableCapabilityId $allocatableCapabilityId, CapabilitySelector $capability, TimeSlot $timeSlot): Option
     {
         $allocations = $this->projectAllocationsRepository->getById($projectId);
         $event = $allocations->allocate($allocatableCapabilityId, $capability, $timeSlot, $this->clock->now());
@@ -124,14 +126,13 @@ final readonly class AllocationFacade
         $toAllocate = $this->findChosenAllocatableCapability($proposedCapabilities, $chosen->get());
         \assert($toAllocate !== null);
 
-        return $this->allocate($projectId, $toAllocate, $capability, $timeSlot)->isPresent();
+        return $this->allocate($projectId, $toAllocate->id, $toAllocate->capabilities, $timeSlot)->isPresent();
     }
 
-    private function findChosenAllocatableCapability(AllocatableCapabilitiesSummary $proposedCapabilities, ResourceId $chosen): ?AllocatableCapabilityId
+    private function findChosenAllocatableCapability(AllocatableCapabilitiesSummary $proposedCapabilities, ResourceId $chosen): ?AllocatableCapabilitySummary
     {
         return $proposedCapabilities->all
-            ->map(fn (AllocatableCapabilitySummary $s) => $s->id)
-            ->filter(fn (AllocatableCapabilityId $id) => $id->toAvailabilityResourceId()->getId()->equals($chosen->getId()))
+            ->filter(fn (AllocatableCapabilitySummary $summary) => $summary->id->toAvailabilityResourceId()->getId()->equals($chosen->getId()))
             ->findFirst()
             ->getOrNull();
     }

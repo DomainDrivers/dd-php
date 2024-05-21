@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\Table;
 use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableCapabilityId;
-use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
+use DomainDrivers\SmartSchedule\Shared\CapabilitySelector;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Control\Option;
 
@@ -56,7 +56,7 @@ class ProjectAllocations
     /**
      * @return Option<CapabilitiesAllocated>
      */
-    public function allocate(AllocatableCapabilityId $allocatableCapabilityId, Capability $capability, TimeSlot $requestedSlot, \DateTimeImmutable $when): Option
+    public function allocate(AllocatableCapabilityId $allocatableCapabilityId, CapabilitySelector $capability, TimeSlot $requestedSlot, \DateTimeImmutable $when): Option
     {
         $allocatedCapability = new AllocatedCapability($allocatableCapabilityId, $capability, $requestedSlot);
         $newAllocations = $this->allocations->add($allocatedCapability);

@@ -7,6 +7,7 @@ namespace DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\GenericList;
+use Munus\Control\Option;
 
 interface AllocatableCapabilityRepository
 {
@@ -21,6 +22,11 @@ interface AllocatableCapabilityRepository
      * @return GenericList<AllocatableCapability>
      */
     public function findAllById(GenericList $ids): GenericList;
+
+    /**
+     * @return Option<AllocatableCapability>
+     */
+    public function findById(AllocatableCapabilityId $id): Option;
 
     public function existsById(AllocatableCapabilityId $allocatableCapabilityId): bool;
 

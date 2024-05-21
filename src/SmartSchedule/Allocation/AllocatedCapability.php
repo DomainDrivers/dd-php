@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace DomainDrivers\SmartSchedule\Allocation;
 
 use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableCapabilityId;
-use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
+use DomainDrivers\SmartSchedule\Shared\CapabilitySelector;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Value\Comparable;
 
@@ -13,7 +13,7 @@ final readonly class AllocatedCapability implements Comparable
 {
     public function __construct(
         public AllocatableCapabilityId $allocatedCapabilityID,
-        public Capability $capability,
+        public CapabilitySelector $capability,
         public TimeSlot $timeSlot
     ) {
     }

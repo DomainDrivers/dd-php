@@ -17,6 +17,7 @@ use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsId;
 use DomainDrivers\SmartSchedule\Allocation\ProjectsAllocationsSummary;
 use DomainDrivers\SmartSchedule\Optimization\OptimizationFacade;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
+use DomainDrivers\SmartSchedule\Shared\CapabilitySelector;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use DomainDrivers\SmartSchedule\Simulation\SimulationFacade;
 use Munus\Collection\Map;
@@ -50,7 +51,7 @@ final class PotentialTransferScenariosTest extends TestCase
         );
         $this->bankingSoftId = ProjectAllocationsId::newOne();
         $this->insuranceSoftId = ProjectAllocationsId::newOne();
-        $this->staszekPhpMid = new AllocatedCapability(AllocatableCapabilityId::newOne(), Capability::skill('php-mid'), $this->jan1);
+        $this->staszekPhpMid = new AllocatedCapability(AllocatableCapabilityId::newOne(), CapabilitySelector::canJustPerform(Capability::skill('php-mid')), $this->jan1);
         $this->potentialTransfers = new PotentialTransfersService(new SimulationFacade(new OptimizationFacade()));
     }
 

@@ -57,12 +57,12 @@ final class ResourceAllocatingTest extends KernelTestCase
         $this->allocationFacade->scheduleProjectAllocationDemands($projectId, Demands::of($demand));
 
         // when
-        $result = $this->allocationFacade->allocateToProject($projectId, $allocatableCapabilityId, $skillPhp, $oneDay);
+        $result = $this->allocationFacade->allocateToProject($projectId, $allocatableCapabilityId, $oneDay);
 
         // then
         self::assertTrue($result->isPresent());
         $summary = $this->allocationFacade->findAllProjectsAllocations();
-        self::assertTrue($summary->projectAllocations->get($projectId->toString())->get()->all->equals(Set::of(new AllocatedCapability($allocatableCapabilityId, $skillPhp, $oneDay))));
+        self::assertTrue($summary->projectAllocations->get($projectId->toString())->get()->all->equals(Set::of(new AllocatedCapability($allocatableCapabilityId, CapabilitySelector::canJustPerform($skillPhp), $oneDay))));
         self::assertTrue($summary->demands->get($projectId->toString())->get()->all->equals(GenericList::of($demand)));
         self::assertTrue($this->availabilityWasBlocked($allocatableCapabilityId->toAvailabilityResourceId(), $oneDay, $projectId));
     }
@@ -84,7 +84,7 @@ final class ResourceAllocatingTest extends KernelTestCase
         $this->allocationFacade->scheduleProjectAllocationDemands($projectId, Demands::of($demand));
 
         // when
-        $result = $this->allocationFacade->allocateToProject($projectId, $allocatableCapabilityId, $skillPhp, $oneDay);
+        $result = $this->allocationFacade->allocateToProject($projectId, $allocatableCapabilityId, $oneDay);
 
         // then
         self::assertFalse($result->isPresent());
@@ -107,7 +107,7 @@ final class ResourceAllocatingTest extends KernelTestCase
         $this->allocationFacade->scheduleProjectAllocationDemands($projectId, Demands::of($demand));
 
         // when
-        $result = $this->allocationFacade->allocateToProject($projectId, $notScheduledCapability, $skillPhp, $oneDay);
+        $result = $this->allocationFacade->allocateToProject($projectId, $notScheduledCapability, $oneDay);
 
         // then
         self::assertFalse($result->isPresent());
@@ -127,8 +127,7 @@ final class ResourceAllocatingTest extends KernelTestCase
         // and
         $this->allocationFacade->scheduleProjectAllocationDemands($projectId, Demands::none());
         // and
-        $chosenCapability = Capability::skill('php');
-        $this->allocationFacade->allocateToProject($projectId, $allocatableCapabilityId, $chosenCapability, $oneDay);
+        $this->allocationFacade->allocateToProject($projectId, $allocatableCapabilityId, $oneDay);
 
         // when
         $result = $this->allocationFacade->releaseFromProject($projectId, $allocatableCapabilityId, $oneDay);
