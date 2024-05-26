@@ -54,7 +54,10 @@ class RiskPeriodicCheckSaga
 
     public function missingDemands(Demands $missingDemands): RiskPeriodicCheckSagaStep
     {
-        // TODO implement
+        $this->missingDemands = $missingDemands;
+        if ($this->areDemandsSatisfied()) {
+            return RiskPeriodicCheckSagaStep::NOTIFY_ABOUT_DEMANDS_SATISFIED;
+        }
 
         return RiskPeriodicCheckSagaStep::DO_NOTHING;
     }
