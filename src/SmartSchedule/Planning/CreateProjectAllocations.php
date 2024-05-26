@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Planning;
 
-use DomainDrivers\SmartSchedule\Allocation\AllocationFacade;
-
 final readonly class CreateProjectAllocations
 {
     public function __construct(
-        private AllocationFacade $allocationFacade,
         private ProjectRepository $projectRepository
     ) {
     }

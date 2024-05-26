@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Planning;
 
-use DomainDrivers\SmartSchedule\Allocation\AllocationFacade;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\Stage;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 
 final readonly class EditStageDateService
 {
     public function __construct(
-        private AllocationFacade $allocationFacade,
         private ProjectRepository $projectRepository
     ) {
     }
