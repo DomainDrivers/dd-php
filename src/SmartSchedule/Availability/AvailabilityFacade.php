@@ -12,7 +12,7 @@ use Munus\Collection\Set;
 use Munus\Control\Option;
 use Symfony\Component\Clock\ClockInterface;
 
-final readonly class AvailabilityFacade
+class AvailabilityFacade
 {
     public function __construct(
         private ResourceAvailabilityRepository $availabilityRepository,

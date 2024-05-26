@@ -10,7 +10,7 @@ use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\GenericList;
 use Munus\Collection\Stream\Collectors;
 
-final readonly class CapabilityFinder
+class CapabilityFinder
 {
     public function __construct(
         private AvailabilityFacade $availabilityFacade,

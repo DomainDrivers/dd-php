@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DomainDrivers\Tests\Unit\SmartSchedule\Planning;
 
+use DomainDrivers\SmartSchedule\Availability\AvailabilityFacade;
 use DomainDrivers\SmartSchedule\Availability\ResourceId;
 use DomainDrivers\SmartSchedule\Planning\CapabilitiesDemanded;
 use DomainDrivers\SmartSchedule\Planning\ChosenResources;
@@ -11,29 +12,41 @@ use DomainDrivers\SmartSchedule\Planning\Demand;
 use DomainDrivers\SmartSchedule\Planning\Demands;
 use DomainDrivers\SmartSchedule\Planning\DemandsPerStage;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\Stage;
+use DomainDrivers\SmartSchedule\Planning\Parallelization\StageParallelization;
+use DomainDrivers\SmartSchedule\Planning\PlanChosenResources;
 use DomainDrivers\SmartSchedule\Planning\PlanningFacade;
 use DomainDrivers\SmartSchedule\Planning\ProjectCard;
 use DomainDrivers\SmartSchedule\Planning\Schedule\Schedule;
+use DomainDrivers\SmartSchedule\Shared\EventsPublisher;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\Duration;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\Map;
 use Munus\Collection\Set;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Zenstruck\Messenger\Test\InteractsWithMessenger;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\Clock\NativeClock;
 
 #[CoversClass(PlanningFacade::class)]
-final class PlanningFacadeTest extends KernelTestCase
+final class PlanningFacadeTest extends TestCase
 {
-    use InteractsWithMessenger;
-
     private PlanningFacade $projectFacade;
+    private EventsPublisher&MockObject $eventsPublisher;
 
     #[\Override]
     protected function setUp(): void
     {
-        $this->projectFacade = self::getContainer()->get(PlanningFacade::class);
+        $projectRepository = new InMemoryProjectRepository();
+        $this->eventsPublisher = $this->createMock(EventsPublisher::class);
+
+        $this->projectFacade = new PlanningFacade(
+            $projectRepository,
+            new StageParallelization(),
+            new PlanChosenResources($projectRepository, $this->createMock(AvailabilityFacade::class), $this->eventsPublisher, new NativeClock()),
+            $this->eventsPublisher,
+            new NativeClock()
+        );
     }
 
     #[Test]
@@ -217,16 +230,12 @@ final class PlanningFacadeTest extends KernelTestCase
     {
         // given
         $projectId = $this->projectFacade->addNewProjectWith('project', Stage::of('Stage1'));
-
-        // when
         $demandForPhp = Demands::of(Demand::forSkill('php'));
-        $this->projectFacade->addDemands($projectId, $demandForPhp);
 
         // then
-        $this->transport('event')->queue()
-            ->assertCount(1)
-            ->first(fn (CapabilitiesDemanded $event): bool => $event->projectId->id->equals($projectId->id) && $event->demands->all->equals($demandForPhp->all)
-            )
-        ;
+        $this->eventsPublisher->expects(self::once())->method('publish')->with(self::callback(fn (CapabilitiesDemanded $event): bool => $event->projectId->id->equals($projectId->id) && $event->demands->all->equals($demandForPhp->all)));
+
+        // when
+        $this->projectFacade->addDemands($projectId, $demandForPhp);
     }
 }

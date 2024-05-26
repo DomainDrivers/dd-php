@@ -10,21 +10,26 @@ use DomainDrivers\SmartSchedule\Allocation\Cashflow\Earnings;
 use DomainDrivers\SmartSchedule\Allocation\Cashflow\EarningsRecalculated;
 use DomainDrivers\SmartSchedule\Allocation\Cashflow\Income;
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsId;
+use DomainDrivers\SmartSchedule\Shared\EventsPublisher;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Zenstruck\Messenger\Test\InteractsWithMessenger;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\Clock\NativeClock;
 
 #[CoversClass(CashFlowFacade::class)]
-final class CashFlowFacadeTest extends KernelTestCase
+final class CashFlowFacadeTest extends TestCase
 {
-    use InteractsWithMessenger;
-
     private CashFlowFacade $cashFlowFacade;
+    private EventsPublisher&MockObject $eventsPublisher;
 
     protected function setUp(): void
     {
-        $this->cashFlowFacade = self::getContainer()->get(CashFlowFacade::class);
+        $this->cashFlowFacade = new CashFlowFacade(
+            new InMemoryCashflowRepository(),
+            $this->eventsPublisher = $this->createMock(EventsPublisher::class),
+            new NativeClock()
+        );
     }
 
     #[Test]
@@ -48,14 +53,10 @@ final class CashFlowFacadeTest extends KernelTestCase
         $income = Income::of(100);
         $cost = Cost::of(50);
 
+        // then
+        $this->eventsPublisher->expects(self::once())->method('publish')->with(self::callback(fn (EarningsRecalculated $event): bool => $event->earnings->equals(Earnings::of(50))));
+
         // when
         $this->cashFlowFacade->addIncomeAndCost($projectId, $income, $cost);
-
-        // then
-        $this->transport('event')->queue()
-            ->assertCount(1)
-            ->first(fn (EarningsRecalculated $event): bool => $event->projectId->id->equals($projectId->id) && $event->earnings->equals(Earnings::of(50))
-            )
-        ;
     }
 }
