@@ -21,17 +21,23 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(CreateHourlyDemandsSummaryService::class)]
 final class CreateHourlyDemandsSummaryServiceTest extends TestCase
 {
+    private TimeSlot $jan;
+
+    protected function setUp(): void
+    {
+        $this->jan = TimeSlot::createMonthlyTimeSlotAtUTC(2021, 1);
+    }
+
     #[Test]
     public function createsMissingDemandsSummaryForAllGivenProjects(): void
     {
         // given
-        $jan = TimeSlot::createMonthlyTimeSlotAtUTC(2021, 1);
         $csharpProjectId = ProjectAllocationsId::newOne();
         $phpProjectId = ProjectAllocationsId::newOne();
-        $charpDemands = Demands::of(new Demand(Capability::skill('c#'), $jan));
-        $phpDemands = Demands::of(new Demand(Capability::skill('php'), $jan));
-        $csharpProject = new ProjectAllocations($csharpProjectId, Allocations::none(), $charpDemands, $jan);
-        $phpProject = new ProjectAllocations($phpProjectId, Allocations::none(), $phpDemands, $jan);
+        $charpDemands = Demands::of(new Demand(Capability::skill('c#'), $this->jan));
+        $phpDemands = Demands::of(new Demand(Capability::skill('php'), $this->jan));
+        $csharpProject = new ProjectAllocations($csharpProjectId, Allocations::none(), $charpDemands, $this->jan);
+        $phpProject = new ProjectAllocations($phpProjectId, Allocations::none(), $phpDemands, $this->jan);
 
         // when
         $result = (new CreateHourlyDemandsSummaryService())->create(GenericList::of($csharpProject, $phpProject), $now = new \DateTimeImmutable());
@@ -41,6 +47,27 @@ final class CreateHourlyDemandsSummaryServiceTest extends TestCase
         self::assertTrue($result->missingDemands->equals(Map::fromArray([
             $csharpProjectId->toString() => $charpDemands,
             $phpProjectId->toString() => $phpDemands,
+        ])));
+    }
+
+    #[Test]
+    public function takesIntoAccountOnlyProjectsWithTimeSlot(): void
+    {
+        // given
+        $withTimeSlotId = ProjectAllocationsId::newOne();
+        $withoutTimeSlotId = ProjectAllocationsId::newOne();
+        $withTimeSlotDemands = Demands::of(new Demand(Capability::skill('c#'), $this->jan));
+        $withoutTimeSlotDemands = Demands::of(new Demand(Capability::skill('php'), $this->jan));
+        $withTimeSlotProject = new ProjectAllocations($withTimeSlotId, Allocations::none(), $withTimeSlotDemands, $this->jan);
+        $withoutTimeSlotProject = ProjectAllocations::withDemands($withoutTimeSlotId, $withoutTimeSlotDemands);
+
+        // when
+        $result = (new CreateHourlyDemandsSummaryService())->create(GenericList::of($withTimeSlotProject, $withoutTimeSlotProject), $now = new \DateTimeImmutable());
+
+        // then
+        self::assertEquals($now, $result->occurredAt);
+        self::assertTrue($result->missingDemands->equals(Map::fromArray([
+            $withTimeSlotId->toString() => $withTimeSlotDemands,
         ])));
     }
 }
