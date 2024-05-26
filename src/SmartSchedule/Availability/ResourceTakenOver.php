@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Availability;
 
-use DomainDrivers\SmartSchedule\Shared\Event;
+use DomainDrivers\SmartSchedule\Shared\PublishedEvent;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\Set;
 use Symfony\Component\Uid\Uuid;
 
-final readonly class ResourceTakenOver implements Event
+final readonly class ResourceTakenOver implements PublishedEvent
 {
     /**
      * @param Set<Owner> $previousOwners

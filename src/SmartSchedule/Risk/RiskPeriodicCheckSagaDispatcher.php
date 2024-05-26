@@ -4,17 +4,15 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Risk;
 
-use DomainDrivers\SmartSchedule\Allocation\CapabilitiesAllocated;
-use DomainDrivers\SmartSchedule\Allocation\CapabilityReleased;
 use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableCapabilitiesSummary;
 use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableCapabilitySummary;
 use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\CapabilityFinder;
 use DomainDrivers\SmartSchedule\Allocation\Cashflow\EarningsRecalculated;
 use DomainDrivers\SmartSchedule\Allocation\Demand;
 use DomainDrivers\SmartSchedule\Allocation\Demands;
+use DomainDrivers\SmartSchedule\Allocation\NotSatisfiedDemands;
 use DomainDrivers\SmartSchedule\Allocation\PotentialTransfersService;
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationScheduled;
-use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsDemandsScheduled;
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsId;
 use DomainDrivers\SmartSchedule\Availability\Owner;
 use DomainDrivers\SmartSchedule\Availability\ResourceTakenOver;
@@ -37,19 +35,6 @@ final readonly class RiskPeriodicCheckSagaDispatcher
 
     #[AsMessageHandler(bus: 'event')]
     // remember about transactions spanning saga and potential external system
-    public function handleProjectAllocationsDemandsScheduled(ProjectAllocationsDemandsScheduled $event): void
-    {
-        $found = $this->riskSagaRepository->findByProjectId($event->projectId);
-        if ($found === null) {
-            $found = new RiskPeriodicCheckSaga($event->projectId, missingDemands: $event->missingDemands);
-        }
-        $nextStep = $found->handleProjectAllocationsDemandsScheduled($event);
-        $this->riskSagaRepository->save($found);
-        $this->perform($nextStep, $found);
-    }
-
-    #[AsMessageHandler(bus: 'event')]
-    // remember about transactions spanning saga and potential external system
     public function handleEarningsRecalculated(EarningsRecalculated $event): void
     {
         $found = $this->riskSagaRepository->findByProjectId($event->projectId);
@@ -65,8 +50,7 @@ final readonly class RiskPeriodicCheckSagaDispatcher
     // remember about transactions spanning saga and potential external system
     public function handleProjectAllocationScheduled(ProjectAllocationScheduled $event): void
     {
-        $found = $this->riskSagaRepository->findByProjectId($event->projectId);
-        \assert($found !== null);
+        $found = $this->riskSagaRepository->findByProjectIdOrCreate($event->projectId);
         $nextStep = $found->handleProjectAllocationScheduled($event);
         $this->riskSagaRepository->save($found);
         $this->perform($nextStep, $found);
@@ -74,24 +58,15 @@ final readonly class RiskPeriodicCheckSagaDispatcher
 
     #[AsMessageHandler(bus: 'event')]
     // remember about transactions spanning saga and potential external system
-    public function handleCapabilitiesAllocated(CapabilitiesAllocated $event): void
+    public function handleNotSatisfiedDemands(NotSatisfiedDemands $event): void
     {
-        $found = $this->riskSagaRepository->findByProjectId($event->projectId);
-        \assert($found !== null);
-        $nextStep = $found->handleCapabilitiesAllocated($event);
-        $this->riskSagaRepository->save($found);
-        $this->perform($nextStep, $found);
-    }
-
-    #[AsMessageHandler(bus: 'event')]
-    // remember about transactions spanning saga and potential external system
-    public function handleCapabilityReleased(CapabilityReleased $event): void
-    {
-        $found = $this->riskSagaRepository->findByProjectId($event->projectId);
-        \assert($found !== null);
-        $nextStep = $found->handleCapabilityReleased($event);
-        $this->riskSagaRepository->save($found);
-        $this->perform($nextStep, $found);
+        $sagas = $this->riskSagaRepository->findByProjectIdInOrElseCreate($event->missingDemands->keys()->toStream()->map(fn (string $key) => ProjectAllocationsId::fromString($key))->collect(Collectors::toList()));
+        foreach ($sagas as $saga) {
+            $missingDemands = $event->missingDemands->get($saga->projectId()->toString())->get();
+            $nextStep = $saga->missingDemands($missingDemands);
+            $this->riskSagaRepository->save($saga);
+            $this->perform($nextStep, $saga);
+        }
     }
 
     #[AsMessageHandler(bus: 'event')]
@@ -134,7 +109,7 @@ final readonly class RiskPeriodicCheckSagaDispatcher
 
     private function handleFindAvailableFor(RiskPeriodicCheckSaga $saga): void
     {
-        $replacements = $this->findAvailableReplacementsFor($saga->missingDemands());
+        $replacements = $this->findAvailableReplacementsFor($saga->getMissingDemands());
         if (!$replacements->values()->flatMap(fn (AllocatableCapabilitiesSummary $ac) => $ac->all->toStream()->collect(Collectors::toList()))->isEmpty()) {
             $this->riskPushNotification->notifyAboutAvailability($saga->projectId(), $replacements);
         }
@@ -142,7 +117,7 @@ final readonly class RiskPeriodicCheckSagaDispatcher
 
     private function handleSimulateRelocation(RiskPeriodicCheckSaga $saga): void
     {
-        $this->findPossibleReplacements($saga->missingDemands())->values()->forEach(function (AllocatableCapabilitiesSummary $replacements) use ($saga) {
+        $this->findPossibleReplacements($saga->getMissingDemands())->values()->forEach(function (AllocatableCapabilitiesSummary $replacements) use ($saga) {
             $replacements->all->forEach(function (AllocatableCapabilitySummary $replacement) use ($saga) {
                 $profitAfterMovingCapabilities = $this->potentialTransfersService->profitAfterMovingCapabilities($saga->projectId(), $replacement, $replacement->timeSlot);
                 if ($profitAfterMovingCapabilities->isPositive()) {

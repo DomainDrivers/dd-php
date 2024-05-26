@@ -50,4 +50,19 @@ final readonly class OrmProjectAllocationsRepository implements ProjectAllocatio
             'projectId' => $ids->toArray(),
         ]));
     }
+
+    #[\Override]
+    public function findAllContainingDate(\DateTimeImmutable $when): GenericList
+    {
+        /** @var ProjectAllocations[] $all */
+        $all = $this->entityManager->getRepository(ProjectAllocations::class)
+            ->createQueryBuilder('pa')
+            ->andWhere('pa.timeSlot.from <= :when')
+            ->andWhere('pa.timeSlot.to > :when')
+            ->setParameter('when', $when)
+            ->getQuery()
+            ->getResult();
+
+        return GenericList::ofAll($all);
+    }
 }

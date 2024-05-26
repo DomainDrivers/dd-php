@@ -7,7 +7,6 @@ namespace DomainDrivers\Tests\Unit\SmartSchedule\Allocation;
 use DomainDrivers\SmartSchedule\Allocation\AllocationFacade;
 use DomainDrivers\SmartSchedule\Allocation\Demand;
 use DomainDrivers\SmartSchedule\Allocation\Demands;
-use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsDemandsScheduled;
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsId;
 use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
@@ -45,23 +44,5 @@ final class DemandSchedulingTest extends KernelTestCase
         self::assertTrue($summary->projectAllocations->containsKey($projectId->toString()));
         self::assertTrue($summary->projectAllocations->get($projectId->toString())->get()->all->isEmpty());
         self::assertTrue($summary->demands->get($projectId->toString())->get()->all->equals(GenericList::of($php)));
-    }
-
-    #[Test]
-    public function projectDemandsScheduledEventIsEmittedAfterDefiningDemands(): void
-    {
-        // given
-        $projectId = ProjectAllocationsId::newOne();
-        $php = new Demand(Capability::skill('php'), TimeSlot::createDailyTimeSlotAtUTC(2022, 2, 2));
-
-        // when
-        $this->allocationFacade->scheduleProjectAllocationDemands($projectId, Demands::of($php));
-
-        // then
-        $this->transport('event')->queue()
-            ->assertCount(1)
-            ->first(fn (ProjectAllocationsDemandsScheduled $event): bool => $event->projectId->id->equals($projectId->id) && $event->missingDemands->all->equals(GenericList::of($php))
-            )
-        ;
     }
 }

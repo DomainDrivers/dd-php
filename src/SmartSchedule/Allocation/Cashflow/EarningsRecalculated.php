@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace DomainDrivers\SmartSchedule\Allocation\Cashflow;
 
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsId;
-use DomainDrivers\SmartSchedule\Shared\Event;
+use DomainDrivers\SmartSchedule\Shared\PublishedEvent;
 use Symfony\Component\Uid\Uuid;
 
-final readonly class EarningsRecalculated implements Event
+final readonly class EarningsRecalculated implements PublishedEvent
 {
     public function __construct(
         public Uuid $uuid,

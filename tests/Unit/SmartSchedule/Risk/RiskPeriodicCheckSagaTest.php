@@ -4,15 +4,12 @@ declare(strict_types=1);
 
 namespace DomainDrivers\Tests\Unit\SmartSchedule\Risk;
 
-use DomainDrivers\SmartSchedule\Allocation\CapabilitiesAllocated;
-use DomainDrivers\SmartSchedule\Allocation\CapabilityReleased;
 use DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\AllocatableCapabilityId;
 use DomainDrivers\SmartSchedule\Allocation\Cashflow\Earnings;
 use DomainDrivers\SmartSchedule\Allocation\Cashflow\EarningsRecalculated;
 use DomainDrivers\SmartSchedule\Allocation\Demand;
 use DomainDrivers\SmartSchedule\Allocation\Demands;
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationScheduled;
-use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsDemandsScheduled;
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsId;
 use DomainDrivers\SmartSchedule\Availability\Owner;
 use DomainDrivers\SmartSchedule\Availability\ResourceTakenOver;
@@ -25,7 +22,6 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Clock\MockClock;
-use Symfony\Component\Uid\Uuid;
 
 #[CoversClass(RiskPeriodicCheckSaga::class)]
 final class RiskPeriodicCheckSagaTest extends TestCase
@@ -58,7 +54,7 @@ final class RiskPeriodicCheckSagaTest extends TestCase
         $saga = new RiskPeriodicCheckSaga($this->projectId, $this->singleDemand);
 
         // then
-        self::assertEquals($this->singleDemand, $saga->missingDemands());
+        self::assertEquals($this->singleDemand, $saga->getMissingDemands());
     }
 
     #[Test]
@@ -74,17 +70,30 @@ final class RiskPeriodicCheckSagaTest extends TestCase
     }
 
     #[Test]
-    public function updatesDemandsOnScheduleChange(): void
+    public function updateMissingDemands(): void
     {
         // given
         $saga = new RiskPeriodicCheckSaga($this->projectId, $this->singleDemand);
 
         // when
-        $nextStep = $saga->handleProjectAllocationsDemandsScheduled(ProjectAllocationsDemandsScheduled::new($this->projectId, $this->manyDemands, $this->clock->now()));
+        $nextStep = $saga->missingDemands($this->manyDemands);
 
         // then
         self::assertEquals(RiskPeriodicCheckSagaStep::DO_NOTHING, $nextStep);
-        self::assertEquals($this->manyDemands, $saga->missingDemands());
+        self::assertEquals($this->manyDemands, $saga->getMissingDemands());
+    }
+
+    #[Test]
+    public function noNewStepsOnWhenMissingDemands(): void
+    {
+        // given
+        $saga = new RiskPeriodicCheckSaga($this->projectId, $this->manyDemands);
+
+        // when
+        $nextStep = $saga->missingDemands($this->manyDemands);
+
+        // then
+        self::assertEquals(RiskPeriodicCheckSagaStep::DO_NOTHING, $nextStep);
     }
 
     #[Test]
@@ -109,15 +118,15 @@ final class RiskPeriodicCheckSagaTest extends TestCase
     }
 
     #[Test]
-    public function informsAboutDemandsSatisfiedWhenDemandsRescheduled(): void
+    public function informsAboutDemandsSatisfiedWhenNoMissingDemands(): void
     {
         // given
         $saga = new RiskPeriodicCheckSaga($this->projectId, $this->manyDemands);
         // and
         $saga->handleEarningsRecalculated(EarningsRecalculated::new($this->projectId, Earnings::of(1000), $this->clock->now()));
         // when
-        $stillMissing = $saga->handleProjectAllocationsDemandsScheduled(ProjectAllocationsDemandsScheduled::new($this->projectId, $this->singleDemand, $this->clock->now()));
-        $zeroDemands = $saga->handleProjectAllocationsDemandsScheduled(ProjectAllocationsDemandsScheduled::new($this->projectId, Demands::none(), $this->clock->now()));
+        $stillMissing = $saga->missingDemands($this->singleDemand);
+        $zeroDemands = $saga->missingDemands(Demands::none());
 
         // then
         self::assertEquals(RiskPeriodicCheckSagaStep::DO_NOTHING, $stillMissing);
@@ -125,38 +134,10 @@ final class RiskPeriodicCheckSagaTest extends TestCase
     }
 
     #[Test]
-    public function notifyAboutNoMissingDemandsOnCapabilityAllocated(): void
-    {
-        // given
-        $saga = new RiskPeriodicCheckSaga($this->projectId, $this->singleDemand);
-
-        // when
-        $nextStep = $saga->handleCapabilitiesAllocated(CapabilitiesAllocated::new(Uuid::v7(), $this->projectId, Demands::none(), $this->clock->now()));
-
-        // then
-        self::assertEquals(RiskPeriodicCheckSagaStep::NOTIFY_ABOUT_DEMANDS_SATISFIED, $nextStep);
-    }
-
-    #[Test]
-    public function noNewStepsOnCapabilityAllocatedWhenMissingDemands(): void
-    {
-        // given
-        $saga = new RiskPeriodicCheckSaga($this->projectId, $this->manyDemands);
-
-        // when
-        $nextStep = $saga->handleCapabilitiesAllocated(CapabilitiesAllocated::new(Uuid::v7(), $this->projectId, $this->singleDemand, $this->clock->now()));
-
-        // then
-        self::assertEquals(RiskPeriodicCheckSagaStep::DO_NOTHING, $nextStep);
-    }
-
-    #[Test]
     public function doNothingOnResourceTakenOverWhenAfterDeadline(): void
     {
         // given
         $saga = new RiskPeriodicCheckSaga($this->projectId, $this->manyDemands);
-        // and
-        $saga->handleCapabilitiesAllocated(CapabilitiesAllocated::new(Uuid::v7(), $this->projectId, $this->singleDemand, $this->clock->now()));
         // and
         $saga->handleProjectAllocationScheduled(ProjectAllocationScheduled::new($this->projectId, $this->projectDates, $this->clock->now()));
 
@@ -174,8 +155,6 @@ final class RiskPeriodicCheckSagaTest extends TestCase
         // given
         $saga = new RiskPeriodicCheckSaga($this->projectId, $this->manyDemands);
         // and
-        $saga->handleCapabilitiesAllocated(CapabilitiesAllocated::new(Uuid::v7(), $this->projectId, $this->manyDemands, $this->clock->now()));
-        // and
         $saga->handleProjectAllocationScheduled(ProjectAllocationScheduled::new($this->projectId, $this->projectDates, $this->clock->now()));
 
         // when
@@ -191,11 +170,9 @@ final class RiskPeriodicCheckSagaTest extends TestCase
     {
         // given
         $saga = new RiskPeriodicCheckSaga($this->projectId, $this->singleDemand);
-        // and
-        $saga->handleCapabilitiesAllocated(CapabilitiesAllocated::new(Uuid::v7(), $this->projectId, Demands::none(), $this->clock->now()));
 
         // when
-        $nextStep = $saga->handleCapabilityReleased(CapabilityReleased::new($this->projectId, $this->singleDemand, $this->clock->now()));
+        $nextStep = $saga->missingDemands($this->singleDemand);
 
         // then
         self::assertEquals(RiskPeriodicCheckSagaStep::DO_NOTHING, $nextStep);
@@ -209,7 +186,7 @@ final class RiskPeriodicCheckSagaTest extends TestCase
         // and
         $saga->handleEarningsRecalculated(EarningsRecalculated::new($this->projectId, Earnings::of(1000), $this->clock->now()));
         // and
-        $saga->handleCapabilitiesAllocated(CapabilitiesAllocated::new(Uuid::v7(), $this->projectId, Demands::none(), $this->clock->now()));
+        $saga->missingDemands(Demands::none());
         // and
         $saga->handleProjectAllocationScheduled(ProjectAllocationScheduled::new($this->projectId, $this->projectDates, $this->clock->now()));
 

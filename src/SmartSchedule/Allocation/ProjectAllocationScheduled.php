@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Allocation;
 
-use DomainDrivers\SmartSchedule\Shared\Event;
+use DomainDrivers\SmartSchedule\Shared\PrivateEvent;
+use DomainDrivers\SmartSchedule\Shared\PublishedEvent;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Symfony\Component\Uid\Uuid;
 
-final readonly class ProjectAllocationScheduled implements Event
+final readonly class ProjectAllocationScheduled implements PublishedEvent, PrivateEvent
 {
     public function __construct(
         public Uuid $uuid,

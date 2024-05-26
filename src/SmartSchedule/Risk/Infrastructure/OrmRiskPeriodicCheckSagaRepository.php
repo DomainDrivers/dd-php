@@ -42,4 +42,31 @@ final readonly class OrmRiskPeriodicCheckSagaRepository implements RiskPeriodicC
     {
         return GenericList::ofAll($this->entityManager->getRepository(RiskPeriodicCheckSaga::class)->findAll());
     }
+
+    #[\Override]
+    public function findByProjectIdOrCreate(ProjectAllocationsId $projectId): RiskPeriodicCheckSaga
+    {
+        $found = $this->findByProjectId($projectId);
+        if ($found === null) {
+            $found = new RiskPeriodicCheckSaga($projectId);
+            $this->save($found);
+        }
+
+        return $found;
+    }
+
+    #[\Override]
+    public function findByProjectIdInOrElseCreate(GenericList $interested): GenericList
+    {
+        $found = $this->findByProjectIdIn($interested);
+        $interested->forEach(function (ProjectAllocationsId $projectId) use (&$found) {
+            if ($found->noneMatch(fn (RiskPeriodicCheckSaga $saga) => $saga->projectId()->id->equals($projectId->id))) {
+                $new = new RiskPeriodicCheckSaga($projectId);
+                $this->save($new);
+                $found = $found->append($new);
+            }
+        });
+
+        return $found;
+    }
 }

@@ -9,13 +9,10 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\Table;
 use Doctrine\ORM\Mapping\Version;
-use DomainDrivers\SmartSchedule\Allocation\CapabilitiesAllocated;
-use DomainDrivers\SmartSchedule\Allocation\CapabilityReleased;
 use DomainDrivers\SmartSchedule\Allocation\Cashflow\Earnings;
 use DomainDrivers\SmartSchedule\Allocation\Cashflow\EarningsRecalculated;
 use DomainDrivers\SmartSchedule\Allocation\Demands;
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationScheduled;
-use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsDemandsScheduled;
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsId;
 use DomainDrivers\SmartSchedule\Availability\ResourceTakenOver;
 
@@ -55,6 +52,13 @@ class RiskPeriodicCheckSaga
         $this->earnings = $earnings ?? Earnings::of(0);
     }
 
+    public function missingDemands(Demands $missingDemands): RiskPeriodicCheckSagaStep
+    {
+        // TODO implement
+
+        return RiskPeriodicCheckSagaStep::DO_NOTHING;
+    }
+
     public function areDemandsSatisfied(): bool
     {
         return $this->missingDemands->all->isEmpty();
@@ -63,16 +67,6 @@ class RiskPeriodicCheckSaga
     public function handleEarningsRecalculated(EarningsRecalculated $event): RiskPeriodicCheckSagaStep
     {
         $this->earnings = $event->earnings;
-
-        return RiskPeriodicCheckSagaStep::DO_NOTHING;
-    }
-
-    public function handleProjectAllocationsDemandsScheduled(ProjectAllocationsDemandsScheduled $event): RiskPeriodicCheckSagaStep
-    {
-        $this->missingDemands = $event->missingDemands;
-        if ($this->areDemandsSatisfied()) {
-            return RiskPeriodicCheckSagaStep::NOTIFY_ABOUT_DEMANDS_SATISFIED;
-        }
 
         return RiskPeriodicCheckSagaStep::DO_NOTHING;
     }
@@ -91,23 +85,6 @@ class RiskPeriodicCheckSaga
         }
 
         return RiskPeriodicCheckSagaStep::NOTIFY_ABOUT_POSSIBLE_RISK;
-    }
-
-    public function handleCapabilityReleased(CapabilityReleased $event): RiskPeriodicCheckSagaStep
-    {
-        $this->missingDemands = $event->missingDemands;
-
-        return RiskPeriodicCheckSagaStep::DO_NOTHING;
-    }
-
-    public function handleCapabilitiesAllocated(CapabilitiesAllocated $event): RiskPeriodicCheckSagaStep
-    {
-        $this->missingDemands = $event->missingDemands;
-        if ($this->areDemandsSatisfied()) {
-            return RiskPeriodicCheckSagaStep::NOTIFY_ABOUT_DEMANDS_SATISFIED;
-        }
-
-        return RiskPeriodicCheckSagaStep::DO_NOTHING;
     }
 
     public function handleWeeklyCheck(\DateTimeImmutable $when): RiskPeriodicCheckSagaStep
@@ -134,7 +111,7 @@ class RiskPeriodicCheckSaga
         return RiskPeriodicCheckSagaStep::DO_NOTHING;
     }
 
-    public function missingDemands(): Demands
+    public function getMissingDemands(): Demands
     {
         return $this->missingDemands;
     }

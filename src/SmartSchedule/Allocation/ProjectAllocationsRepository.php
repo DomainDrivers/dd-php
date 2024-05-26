@@ -30,4 +30,9 @@ interface ProjectAllocationsRepository
      * @return GenericList<ProjectAllocations>
      */
     public function findAllById(Set $ids): GenericList;
+
+    /**
+     * @return GenericList<ProjectAllocations>
+     */
+    public function findAllContainingDate(\DateTimeImmutable $when): GenericList;
 }

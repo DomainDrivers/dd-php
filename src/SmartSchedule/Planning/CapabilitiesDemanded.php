@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace DomainDrivers\SmartSchedule\Planning;
 
-use DomainDrivers\SmartSchedule\Shared\Event;
+use DomainDrivers\SmartSchedule\Shared\PublishedEvent;
 use Symfony\Component\Uid\Uuid;
 
-final readonly class CapabilitiesDemanded implements Event
+final readonly class CapabilitiesDemanded implements PublishedEvent
 {
     public function __construct(
         public Uuid $uuid,

@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace DomainDrivers\SmartSchedule\Planning;
 
 use DomainDrivers\SmartSchedule\Availability\ResourceId;
-use DomainDrivers\SmartSchedule\Shared\Event;
+use DomainDrivers\SmartSchedule\Shared\PublishedEvent;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\Set;
 use Symfony\Component\Uid\Uuid;
 
-final readonly class NeededResourcesChosen implements Event
+final readonly class NeededResourcesChosen implements PublishedEvent
 {
     /**
      * @param Set<ResourceId> $neededResources

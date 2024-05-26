@@ -98,17 +98,17 @@ final readonly class AllocationFacade
     public function editProjectDates(ProjectAllocationsId $projectId, TimeSlot $fromTo): void
     {
         $allocations = $this->projectAllocationsRepository->getById($projectId);
-        $allocations->defineSlot($fromTo, $this->clock->now());
+        $projectDatesSet = $allocations->defineSlot($fromTo, $this->clock->now());
         $this->projectAllocationsRepository->save($allocations);
-        $this->eventsPublisher->publish(ProjectAllocationScheduled::new($projectId, $fromTo, $this->clock->now()));
+        $projectDatesSet->ifPresent(fn (ProjectAllocationScheduled $event) => $this->eventsPublisher->publish($event));
     }
 
     public function scheduleProjectAllocationDemands(ProjectAllocationsId $projectId, Demands $demands): void
     {
         $allocations = $this->projectAllocationsRepository->findById($projectId)->getOrElse(ProjectAllocations::empty($projectId));
-        $allocations->addDemands($demands, $this->clock->now())->ifPresent(
-            fn (ProjectAllocationsDemandsScheduled $event) => $this->eventsPublisher->publish($event)
-        );
+        $allocations->addDemands($demands, $this->clock->now());
+        // event could be stored in a local store
+        // always remember about transactional boundaries
         $this->projectAllocationsRepository->save($allocations);
     }
 

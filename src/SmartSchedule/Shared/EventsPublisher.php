@@ -7,5 +7,5 @@ namespace DomainDrivers\SmartSchedule\Shared;
 interface EventsPublisher
 {
     // remember about transactions scope
-    public function publish(Event $event): void;
+    public function publish(PublishedEvent $event): void;
 }

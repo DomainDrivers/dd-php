@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace DomainDrivers\SmartSchedule\Planning;
 
 use DomainDrivers\SmartSchedule\Availability\ResourceId;
-use DomainDrivers\SmartSchedule\Shared\Event;
+use DomainDrivers\SmartSchedule\Shared\PublishedEvent;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Symfony\Component\Uid\Uuid;
 
-final readonly class CriticalStagePlanned implements Event
+final readonly class CriticalStagePlanned implements PublishedEvent
 {
     public function __construct(
         public Uuid $uuid,

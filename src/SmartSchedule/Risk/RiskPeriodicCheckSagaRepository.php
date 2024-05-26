@@ -24,4 +24,13 @@ interface RiskPeriodicCheckSagaRepository
      * @return GenericList<RiskPeriodicCheckSaga>
      */
     public function findAll(): GenericList;
+
+    public function findByProjectIdOrCreate(ProjectAllocationsId $projectId): RiskPeriodicCheckSaga;
+
+    /**
+     * @param GenericList<ProjectAllocationsId> $interested
+     *
+     * @return GenericList<RiskPeriodicCheckSaga>
+     */
+    public function findByProjectIdInOrElseCreate(GenericList $interested): GenericList;
 }
