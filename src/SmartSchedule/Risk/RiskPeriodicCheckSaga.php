@@ -57,35 +57,81 @@ class RiskPeriodicCheckSaga
 
     public function areDemandsSatisfied(): bool
     {
-        return false;
+        return $this->missingDemands->all->isEmpty();
     }
 
     public function handleEarningsRecalculated(EarningsRecalculated $event): RiskPeriodicCheckSagaStep
     {
+        $this->earnings = $event->earnings;
+
+        return RiskPeriodicCheckSagaStep::DO_NOTHING;
     }
 
     public function handleProjectAllocationsDemandsScheduled(ProjectAllocationsDemandsScheduled $event): RiskPeriodicCheckSagaStep
     {
+        $this->missingDemands = $event->missingDemands;
+        if ($this->areDemandsSatisfied()) {
+            return RiskPeriodicCheckSagaStep::NOTIFY_ABOUT_DEMANDS_SATISFIED;
+        }
+
+        return RiskPeriodicCheckSagaStep::DO_NOTHING;
     }
 
     public function handleProjectAllocationScheduled(ProjectAllocationScheduled $event): RiskPeriodicCheckSagaStep
     {
+        $this->deadline = $event->fromTo->to;
+
+        return RiskPeriodicCheckSagaStep::DO_NOTHING;
     }
 
     public function handleResourceTakenOver(ResourceTakenOver $event): RiskPeriodicCheckSagaStep
     {
+        if ($this->deadline !== null && $event->occurredAt > $this->deadline) {
+            return RiskPeriodicCheckSagaStep::DO_NOTHING;
+        }
+
+        return RiskPeriodicCheckSagaStep::NOTIFY_ABOUT_POSSIBLE_RISK;
     }
 
     public function handleCapabilityReleased(CapabilityReleased $event): RiskPeriodicCheckSagaStep
     {
+        $this->missingDemands = $event->missingDemands;
+
+        return RiskPeriodicCheckSagaStep::DO_NOTHING;
     }
 
     public function handleCapabilitiesAllocated(CapabilitiesAllocated $event): RiskPeriodicCheckSagaStep
     {
+        $this->missingDemands = $event->missingDemands;
+        if ($this->areDemandsSatisfied()) {
+            return RiskPeriodicCheckSagaStep::NOTIFY_ABOUT_DEMANDS_SATISFIED;
+        }
+
+        return RiskPeriodicCheckSagaStep::DO_NOTHING;
     }
 
     public function handleWeeklyCheck(\DateTimeImmutable $when): RiskPeriodicCheckSagaStep
     {
+        if ($this->deadline === null || $when > $this->deadline) {
+            return RiskPeriodicCheckSagaStep::DO_NOTHING;
+        }
+
+        if ($this->areDemandsSatisfied()) {
+            return RiskPeriodicCheckSagaStep::DO_NOTHING;
+        }
+
+        $daysToDeadline = ($this->deadline->getTimestamp() - $when->getTimestamp()) / 86400;
+        if ($daysToDeadline > self::UPCOMING_DEADLINE_AVAILABILITY_SEARCH) {
+            return RiskPeriodicCheckSagaStep::DO_NOTHING;
+        }
+        if ($daysToDeadline > self::UPCOMING_DEADLINE_REPLACEMENT_SUGGESTION) {
+            return RiskPeriodicCheckSagaStep::FIND_AVAILABLE;
+        }
+        if ($this->earnings->greaterThan(Earnings::of(self::RISK_THRESHOLD_VALUE))) {
+            return RiskPeriodicCheckSagaStep::SUGGEST_REPLACEMENT;
+        }
+
+        return RiskPeriodicCheckSagaStep::DO_NOTHING;
     }
 
     public function missingDemands(): Demands
