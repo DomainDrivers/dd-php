@@ -24,7 +24,7 @@ final readonly class SlotToSegments
         $segmentInMinutesDuration = $duration->minutes;
         $numberOfSegments = $this->calculateNumberOfSegments($timeSlot, $segmentInMinutesDuration);
 
-        return Stream::iterate($timeSlot->from, fn (\DateTimeImmutable $current) => $current->modify(sprintf('+%s minutes', $segmentInMinutesDuration)))
+        return Stream::iterate($timeSlot->from, fn (\DateTimeImmutable $current): \DateTimeImmutable => $current->modify(sprintf('+%s minutes', $segmentInMinutesDuration)))
             ->take($numberOfSegments)
             ->map(fn (\DateTimeImmutable $currentStart) => new TimeSlot($currentStart, $this->calculateEnd($segmentInMinutesDuration, $currentStart, $timeSlot->to)))
             ->collect(Stream\Collectors::toList())
