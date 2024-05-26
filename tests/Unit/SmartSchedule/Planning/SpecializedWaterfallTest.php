@@ -12,9 +12,11 @@ use DomainDrivers\SmartSchedule\Shared\Capability\Capability;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\Duration;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use DomainDrivers\Tests\Unit\SmartSchedule\Planning\Schedule\Assertions\ScheduleAssert;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
+#[CoversClass(PlanningFacade::class)]
 final class SpecializedWaterfallTest extends KernelTestCase
 {
     private PlanningFacade $projectFacade;
@@ -36,10 +38,6 @@ final class SpecializedWaterfallTest extends KernelTestCase
     #[Test]
     public function specializedWaterfallProjectProcess(): void
     {
-        if (time() > 1) { // phpstan workaround
-            self::markTestSkipped('Not implemented yet');
-        }
-
         // given
         $projectId = $this->projectFacade->addNewProjectWith('waterfall');
 
