@@ -8,6 +8,7 @@ use DomainDrivers\SmartSchedule\Allocation\Cashflow\Cashflow;
 use DomainDrivers\SmartSchedule\Planning\Project;
 use DomainDrivers\SmartSchedule\Resource\Device\Device;
 use DomainDrivers\SmartSchedule\Resource\Employee\Employee;
+use DomainDrivers\SmartSchedule\Risk\RiskPeriodicCheckSaga;
 use PHPStan\Reflection\PropertyReflection;
 use PHPStan\Rules\Properties\ReadWritePropertiesExtension;
 
@@ -18,6 +19,7 @@ final readonly class ReadWriteProperties implements ReadWritePropertiesExtension
         Cashflow::class,
         Device::class,
         Employee::class,
+        RiskPeriodicCheckSaga::class,
     ];
 
     #[\Override]

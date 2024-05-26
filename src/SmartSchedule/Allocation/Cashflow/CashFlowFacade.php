@@ -6,6 +6,8 @@ namespace DomainDrivers\SmartSchedule\Allocation\Cashflow;
 
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsId;
 use DomainDrivers\SmartSchedule\Shared\EventsPublisher;
+use Munus\Collection\Map;
+use Munus\Collection\Stream\Collectors;
 use Symfony\Component\Clock\ClockInterface;
 
 final readonly class CashFlowFacade
@@ -28,5 +30,16 @@ final readonly class CashFlowFacade
     public function find(ProjectAllocationsId $projectId): Earnings
     {
         return $this->cashflowRepository->getById($projectId)->earnings();
+    }
+
+    /**
+     * @return Map<string, Earnings>
+     */
+    public function findAllEarnings(): Map
+    {
+        return $this->cashflowRepository->findAll()->toStream()->collect(Collectors::toMap(
+            fn (Cashflow $c) => $c->projectId()->toString(),
+            fn (Cashflow $c) => $c->earnings()
+        ));
     }
 }

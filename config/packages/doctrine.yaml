@@ -23,6 +23,7 @@ doctrine:
             allocatable_resource_id: DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\Infrastructure\AllocatableResourceIdType
             allocatable_capability_id: DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\Infrastructure\AllocatableCapabilityIdType
             capability_selector: DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\Infrastructure\CapabilitySelectorType
+            risk_periodic_check_saga_id: DomainDrivers\SmartSchedule\Risk\Infrastructure\RiskPeriodicCheckSagaIdType
         schema_filter: '~^(?!availabilities)~'
     orm:
         auto_generate_proxy_classes: true
@@ -53,6 +54,12 @@ doctrine:
                 dir: '%kernel.project_dir%/src/SmartSchedule/Resource'
                 prefix: 'DomainDrivers\SmartSchedule\Resource'
                 alias: Resource
+            Risk:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/SmartSchedule/Risk'
+                prefix: 'DomainDrivers\SmartSchedule\Risk'
+                alias: Risk
             Shared:
                 type: attribute
                 is_bundle: false

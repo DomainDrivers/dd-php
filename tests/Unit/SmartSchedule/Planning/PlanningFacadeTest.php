@@ -223,7 +223,7 @@ final class PlanningFacadeTest extends KernelTestCase
         $this->projectFacade->addDemands($projectId, $demandForPhp);
 
         // then
-        $this->transport()->queue()
+        $this->transport('event')->queue()
             ->assertCount(1)
             ->first(fn (CapabilitiesDemanded $event): bool => $event->projectId->id->equals($projectId->id) && $event->demands->all->equals($demandForPhp->all)
             )

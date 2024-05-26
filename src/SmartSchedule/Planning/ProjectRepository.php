@@ -19,4 +19,9 @@ interface ProjectRepository
      * @return GenericList<Project>
      */
     public function findAllById(Set $projectsIds): GenericList;
+
+    /**
+     * @return GenericList<Project>
+     */
+    public function findAll(): GenericList;
 }

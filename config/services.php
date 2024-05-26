@@ -14,12 +14,14 @@ use DomainDrivers\SmartSchedule\Allocation\Cashflow\CashFlowFacade;
 use DomainDrivers\SmartSchedule\Allocation\Cashflow\CashflowRepository;
 use DomainDrivers\SmartSchedule\Allocation\Cashflow\Infrastructure\OrmCashflowRepository;
 use DomainDrivers\SmartSchedule\Allocation\Infrastructure\OrmProjectAllocationsRepository;
+use DomainDrivers\SmartSchedule\Allocation\PotentialTransfersService;
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsRepository;
 use DomainDrivers\SmartSchedule\Availability\AvailabilityFacade;
 use DomainDrivers\SmartSchedule\Availability\Infrastructure\DbalResourceAvailabilityReadModel;
 use DomainDrivers\SmartSchedule\Availability\Infrastructure\DbalResourceAvailabilityRepository;
 use DomainDrivers\SmartSchedule\Availability\ResourceAvailabilityReadModel;
 use DomainDrivers\SmartSchedule\Availability\ResourceAvailabilityRepository;
+use DomainDrivers\SmartSchedule\Optimization\OptimizationFacade;
 use DomainDrivers\SmartSchedule\Planning\Infrastructure\OrmProjectRepository;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\StageParallelization;
 use DomainDrivers\SmartSchedule\Planning\PlanChosenResources;
@@ -33,9 +35,18 @@ use DomainDrivers\SmartSchedule\Resource\Employee\EmployeeFacade;
 use DomainDrivers\SmartSchedule\Resource\Employee\EmployeeRepository;
 use DomainDrivers\SmartSchedule\Resource\Employee\Infrastructure\OrmEmployeeRepository;
 use DomainDrivers\SmartSchedule\Resource\Employee\ScheduleEmployeeCapabilities;
+use DomainDrivers\SmartSchedule\Resource\ResourceFacade;
+use DomainDrivers\SmartSchedule\Risk\Infrastructure\OrmRiskPeriodicCheckSagaRepository;
+use DomainDrivers\SmartSchedule\Risk\RiskPeriodicCheckSagaDispatcher;
+use DomainDrivers\SmartSchedule\Risk\RiskPeriodicCheckSagaRepository;
+use DomainDrivers\SmartSchedule\Risk\RiskPushNotification;
+use DomainDrivers\SmartSchedule\Risk\VerifyCriticalResourceAvailableDuringPlanning;
+use DomainDrivers\SmartSchedule\Risk\VerifyEnoughDemandsDuringPlanning;
+use DomainDrivers\SmartSchedule\Risk\VerifyNeededResourcesAvailableInTimeSlot;
 use DomainDrivers\SmartSchedule\Shared\EventsPublisher;
 use DomainDrivers\SmartSchedule\Shared\Infrastructure\FixSchemaListener;
 use DomainDrivers\SmartSchedule\Shared\Infrastructure\MessengerEventPublisher;
+use DomainDrivers\SmartSchedule\Simulation\SimulationFacade;
 use Symfony\Component\Clock\ClockInterface;
 use Symfony\Component\Clock\NativeClock;
 
@@ -106,6 +117,20 @@ return static function (ContainerConfigurator $configurator): void {
 
     $services->set(MessengerEventPublisher::class);
     $services->alias(EventsPublisher::class, MessengerEventPublisher::class);
+
+    $services->set(OrmRiskPeriodicCheckSagaRepository::class);
+    $services->alias(RiskPeriodicCheckSagaRepository::class, OrmRiskPeriodicCheckSagaRepository::class);
+
+    $services->set(PotentialTransfersService::class);
+    $services->set(RiskPushNotification::class);
+    $services->set(SimulationFacade::class);
+    $services->set(OptimizationFacade::class);
+    $services->set(ResourceFacade::class);
+
+    $services->set(RiskPeriodicCheckSagaDispatcher::class);
+    $services->set(VerifyCriticalResourceAvailableDuringPlanning::class);
+    $services->set(VerifyNeededResourcesAvailableInTimeSlot::class);
+    $services->set(VerifyEnoughDemandsDuringPlanning::class);
 
     if (in_array($configurator->env(), ['dev', 'test'], true)) {
         $services->set(FixSchemaListener::class)

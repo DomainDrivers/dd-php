@@ -47,6 +47,11 @@ final readonly class Owner implements \Stringable
         return $this->toString() === $other->toString();
     }
 
+    public function getId(): Uuid
+    {
+        return $this->id ?? throw new \RuntimeException('OwnerId not set');
+    }
+
     #[\Override]
     public function __toString(): string
     {

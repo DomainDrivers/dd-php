@@ -117,9 +117,15 @@ final readonly class PlanningFacade
      */
     public function loadAll(Set $projectsIds): GenericList
     {
-        return $this->projectRepository
-            ->findAllById($projectsIds)
-            ->map(fn (Project $project) => $this->toSummary($project));
+        return $this->projectRepository->findAllById($projectsIds)->map($this->toSummary(...));
+    }
+
+    /**
+     * @return GenericList<ProjectCard>
+     */
+    public function findAll(): GenericList
+    {
+        return $this->projectRepository->findAll()->map($this->toSummary(...));
     }
 
     private function toSummary(Project $project): ProjectCard

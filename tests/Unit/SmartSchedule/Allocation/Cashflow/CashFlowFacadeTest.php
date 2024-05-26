@@ -52,7 +52,7 @@ final class CashFlowFacadeTest extends KernelTestCase
         $this->cashFlowFacade->addIncomeAndCost($projectId, $income, $cost);
 
         // then
-        $this->transport()->queue()
+        $this->transport('event')->queue()
             ->assertCount(1)
             ->first(fn (EarningsRecalculated $event): bool => $event->projectId->id->equals($projectId->id) && $event->earnings->equals(Earnings::of(50))
             )

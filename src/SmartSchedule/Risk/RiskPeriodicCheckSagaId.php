@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace DomainDrivers\SmartSchedule\Allocation;
+namespace DomainDrivers\SmartSchedule\Risk;
 
+use Munus\Value\Comparable;
 use Symfony\Component\Uid\Uuid;
 
-final readonly class ProjectAllocationsId implements \Stringable
+final readonly class RiskPeriodicCheckSagaId implements \Stringable, Comparable
 {
-    public function __construct(public Uuid $id)
+    private function __construct(public Uuid $id)
     {
     }
 
@@ -31,5 +32,11 @@ final readonly class ProjectAllocationsId implements \Stringable
     public function __toString(): string
     {
         return $this->toString();
+    }
+
+    #[\Override]
+    public function equals(Comparable $other): bool
+    {
+        return self::class === $other::class && $this->id->equals($other->id);
     }
 }

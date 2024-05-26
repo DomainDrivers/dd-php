@@ -31,6 +31,11 @@ class Cashflow
         $this->cost = Cost::of(0);
     }
 
+    public function projectId(): ProjectAllocationsId
+    {
+        return $this->projectId;
+    }
+
     public function earnings(): Earnings
     {
         return $this->income->minus($this->cost);

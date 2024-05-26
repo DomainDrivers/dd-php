@@ -256,7 +256,7 @@ final class AvailabilityFacadeTest extends KernelTestCase
 
         // then
         self::assertTrue($result);
-        $this->transport()->queue()
+        $this->transport('event')->queue()
             ->assertCount(1)
             ->first(fn (ResourceTakenOver $event): bool => $event->resourceId->getId()->equals($resourceId->getId())
                 && $event->previousOwners->equals(Set::of($initialOwner))

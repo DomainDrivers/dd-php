@@ -37,4 +37,10 @@ final readonly class OrmProjectRepository implements ProjectRepository
             'id' => $projectsIds->toArray(),
         ]));
     }
+
+    #[\Override]
+    public function findAll(): GenericList
+    {
+        return GenericList::ofAll($this->entityManager->getRepository(Project::class)->findAll());
+    }
 }

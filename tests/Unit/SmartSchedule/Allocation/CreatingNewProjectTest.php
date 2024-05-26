@@ -48,7 +48,7 @@ final class CreatingNewProjectTest extends KernelTestCase
         self::assertTrue($projectSummary->demands->get($newProject->toString())->get()->all->equals($demands->all));
         self::assertTrue($projectSummary->timeSlots->get($newProject->toString())->get()->equals($this->jan));
 
-        $this->transport()->queue()
+        $this->transport('event')->queue()
             ->assertCount(1)
             ->first(fn (ProjectAllocationScheduled $event): bool => $event->projectId->id->equals($newProject->id) && $event->fromTo->equals($this->jan)
             )

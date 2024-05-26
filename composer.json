@@ -9,6 +9,7 @@
         "doctrine/doctrine-bundle": "^2.12",
         "doctrine/doctrine-migrations-bundle": "^3.3",
         "doctrine/orm": "^3.1",
+        "dragonmantank/cron-expression": "^3.3",
         "munusphp/munus": "^0.15",
         "scienta/doctrine-json-functions": "^6.1",
         "symfony/clock": "^7.0",
@@ -17,6 +18,7 @@
         "symfony/framework-bundle": "7.0.*",
         "symfony/messenger": "^7.0",
         "symfony/runtime": "7.0.*",
+        "symfony/scheduler": "^7.0",
         "symfony/uid": "^7.0",
         "symfony/yaml": "7.0.*"
     },

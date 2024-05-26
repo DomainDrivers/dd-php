@@ -58,7 +58,7 @@ final class DemandSchedulingTest extends KernelTestCase
         $this->allocationFacade->scheduleProjectAllocationDemands($projectId, Demands::of($php));
 
         // then
-        $this->transport()->queue()
+        $this->transport('event')->queue()
             ->assertCount(1)
             ->first(fn (ProjectAllocationsDemandsScheduled $event): bool => $event->projectId->id->equals($projectId->id) && $event->missingDemands->all->equals(GenericList::of($php))
             )

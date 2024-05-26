@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use DomainDrivers\SmartSchedule\Allocation\Cashflow\Cashflow;
 use DomainDrivers\SmartSchedule\Allocation\Cashflow\CashflowRepository;
 use DomainDrivers\SmartSchedule\Allocation\ProjectAllocationsId;
+use Munus\Collection\GenericList;
 use Munus\Control\Option;
 
 final readonly class OrmCashflowRepository implements CashflowRepository
@@ -33,5 +34,11 @@ final readonly class OrmCashflowRepository implements CashflowRepository
     public function findById(ProjectAllocationsId $id): Option
     {
         return Option::of($this->entityManager->find(Cashflow::class, $id));
+    }
+
+    #[\Override]
+    public function findAll(): GenericList
+    {
+        return GenericList::ofAll($this->entityManager->getRepository(Cashflow::class)->findAll());
     }
 }
