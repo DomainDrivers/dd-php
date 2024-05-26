@@ -21,6 +21,7 @@ final class PlanningFacadeIntegrationTest extends KernelTestCase
     #[\Override]
     protected function setUp(): void
     {
+        self::getContainer()->get('snc_redis.default')->flushAll();
         $this->projectFacade = self::getContainer()->get(PlanningFacade::class);
     }
 

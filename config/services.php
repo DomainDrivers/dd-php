@@ -22,7 +22,8 @@ use DomainDrivers\SmartSchedule\Availability\Infrastructure\DbalResourceAvailabi
 use DomainDrivers\SmartSchedule\Availability\ResourceAvailabilityReadModel;
 use DomainDrivers\SmartSchedule\Availability\ResourceAvailabilityRepository;
 use DomainDrivers\SmartSchedule\Optimization\OptimizationFacade;
-use DomainDrivers\SmartSchedule\Planning\Infrastructure\OrmProjectRepository;
+use DomainDrivers\SmartSchedule\Planning\Infrastructure\ProjectSerializer;
+use DomainDrivers\SmartSchedule\Planning\Infrastructure\RedisProjectRepository;
 use DomainDrivers\SmartSchedule\Planning\Parallelization\StageParallelization;
 use DomainDrivers\SmartSchedule\Planning\PlanChosenResources;
 use DomainDrivers\SmartSchedule\Planning\PlanningFacade;
@@ -66,8 +67,10 @@ return static function (ContainerConfigurator $configurator): void {
     $services->set(AvailabilityFacade::class)
         ->public();
 
-    $services->set(OrmProjectRepository::class);
-    $services->alias(ProjectRepository::class, OrmProjectRepository::class);
+    $services->set(ProjectSerializer::class);
+    $services->set(RedisProjectRepository::class)
+        ->arg('$redis', service('snc_redis.default'));
+    $services->alias(ProjectRepository::class, RedisProjectRepository::class);
 
     $services->set(PlanningFacade::class)
         ->public();

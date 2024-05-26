@@ -34,6 +34,7 @@ final class StandardWaterfallTest extends KernelTestCase
     #[\Override]
     protected function setUp(): void
     {
+        self::getContainer()->get('snc_redis.default')->flushAll();
         $this->projectFacade = self::getContainer()->get(PlanningFacade::class);
         $this->jan_1 = new \DateTimeImmutable('2020-01-01 00:00:00.00');
         $this->resource_1 = ResourceId::newOne();

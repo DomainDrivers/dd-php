@@ -28,5 +28,10 @@ services:
       interval: 1s
       retries: 15
 
+  redis:
+    image: 'redis:7.2-alpine'
+    ports:
+      - "6380:6379"
+
 volumes:
   db-data:

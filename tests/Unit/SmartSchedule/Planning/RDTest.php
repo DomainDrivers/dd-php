@@ -36,6 +36,7 @@ final class RDTest extends KernelTestCase
     #[\Override]
     protected function setUp(): void
     {
+        self::getContainer()->get('snc_redis.default')->flushAll();
         $this->projectFacade = self::getContainer()->get(PlanningFacade::class);
         $this->availabilityFacade = self::getContainer()->get(AvailabilityFacade::class);
         $this->january = TimeSlot::with('2020-01-01 00:00:00', '2020-01-31 00:00:00');

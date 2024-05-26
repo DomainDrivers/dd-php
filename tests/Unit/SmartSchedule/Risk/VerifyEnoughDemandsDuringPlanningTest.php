@@ -29,6 +29,7 @@ final class VerifyEnoughDemandsDuringPlanningTest extends KernelTestCase
 
     protected function setUp(): void
     {
+        self::getContainer()->get('snc_redis.default')->flushAll();
         $this->riskPushNotification = $this->createMock(RiskPushNotification::class);
         self::getContainer()->set(RiskPushNotification::class, $this->riskPushNotification);
         $this->employeeFacade = self::getContainer()->get(EmployeeFacade::class);

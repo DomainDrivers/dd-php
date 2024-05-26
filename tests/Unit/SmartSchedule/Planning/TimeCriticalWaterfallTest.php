@@ -24,6 +24,7 @@ final class TimeCriticalWaterfallTest extends KernelTestCase
     #[\Override]
     protected function setUp(): void
     {
+        self::getContainer()->get('snc_redis.default')->flushAll();
         $this->projectFacade = self::getContainer()->get(PlanningFacade::class);
         $this->jan_1_5 = TimeSlot::with('2020-01-01 00:00:00', '2020-01-05 00:00:00');
         $this->jan_1_3 = TimeSlot::with('2020-01-01 00:00:00', '2020-01-03 00:00:00');
