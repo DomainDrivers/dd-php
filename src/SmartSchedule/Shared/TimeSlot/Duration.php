@@ -25,6 +25,11 @@ final readonly class Duration
         return new self($hours * 3600);
     }
 
+    public static function ofMinutes(int $minutes): self
+    {
+        return new self($minutes * 60);
+    }
+
     public static function between(\DateTimeImmutable $start, \DateTimeImmutable $end): self
     {
         if ($start > $end) {

@@ -7,6 +7,8 @@ namespace DomainDrivers\Tests\Unit\SmartSchedule\Availability;
 use DomainDrivers\SmartSchedule\Availability\AvailabilityFacade;
 use DomainDrivers\SmartSchedule\Availability\Owner;
 use DomainDrivers\SmartSchedule\Availability\ResourceId;
+use DomainDrivers\SmartSchedule\Availability\Segment\Segments;
+use DomainDrivers\SmartSchedule\Shared\TimeSlot\Duration;
 use DomainDrivers\SmartSchedule\Shared\TimeSlot\TimeSlot;
 use Munus\Collection\GenericList;
 use Munus\Collection\Set;
@@ -29,19 +31,20 @@ final class AvailabilityCalendarTest extends KernelTestCase
     {
         // given
         $resourceId = ResourceId::newOne();
-        $oneDay = TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1);
-        $fifteenMinutes = new TimeSlot($oneDay->from->modify('+15 minutes'), $oneDay->from->modify('+30 minutes'));
+        $durationOfSevenSlots = Duration::ofMinutes(7 * Segments::DEFAULT_SEGMENT_DURATION_IN_MINUTES);
+        $sevenSlots = TimeSlot::createTimeSlotAtUTCOfDuration(2021, 1, 1, $durationOfSevenSlots);
+        $minimumSlot = new TimeSlot($sevenSlots->from, $sevenSlots->from->modify(sprintf('+%s minutes', Segments::DEFAULT_SEGMENT_DURATION_IN_MINUTES)));
         $owner = Owner::newOne();
         // and
-        $this->availabilityFacade->createResourceSlots($resourceId, $oneDay);
+        $this->availabilityFacade->createResourceSlots($resourceId, $sevenSlots);
 
         // when
-        $this->availabilityFacade->block($resourceId, $fifteenMinutes, $owner);
+        $this->availabilityFacade->block($resourceId, $minimumSlot, $owner);
 
         // then
-        $calendar = $this->availabilityFacade->loadCalendar($resourceId, $oneDay);
-        self::assertTrue($calendar->takenBy($owner)->equals(GenericList::of($fifteenMinutes)));
-        self::assertTrue($calendar->availableSlots()->equals($oneDay->leftoverAfterRemovingCommonWith($fifteenMinutes)));
+        $calendar = $this->availabilityFacade->loadCalendar($resourceId, $sevenSlots);
+        self::assertTrue($calendar->takenBy($owner)->equals(GenericList::of($minimumSlot)));
+        self::assertTrue($calendar->availableSlots()->equals($sevenSlots->leftoverAfterRemovingCommonWith($minimumSlot)));
     }
 
     #[Test]
@@ -50,22 +53,23 @@ final class AvailabilityCalendarTest extends KernelTestCase
         // given
         $resourceId = ResourceId::newOne();
         $resourceId2 = ResourceId::newOne();
-        $oneDay = TimeSlot::createDailyTimeSlotAtUTC(2021, 1, 1);
-        $fifteenMinutes = new TimeSlot($oneDay->from->modify('+15 minutes'), $oneDay->from->modify('+30 minutes'));
+        $durationOfSevenSlots = Duration::ofMinutes(7 * Segments::DEFAULT_SEGMENT_DURATION_IN_MINUTES);
+        $sevenSlots = TimeSlot::createTimeSlotAtUTCOfDuration(2021, 1, 1, $durationOfSevenSlots);
+        $minimumSlot = new TimeSlot($sevenSlots->from, $sevenSlots->from->modify(sprintf('+%s minutes', Segments::DEFAULT_SEGMENT_DURATION_IN_MINUTES)));
 
         $owner = Owner::newOne();
-        $this->availabilityFacade->createResourceSlots($resourceId, $oneDay);
-        $this->availabilityFacade->createResourceSlots($resourceId2, $oneDay);
+        $this->availabilityFacade->createResourceSlots($resourceId, $sevenSlots);
+        $this->availabilityFacade->createResourceSlots($resourceId2, $sevenSlots);
 
         // when
-        $this->availabilityFacade->block($resourceId, $fifteenMinutes, $owner);
-        $this->availabilityFacade->block($resourceId2, $fifteenMinutes, $owner);
+        $this->availabilityFacade->block($resourceId, $minimumSlot, $owner);
+        $this->availabilityFacade->block($resourceId2, $minimumSlot, $owner);
 
         // then
-        $calendars = $this->availabilityFacade->loadCalendars(Set::of($resourceId, $resourceId2), $oneDay);
-        self::assertTrue($calendars->get($resourceId)->takenBy($owner)->equals(GenericList::of($fifteenMinutes)));
-        self::assertTrue($calendars->get($resourceId2)->takenBy($owner)->equals(GenericList::of($fifteenMinutes)));
-        self::assertTrue($calendars->get($resourceId)->availableSlots()->equals($oneDay->leftoverAfterRemovingCommonWith($fifteenMinutes)));
-        self::assertTrue($calendars->get($resourceId2)->availableSlots()->equals($oneDay->leftoverAfterRemovingCommonWith($fifteenMinutes)));
+        $calendars = $this->availabilityFacade->loadCalendars(Set::of($resourceId, $resourceId2), $sevenSlots);
+        self::assertTrue($calendars->get($resourceId)->takenBy($owner)->equals(GenericList::of($minimumSlot)));
+        self::assertTrue($calendars->get($resourceId2)->takenBy($owner)->equals(GenericList::of($minimumSlot)));
+        self::assertTrue($calendars->get($resourceId)->availableSlots()->equals($sevenSlots->leftoverAfterRemovingCommonWith($minimumSlot)));
+        self::assertTrue($calendars->get($resourceId2)->availableSlots()->equals($sevenSlots->leftoverAfterRemovingCommonWith($minimumSlot)));
     }
 }

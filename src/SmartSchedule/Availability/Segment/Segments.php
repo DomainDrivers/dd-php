@@ -9,7 +9,7 @@ use Munus\Collection\GenericList;
 
 final readonly class Segments
 {
-    public const int DEFAULT_SEGMENT_DURATION_IN_MINUTES = 15;
+    public const int DEFAULT_SEGMENT_DURATION_IN_MINUTES = 60;
 
     /**
      * @return GenericList<TimeSlot>

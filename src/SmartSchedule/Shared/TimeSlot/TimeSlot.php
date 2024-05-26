@@ -32,12 +32,7 @@ final readonly class TimeSlot implements Comparable
 
     public static function createDailyTimeSlotAtUTC(int $year, int $month, int $day): self
     {
-        $from = new \DateTimeImmutable(\sprintf('%s-%s-%s 00:00:00', $year, $month, $day), new \DateTimeZone('UTC'));
-
-        return new self(
-            $from,
-            $from->modify('+1 day')
-        );
+        return self::createTimeSlotAtUTCOfDuration($year, $month, $day, Duration::ofDays(1));
     }
 
     public static function createMonthlyTimeSlotAtUTC(int $year, int $month): self
@@ -47,6 +42,16 @@ final readonly class TimeSlot implements Comparable
         return new self(
             $from,
             $from->modify('last day of')->modify('+1 day')
+        );
+    }
+
+    public static function createTimeSlotAtUTCOfDuration(int $year, int $month, int $day, Duration $duration): self
+    {
+        $from = new \DateTimeImmutable(\sprintf('%s-%s-%s 00:00:00', $year, $month, $day), new \DateTimeZone('UTC'));
+
+        return new self(
+            $from,
+            $from->add($duration->toDateInterval())
         );
     }
 

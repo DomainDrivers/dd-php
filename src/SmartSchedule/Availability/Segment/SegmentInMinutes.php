@@ -10,13 +10,16 @@ final readonly class SegmentInMinutes
     {
     }
 
-    public static function of(int $minutes): self
+    public static function of(int $minutes, int $slotDurationInMinutes = Segments::DEFAULT_SEGMENT_DURATION_IN_MINUTES): self
     {
         if ($minutes <= 0) {
             throw new \InvalidArgumentException('SegmentInMinutesDuration must be positive');
         }
-        if ($minutes % Segments::DEFAULT_SEGMENT_DURATION_IN_MINUTES != 0) {
-            throw new \InvalidArgumentException(sprintf('SegmentInMinutesDuration must be a multiple of %s', Segments::DEFAULT_SEGMENT_DURATION_IN_MINUTES));
+        if ($minutes < $slotDurationInMinutes) {
+            throw new \InvalidArgumentException(sprintf('SegmentInMinutesDuration must be at least %s minutes', $slotDurationInMinutes));
+        }
+        if ($minutes % $slotDurationInMinutes != 0) {
+            throw new \InvalidArgumentException(sprintf('SegmentInMinutesDuration must be a multiple of %s', $slotDurationInMinutes));
         }
 
         return new self($minutes);

@@ -17,6 +17,7 @@ final class DurationTest extends TestCase
     {
         self::assertTrue(Duration::ofHours(3)->equals(Duration::ofHours(2)->plus(Duration::ofHours(1))));
         self::assertTrue(Duration::ofDays(1)->equals(Duration::ofHours(23)->plus(Duration::ofHours(1))));
+        self::assertTrue(Duration::ofMinutes(7)->equals(Duration::ofMinutes(3)->plus(Duration::ofMinutes(4))));
     }
 
     #[Test]

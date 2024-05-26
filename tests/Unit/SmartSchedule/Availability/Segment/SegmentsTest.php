@@ -18,16 +18,18 @@ final class SegmentsTest extends TestCase
 {
     use AssertThrows;
 
-    #[Test]
-    public function unitHasToBeMultipleOf15Minutes(): void
-    {
-        self::assertThrows(\InvalidArgumentException::class, fn () => SegmentInMinutes::of(20));
-        self::assertThrows(\InvalidArgumentException::class, fn () => SegmentInMinutes::of(18));
-        self::assertThrows(\InvalidArgumentException::class, fn () => SegmentInMinutes::of(7));
+    private const int FIFTEEN_MINUTES_SEGMENT_DURATION = 15;
 
-        self::assertSame(15, SegmentInMinutes::of(15)->minutes);
-        self::assertSame(30, SegmentInMinutes::of(30)->minutes);
-        self::assertSame(45, SegmentInMinutes::of(45)->minutes);
+    #[Test]
+    public function unitHasToBeMultipleOfDefaultSlotDurationInMinutes(): void
+    {
+        self::assertThrows(\InvalidArgumentException::class, fn () => SegmentInMinutes::of(20, self::FIFTEEN_MINUTES_SEGMENT_DURATION));
+        self::assertThrows(\InvalidArgumentException::class, fn () => SegmentInMinutes::of(18, self::FIFTEEN_MINUTES_SEGMENT_DURATION));
+        self::assertThrows(\InvalidArgumentException::class, fn () => SegmentInMinutes::of(7, self::FIFTEEN_MINUTES_SEGMENT_DURATION));
+
+        self::assertSame(15, SegmentInMinutes::of(15, self::FIFTEEN_MINUTES_SEGMENT_DURATION)->minutes);
+        self::assertSame(30, SegmentInMinutes::of(30, self::FIFTEEN_MINUTES_SEGMENT_DURATION)->minutes);
+        self::assertSame(45, SegmentInMinutes::of(45, self::FIFTEEN_MINUTES_SEGMENT_DURATION)->minutes);
     }
 
     #[Test]
@@ -39,7 +41,7 @@ final class SegmentsTest extends TestCase
         $timeSlot = new TimeSlot($start, $end);
 
         // when
-        $segments = Segments::split($timeSlot, SegmentInMinutes::of(15))->toArray();
+        $segments = Segments::split($timeSlot, SegmentInMinutes::of(15, self::FIFTEEN_MINUTES_SEGMENT_DURATION))->toArray();
 
         // then
         self::assertCount(4, $segments);
@@ -62,7 +64,7 @@ final class SegmentsTest extends TestCase
         $timeSlot = new TimeSlot($start, $end);
 
         // when
-        $segments = Segments::split($timeSlot, SegmentInMinutes::of(90))->toArray();
+        $segments = Segments::split($timeSlot, SegmentInMinutes::of(90, self::FIFTEEN_MINUTES_SEGMENT_DURATION))->toArray();
 
         // then
         self::assertCount(1, $segments);
@@ -79,7 +81,7 @@ final class SegmentsTest extends TestCase
         $timeSlot = new TimeSlot($start, $end);
 
         // when
-        $segment = Segments::normalizeToSegmentBoundaries($timeSlot, SegmentInMinutes::of(90));
+        $segment = Segments::normalizeToSegmentBoundaries($timeSlot, SegmentInMinutes::of(90, self::FIFTEEN_MINUTES_SEGMENT_DURATION));
 
         // then
         self::assertEquals(new \DateTimeImmutable('2023-09-09T00:00:00Z'), $segment->from);
@@ -93,7 +95,7 @@ final class SegmentsTest extends TestCase
         $start = new \DateTimeImmutable('2023-09-09T00:10:00Z');
         $end = new \DateTimeImmutable('2023-09-09T00:59:00Z');
         $timeSlot = new TimeSlot($start, $end);
-        $oneHour = SegmentInMinutes::of(60);
+        $oneHour = SegmentInMinutes::of(60, self::FIFTEEN_MINUTES_SEGMENT_DURATION);
 
         // when
         $segments = Segments::split($timeSlot, $oneHour)->toArray();
@@ -113,7 +115,7 @@ final class SegmentsTest extends TestCase
         $timeSlot = new TimeSlot($start, $end);
 
         // when
-        $segments = (new SlotToSegments())($timeSlot, SegmentInMinutes::of(30))->toArray();
+        $segments = (new SlotToSegments())($timeSlot, SegmentInMinutes::of(30, self::FIFTEEN_MINUTES_SEGMENT_DURATION))->toArray();
 
         // then
         self::assertCount(2, $segments);

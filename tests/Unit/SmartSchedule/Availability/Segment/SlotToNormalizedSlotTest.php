@@ -14,6 +14,8 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(SlotToNormalizedSlot::class)]
 final class SlotToNormalizedSlotTest extends TestCase
 {
+    private const int FIFTEEN_MINUTES_SEGMENT_DURATION = 15;
+
     #[Test]
     public function hasNoEffectWhenSlotAlreadyNormalized(): void
     {
@@ -21,7 +23,7 @@ final class SlotToNormalizedSlotTest extends TestCase
         $start = new \DateTimeImmutable('2023-09-09T00:00:00Z');
         $end = new \DateTimeImmutable('2023-09-09T01:00:00Z');
         $timeSlot = new TimeSlot($start, $end);
-        $oneHour = SegmentInMinutes::of(60);
+        $oneHour = SegmentInMinutes::of(60, self::FIFTEEN_MINUTES_SEGMENT_DURATION);
 
         // when
         $normalized = (new SlotToNormalizedSlot())($timeSlot, $oneHour);
@@ -37,7 +39,7 @@ final class SlotToNormalizedSlotTest extends TestCase
         $start = new \DateTimeImmutable('2023-09-09T00:10:00Z');
         $end = new \DateTimeImmutable('2023-09-09T00:59:00Z');
         $timeSlot = new TimeSlot($start, $end);
-        $oneHour = SegmentInMinutes::of(60);
+        $oneHour = SegmentInMinutes::of(60, self::FIFTEEN_MINUTES_SEGMENT_DURATION);
 
         // when
         $normalized = (new SlotToNormalizedSlot())($timeSlot, $oneHour);
@@ -54,7 +56,7 @@ final class SlotToNormalizedSlotTest extends TestCase
         $start = new \DateTimeImmutable('2023-09-09T00:29:00Z');
         $end = new \DateTimeImmutable('2023-09-09T00:31:00Z');
         $timeSlot = new TimeSlot($start, $end);
-        $oneHour = SegmentInMinutes::of(60);
+        $oneHour = SegmentInMinutes::of(60, self::FIFTEEN_MINUTES_SEGMENT_DURATION);
 
         // when
         $normalized = (new SlotToNormalizedSlot())($timeSlot, $oneHour);
@@ -74,7 +76,7 @@ final class SlotToNormalizedSlotTest extends TestCase
         $start2 = new \DateTimeImmutable('2023-09-09T00:30:00Z');
         $end2 = new \DateTimeImmutable('2023-09-09T00:45:00Z');
         $timeSlot2 = new TimeSlot($start2, $end2);
-        $fifteenMinutes = SegmentInMinutes::of(15);
+        $fifteenMinutes = SegmentInMinutes::of(15, self::FIFTEEN_MINUTES_SEGMENT_DURATION);
 
         // when
         $normalized = (new SlotToNormalizedSlot())($timeSlot, $fifteenMinutes);

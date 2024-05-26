@@ -119,4 +119,11 @@ final readonly class ResourceGroupedAvailability
     {
         return $this->resourceAvailabilities->isEmpty();
     }
+
+    public function isEntirelyWithParentId(ResourceId $parentId): bool
+    {
+        return $this->resourceAvailabilities->allMatch(
+            fn (ResourceAvailability $ra): bool => $ra->resourceParentId->getId()->equals($parentId->getId())
+        );
+    }
 }
