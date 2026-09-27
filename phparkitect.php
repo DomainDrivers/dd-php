@@ -10,7 +10,7 @@ return static function (Config $config): void {
     $classSet = ClassSet::fromDir(__DIR__.'/src');
 
     $layeredArchitectureRules = Architecture::withComponents()
-        ->component('Availability')->definedBy('DomainDrivers\SmartSchedule\Planning\Availability\*')
+        ->component('Availability')->definedBy('DomainDrivers\SmartSchedule\Availability\*')
         ->component('Allocation')->definedBy('DomainDrivers\SmartSchedule\Allocation\*')
         ->component('CapabilityScheduling')->definedBy('DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\*')
         ->component('CapabilityScheduling-Acl')->definedBy('DomainDrivers\SmartSchedule\Allocation\CapabilityScheduling\LegacyAcl\*')
